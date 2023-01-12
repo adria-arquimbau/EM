@@ -99,6 +99,7 @@ namespace EventsManager.Server.Areas.Identity.Pages.Account.Manage
 
         public async Task<IActionResult> OnPostChangeEmailAsync()
         {
+            throw new NotSupportedException(); // exception to dont allow change the email
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
