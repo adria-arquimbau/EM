@@ -7,6 +7,7 @@ using System.Text;
 using System.Text.Encodings.Web;
 using Microsoft.AspNetCore.Authentication;
 using EventsManager.Server.Models;
+using EventsManager.Shared.Enumerations;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -115,6 +116,14 @@ namespace EventsManager.Server.Areas.Identity.Pages.Account
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
             if (ModelState.IsValid)
             {
+                //Check if email is already taken
+                var existentUser = await _userManager.FindByEmailAsync(Input.Email);
+                if (existentUser != null)
+                {
+                    ModelState.AddModelError(string.Empty, "Email already in use.");
+                    return Page();
+                }
+    
                 var user = CreateUser();
 
                 await _userStore.SetUserNameAsync(user, Input.UserName, CancellationToken.None);
@@ -134,9 +143,20 @@ namespace EventsManager.Server.Areas.Identity.Pages.Account
                         values: new { area = "Identity", userId = userId, code = code, returnUrl = returnUrl },
                         protocol: Request.Scheme);
 
-                    await _emailSender.SendEmailAsync(Input.Email, "Confirm your email",
-                        $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
+                  
+                    await _emailSender.SendEmailAsync(Input.Email, "Confirm your email", $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
 
+                    try
+                    {
+                        await _userManager.AddToRoleAsync(user, ApplicationRoles.USER.ToString());
+                    }
+                    catch (Exception e)
+                    {
+                        await _userManager.DeleteAsync(user);
+                        ModelState.AddModelError(string.Empty, "Error while adding user to role");
+                        return Page();
+                    }
+                    
                     if (_userManager.Options.SignIn.RequireConfirmedAccount)
                     {
                         return RedirectToPage("RegisterConfirmation", new { email = Input.Email, returnUrl = returnUrl });

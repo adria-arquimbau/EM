@@ -1,6 +1,9 @@
 ﻿@page "/"
 
+@using EventsManager.Client.Components
+
 @inject AuthenticationStateProvider authenticationStateProvider
+
 <PageTitle>Index</PageTitle>
 
 <AuthorizeView>
@@ -14,4 +17,4 @@
 
 Welcome to Events Manager.
 
-<SurveyPrompt Title="How is Blazor working for you?" />
+<HorizontalEventsCards></HorizontalEventsCards>

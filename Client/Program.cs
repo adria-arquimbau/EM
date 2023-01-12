@@ -2,6 +2,7 @@ using EventsManager.Client;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
+using Microsoft.Fast.Components.FluentUI;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
@@ -14,5 +15,5 @@ builder.Services.AddHttpClient("EventsManager.ServerAPI", client => client.BaseA
 builder.Services.AddScoped(sp => sp.GetRequiredService<IHttpClientFactory>().CreateClient("EventsManager.ServerAPI"));
 
 builder.Services.AddApiAuthorization();
-
+builder.Services.AddFluentUIComponents();
 await builder.Build().RunAsync();
