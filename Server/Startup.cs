@@ -36,9 +36,6 @@ public class Startup {
                 options.Password.RequireUppercase = false;
                 options.Password.RequireNonAlphanumeric = false;
                 options.Password.RequiredUniqueChars = 0;
-                options.ClaimsIdentity.RoleClaimType = ClaimTypes.Role;
-                options.ClaimsIdentity.EmailClaimType = ClaimTypes.Email;
-                options.ClaimsIdentity.UserIdClaimType = ClaimTypes.NameIdentifier;
             })
             .AddRoles<IdentityRole>()
             .AddEntityFrameworkStores<ApplicationDbContext>();
