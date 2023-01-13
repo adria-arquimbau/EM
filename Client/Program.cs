@@ -1,4 +1,5 @@
 using EventsManager.Client;
+using EventsManager.Client.Authorization;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
@@ -14,6 +15,7 @@ builder.Services.AddHttpClient("EventsManager.ServerAPI", client => client.BaseA
 // Supply HttpClient instances that include access tokens when making requests to the server project
 builder.Services.AddScoped(sp => sp.GetRequiredService<IHttpClientFactory>().CreateClient("EventsManager.ServerAPI"));
 
-builder.Services.AddApiAuthorization();
+builder.Services.AddApiAuthorization()
+    .AddAccountClaimsPrincipalFactory<CustomUserFactory>();
 builder.Services.AddFluentUIComponents();
 await builder.Build().RunAsync();

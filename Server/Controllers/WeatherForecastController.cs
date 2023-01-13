@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace EventsManager.Server.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "Administrator")] 
     [ApiController]
     [Route("[controller]")]
     public class WeatherForecastController : ControllerBase

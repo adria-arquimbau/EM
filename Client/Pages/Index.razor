@@ -1,6 +1,7 @@
 ﻿@page "/"
 
 @using EventsManager.Client.Components
+@using System.Security.Claims
 
 @inject AuthenticationStateProvider authenticationStateProvider
 
@@ -9,6 +10,12 @@
 <AuthorizeView>
     <Authorized>
         <h1>Hello, @context.User.Identity?.Name!</h1>
+        <ul>
+            @foreach (var claim in context.User.Claims)
+            {
+                <li><b>@claim.Type</b>: @claim.Value</li>
+            }
+        </ul>
     </Authorized>
     <NotAuthorized>
         <h1>Hello, anonymous user! Please register or log in ;)</h1>
