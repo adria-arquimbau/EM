@@ -116,13 +116,13 @@ namespace EventsManager.Server.Areas.Identity.Pages.Account
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
             if (ModelState.IsValid)
             {
-                //Check if email is already taken
-                var existentUser = await _userManager.FindByEmailAsync(Input.Email);
-                if (existentUser != null)
-                {
-                    ModelState.AddModelError(string.Empty, "Email already in use.");
-                    return Page();
-                }
+                // //Check if email is already taken
+                // var existentUser = await _userManager.FindByEmailAsync(Input.Email);
+                // if (existentUser != null)
+                // {
+                //     ModelState.AddModelError(string.Empty, "Email already in use.");
+                //     return Page();
+                // }
     
                 var user = CreateUser();
 
