@@ -26,4 +26,10 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="7.0.1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="eventsmanagercert.pfx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
