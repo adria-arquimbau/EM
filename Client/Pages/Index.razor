@@ -1,27 +1,19 @@
 ﻿@page "/"
-
 @using EventsManager.Client.Components
-@using System.Security.Claims
 
-@inject AuthenticationStateProvider authenticationStateProvider
+
 
 <PageTitle>Index</PageTitle>
 
 <AuthorizeView>
     <Authorized>
-        <h1>Hello, @context.User.Identity?.Name!</h1>
-        <ul>
-            @foreach (var claim in context.User.Claims)
-            {
-                <li><b>@claim.Type</b>: @claim.Value</li>
-            }
-        </ul>
+        <h1>Hello, @context.User.Identity?.Name!</h1> Welcome to Events Manager.
+        <UserInformation></UserInformation>
     </Authorized>
     <NotAuthorized>
-        <h1>Hello, anonymous user! Please register or log in ;)</h1>
+        <h1>Hello, anonymous user! Please register or log in ;)</h1> Welcome to Events Manager.
     </NotAuthorized>
 </AuthorizeView>
 
-Welcome to Events Manager.
 
-<HorizontalEventsCards></HorizontalEventsCards>
+

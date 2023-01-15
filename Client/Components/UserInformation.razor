@@ -1,0 +1,41 @@
+﻿@using EventsManager.Shared
+@using System.Net
+
+@inject HttpClient Http
+@inject AuthenticationStateProvider authenticationStateProvider
+
+<h3>UserInformation</h3>
+@if (user != null)
+{
+    <div>
+        Email: <FluentTextField Appearance="Appearance.Filled" Readonly="true" Value="@user.Email"></FluentTextField>
+    </div>
+    if (user.UserName != user.Email)
+    {
+        <div>
+            User name: <FluentTextField Appearance="Appearance.Filled" Readonly="true" Value="@user.UserName"></FluentTextField>
+        </div>
+        
+    }
+    if (user.UserName == user.Email)
+    {
+        <div>
+            User name: <FluentTextField Appearance="Appearance.Filled" Placeholder="My user name" ></FluentTextField>
+            <p>*Please choose a User Name</p>
+        </div>
+        
+    }
+    <FluentButton Appearance="Appearance.Accent">Save</FluentButton>
+}
+
+@code {
+    private UserDto? user;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (await authenticationStateProvider.GetAuthenticationStateAsync() is { User.Identity.IsAuthenticated: true })
+        {
+            user = await Http.GetFromJsonAsync<UserDto>("User");
+        }
+    }
+}
