@@ -50,6 +50,11 @@ public class Startup {
         JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Remove("role");
 
         services.AddAuthentication()
+            .AddGoogle(options =>
+            {
+                options.ClientId = "104708052542-uqishvtn1l1kue90l72j7l8q6ciipfmc.apps.googleusercontent.com";
+                options.ClientSecret = "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";
+            })
             .AddIdentityServerJwt();
 
         services.AddControllersWithViews();
