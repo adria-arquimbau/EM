@@ -64,7 +64,8 @@
 
     protected override async Task OnInitializedAsync()
     {
-        if (await authenticationStateProvider.GetAuthenticationStateAsync() is { User.Identity.IsAuthenticated: true })
+        var authState = await authenticationStateProvider.GetAuthenticationStateAsync();
+        if (authState.User.Identity?.IsAuthenticated == true)
         {
             user = await Http.GetFromJsonAsync<UserDto>("User");
         }

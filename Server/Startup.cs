@@ -44,7 +44,7 @@ public class Startup {
         .AddRoles<IdentityRole>()
         .AddEntityFrameworkStores<ApplicationDbContext>();
 
-        services.AddIdentityServer(options => {})
+        services.AddIdentityServer()
             .AddApiAuthorization<ApplicationUser, ApplicationDbContext>(opt => 
             {
                 opt.IdentityResources["openid"].UserClaims.Add("role");
