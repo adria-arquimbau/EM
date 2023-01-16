@@ -1,0 +1,13 @@
+.basic-info-container{
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    width: 100%;
+    height: 100%;
+}
+
+.basic-info-field{
+    margin-bottom: 0.5px;
+}

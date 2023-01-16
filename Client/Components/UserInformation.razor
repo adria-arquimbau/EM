@@ -1,35 +1,66 @@
 ﻿@using EventsManager.Shared
 @using System.Net
+@using System.Text
+@using System.Text.Json
+@using EventsManager.Shared.Dtos
 
 @inject HttpClient Http
 @inject AuthenticationStateProvider authenticationStateProvider
 
-<h3>UserInformation</h3>
 @if (user != null)
 {
-    <div>
-        Email: <FluentTextField Appearance="Appearance.Filled" Readonly="true" Value="@user.Email"></FluentTextField>
+    <h3>My basic information</h3>
+    <div class="basic-info-container">
+        <div class="basic-info-field">
+            <FluentTextField Appearance="Appearance.Filled" Size="GetEmailSize()" Readonly="true" Value="@user.Email">Email</FluentTextField>
+        </div>
+        
+        <div class="basic-info-field">
+            <FluentTextField Appearance="Appearance.Filled" Readonly="true" Value="@user.UserName">User name</FluentTextField>
+        </div>
+        
+        <div class="basic-info-field">
+            <FluentTextField Appearance="GetAppearance(user.Name)" Placeholder="Name" Value="@user.Name" ValueChanged="v => user.Name = v" @onchange="() => user.IsChanged = true">Name</FluentTextField>
+        </div>
+        
+        <div class="basic-info-field">
+            <FluentTextField Appearance="GetAppearance(user.FamilyName)" Placeholder="Family name" Value="@user.FamilyName" ValueChanged="v => user.FamilyName = v" @onchange="() => user.IsChanged = true">Family name</FluentTextField>
+        </div>
+        
+        <div class="basic-info-field">
+            <FluentTextField Appearance="GetAppearance(user.Address)" Placeholder="Address" Value="@user.Address" ValueChanged="v => user.Address = v" @onchange="() => user.IsChanged = true">Address</FluentTextField>
+        </div>
+        
+        <div class="basic-info-field">
+            <FluentTextField Appearance="GetAppearance(user.City)" Placeholder="City" Value="@user.City" ValueChanged="v => user.City = v" @onchange="() => user.IsChanged = true">City</FluentTextField>
+        </div>
+        
+        <div class="basic-info-field">
+            <FluentTextField Appearance="GetAppearance(user.Country)" Placeholder="Country" Value="@user.Country" ValueChanged="v => user.Country = v" @onchange="() => user.IsChanged = true">Country</FluentTextField>
+        </div>
+        
+        <div class="basic-info-field">
+            <FluentTextField Appearance="GetAppearance(user.PostalCode)" Placeholder="Postal code" Value="@user.PostalCode" ValueChanged="v => user.PostalCode = v" @onchange="() => user.IsChanged = true">Postal code</FluentTextField>
+        </div>
+        
+        
+        <div class="basic-info-field">
+            @if (!user.RequestingUpdate && user.IsChanged)
+            {
+                <FluentButton Appearance="Appearance.Accent" @onclick="SaveAccount">Save</FluentButton>
+            }
+            @if (user.RequestingUpdate)
+            {
+                <FluentButton Appearance="Appearance.Accent" Disabled="true">Saving</FluentButton>
+            }
+            
+        </div>
+        
     </div>
-    if (user.UserName != user.Email)
-    {
-        <div>
-            User name: <FluentTextField Appearance="Appearance.Filled" Readonly="true" Value="@user.UserName"></FluentTextField>
-        </div>
-        
-    }
-    if (user.UserName == user.Email)
-    {
-        <div>
-            User name: <FluentTextField Appearance="Appearance.Filled" Placeholder="My user name" ></FluentTextField>
-            <p>*Please choose a User Name</p>
-        </div>
-        
-    }
-    <FluentButton Appearance="Appearance.Accent">Save</FluentButton>
 }
 
 @code {
-    private UserDto? user;
+    private UserDto? user { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
@@ -38,4 +69,25 @@
             user = await Http.GetFromJsonAsync<UserDto>("User");
         }
     }
-}
+
+    private int GetEmailSize()
+    {
+        return user!.Email.Length + 2;
+    }
+
+    private async Task SaveAccount()
+    {
+        user!.RequestingUpdate = true;
+        var userToString = JsonSerializer.Serialize(user);
+        await Http.PutAsync("User", new StringContent(userToString, Encoding.UTF8, "application/json"));
+        user.RequestingUpdate = false;
+        user.IsChanged = false;
+    }
+
+    private Appearance GetAppearance(string? input)
+    {
+        return input == null ? Appearance.Filled : Appearance.Outline;
+    }   
+    
+}   
+    

@@ -1,8 +1,11 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
+using System.Reflection;
 using System.Security.Claims;
 using EventsManager.Server.Data;
+using EventsManager.Server.Handlers.Queries;
 using EventsManager.Server.Models;
 using EventsManager.Shared;
+using MediatR;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -59,6 +62,8 @@ public class Startup {
 
         services.AddControllersWithViews();
         services.AddRazorPages();
+        
+        services.AddMediatR(typeof(GetMyUserCommandHandler).GetTypeInfo().Assembly);
     }
     
     public void Configure(WebApplication app, IWebHostEnvironment env, IServiceProvider services) {

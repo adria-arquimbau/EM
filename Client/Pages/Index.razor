@@ -3,11 +3,12 @@
 
 
 
-<PageTitle>Index</PageTitle>
+<PageTitle>Welcome</PageTitle>
 
 <AuthorizeView>
     <Authorized>
         <h1>Hello, @context.User.Identity?.Name!</h1> Welcome to Events Manager.
+        <FluentDivider></FluentDivider>
         <UserInformation></UserInformation>
     </Authorized>
     <NotAuthorized>
