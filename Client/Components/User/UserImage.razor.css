@@ -1,0 +1,12 @@
+.user-image-container{
+    
+}
+
+.user-image-options{
+    display: flex;
+    flex-direction: row;
+}
+
+.user-image-options-button{
+    margin-right: 5px;
+}

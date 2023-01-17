@@ -8,8 +8,16 @@
 
 @if(UserImageUrl != null)
 {
-    <div>
+    <div class="user-image-container">
         <img href="" alt="" width="200" src="@UserImageUrl"/>
+        <div class="user-image-options">
+            <div class="user-image-options-button">
+                <FluentButton Appearance="Appearance.Accent" >Upload image</FluentButton>
+            </div>
+            <div class="user-image-options-button">
+                <FluentButton Appearance="Appearance.Accent">Delete image</FluentButton>
+            </div>
+        </div>
     </div>
 }
 @if (UserImageUrl == null)
