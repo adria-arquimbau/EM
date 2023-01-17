@@ -1,5 +1,7 @@
 ﻿using System.Security.Claims;
-using EventsManager.Server.Handlers.Commands.UpdateMyUser;
+using EventsManager.Server.Handlers.Commands.User.DeleteUserImage;
+using EventsManager.Server.Handlers.Commands.User.UpdateMyUser;
+using EventsManager.Server.Handlers.Commands.User.UploadUserImage;
 using EventsManager.Server.Handlers.Queries;
 using EventsManager.Shared.Dtos;
 using MediatR;
@@ -33,6 +35,21 @@ public class UserController : ControllerBase
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         await _mediator.Send(new UpdateMyUserCommandRequest(userId, request));
+        return Ok();
+    }
+    
+    [HttpPost("image")]
+    public async Task<IActionResult> UploadUserImage(IFormFile files) 
+    {   
+        await _mediator.Send(new UploadUserImageCommandRequest(files, User.FindFirst(ClaimTypes.NameIdentifier)?.Value));
+        return Ok();  
+    }
+    
+    [HttpDelete("image")]   
+    public async Task<IActionResult> DeleteUserImage()
+    {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        await _mediator.Send(new DeleteUserImageCommandRequest(userId));
         return Ok();
     }
 }

@@ -7,54 +7,48 @@
 
 @attribute [Authorize(Roles = "User")] 
 
-@if (User != null)
-{
-    <h3>My basic information</h3>
-    <FluentSwitch ValueChanged="_ => AllowEdit()">
-        Edit
-    </FluentSwitch>
-    <div class="basic-info-container">
-        <div class="basic-info-field">
-            <FluentTextField Appearance="Appearance.Filled" Disabled="Disabled" Size="GetEmailSize()" Readonly="true" Value="@User.Email">Email</FluentTextField>
-        </div>
-        
-        <div class="basic-info-field">
-            <FluentTextField Appearance="Appearance.Filled" Disabled="Disabled" Readonly="true" Value="@User.UserName">User name</FluentTextField>
-        </div>
-        
-        <div class="basic-info-field">
-            <FluentTextField Appearance="TextFieldAppearance" Readonly="ReadOnly" Placeholder="Phone number" Value="@User.PhoneNumber" ValueChanged="v => User.PhoneNumber = v">Phone number</FluentTextField>
-        </div>
-        
-        <div class="basic-info-field">
-            <FluentTextField Appearance="TextFieldAppearance" Readonly="ReadOnly" Placeholder="Name" Value="@User.Name" ValueChanged="v => User.Name = v">Name</FluentTextField>
-        </div>
-        
-        <div class="basic-info-field">
-            <FluentTextField Appearance="TextFieldAppearance" Readonly="ReadOnly" Placeholder="Family name" Value="@User.FamilyName" ValueChanged="v => User.FamilyName = v">Family name</FluentTextField>
-        </div>
-        
-        <div class="basic-info-field">
-            <FluentTextField Appearance="TextFieldAppearance" Readonly="ReadOnly" Placeholder="Address" Value="@User.Address" ValueChanged="v => User.Address = v" >Address</FluentTextField>
-        </div>
-        
-        <div class="basic-info-field">
-            <FluentTextField Appearance="TextFieldAppearance" Readonly="ReadOnly" Placeholder="City" Value="@User.City" ValueChanged="v => User.City = v">City</FluentTextField>
-        </div>
-        
-        <div class="basic-info-field">
-            <FluentTextField Appearance="TextFieldAppearance" Readonly="ReadOnly" Placeholder="Country" Value="@User.Country" ValueChanged="v => User.Country = v">Country</FluentTextField>
-        </div>
-        
-        <div class="basic-info-field">
-            <FluentTextField Appearance="TextFieldAppearance" Readonly="ReadOnly" Placeholder="Postal code" Value="@User.PostalCode" ValueChanged="v => User.PostalCode = v">Postal code</FluentTextField>
-        </div>
+<h3>My basic information</h3>
+<FluentSwitch @onchange="AllowEdit">
+    Edit
+</FluentSwitch>
+<div class="basic-info-container">
+    <div class="basic-info-field">
+        <FluentTextField Appearance="Appearance.Filled" Disabled="Disabled" Size="GetEmailSize()" Readonly="true" Value="@User.Email">Email</FluentTextField>
     </div>
-}
-@if (User == null)
-{
-    <FluentProgressRing></FluentProgressRing>
-}
+    
+    <div class="basic-info-field">
+        <FluentTextField Appearance="Appearance.Filled" Disabled="Disabled" Readonly="true" Value="@User.UserName">User name</FluentTextField>
+    </div>
+    
+    <div class="basic-info-field">
+        <FluentTextField Appearance="TextFieldAppearance" Readonly="ReadOnly" Placeholder="Phone number" Value="@User.PhoneNumber" ValueChanged="v => User.PhoneNumber = v">Phone number</FluentTextField>
+    </div>
+    
+    <div class="basic-info-field">
+        <FluentTextField Appearance="TextFieldAppearance" Readonly="ReadOnly" Placeholder="Name" Value="@User.Name" ValueChanged="v => User.Name = v">Name</FluentTextField>
+    </div>
+    
+    <div class="basic-info-field">
+        <FluentTextField Appearance="TextFieldAppearance" Readonly="ReadOnly" Placeholder="Family name" Value="@User.FamilyName" ValueChanged="v => User.FamilyName = v">Family name</FluentTextField>
+    </div>
+    
+    <div class="basic-info-field">
+        <FluentTextField Appearance="TextFieldAppearance" Readonly="ReadOnly" Placeholder="Address" Value="@User.Address" ValueChanged="v => User.Address = v" >Address</FluentTextField>
+    </div>
+    
+    <div class="basic-info-field">
+        <FluentTextField Appearance="TextFieldAppearance" Readonly="ReadOnly" Placeholder="City" Value="@User.City" ValueChanged="v => User.City = v">City</FluentTextField>
+    </div>
+    
+    <div class="basic-info-field">
+        <FluentTextField Appearance="TextFieldAppearance" Readonly="ReadOnly" Placeholder="Country" Value="@User.Country" ValueChanged="v => User.Country = v">Country</FluentTextField>
+    </div>
+    
+    <div class="basic-info-field">
+        <FluentTextField Appearance="TextFieldAppearance" Readonly="ReadOnly" Placeholder="Postal code" Value="@User.PostalCode" ValueChanged="v => User.PostalCode = v">Postal code</FluentTextField>
+    </div>
+</div>
+
 
 @code { 
     [Parameter]

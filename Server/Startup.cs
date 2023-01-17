@@ -64,6 +64,8 @@ public class Startup {
         services.AddRazorPages();
         
         services.AddMediatR(typeof(GetMyUserQueryHandler).GetTypeInfo().Assembly);
+        var blobStorageSection = configuration.GetSection("BlobStorage");
+        services.Configure<BlobStorageSettings>(blobStorageSection);    
     }
     
     public void Configure(WebApplication app, IWebHostEnvironment env, IServiceProvider services) {

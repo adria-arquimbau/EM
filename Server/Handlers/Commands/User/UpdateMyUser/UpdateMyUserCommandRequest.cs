@@ -1,7 +1,7 @@
 ﻿using EventsManager.Shared.Dtos;
 using MediatR;
 
-namespace EventsManager.Server.Handlers.Commands.UpdateMyUser;
+namespace EventsManager.Server.Handlers.Commands.User.UpdateMyUser;
 
 public class UpdateMyUserCommandRequest : IRequest
 {

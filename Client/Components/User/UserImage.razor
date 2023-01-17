@@ -6,26 +6,113 @@
 
 @attribute [Authorize(Roles = "User")] 
 
-@if(UserImageUrl != null)
-{
-    <div class="user-image-container">
-        <img href="" alt="" width="200" src="@UserImageUrl"/>
-        <div class="user-image-options">
-            <div class="user-image-options-button">
-                <FluentButton Appearance="Appearance.Accent" >Upload image</FluentButton>
+<div class="user-image-container">
+    @if (UserImageUrl == null)
+    {
+        <form class="user-image-upload" @onsubmit="@UploadImage" enctype="multipart/form-data">
+            @if (imgUrl != null)
+            {
+                <img size="" src="@imgUrl" alt="User image" height="200" width="200"/>
+                <div class="user-image-upload-options">
+                    @* <input type="submit" value="Upload"> *@
+                    <FluentButton Type="ButtonType.Submit" Appearance="Appearance.Accent" @onclick="DeleteLocalImage">Upload</FluentButton>
+                    <FluentButton Appearance="Appearance.Accent" @onclick="DeleteLocalImage">Delete preview</FluentButton>
+                </div>
+            }
+            else
+            {
+                <InputFile OnChange="@SelectFile">Select an image</InputFile>
+            }
+        </form>
+    }
+    @if (UserImageUrl != null)
+    {
+        <img size="" src="@UserImageUrl" alt="Event image" height="200" width="200"/>
+
+        @if (!RequestingDeleteImage)
+        {
+            <div>
+                <FluentButton Appearance="Appearance.Accent" @onclick="DeleteImage">Delete image</FluentButton>
             </div>
-            <div class="user-image-options-button">
-                <FluentButton Appearance="Appearance.Accent">Delete image</FluentButton>
-            </div>
-        </div>
-    </div>
-}
-@if (UserImageUrl == null)
-{
-    <FluentProgressRing></FluentProgressRing>
-}
+        }
+        else
+        {
+            <FluentButton Disabled="true" Appearance="Appearance.Accent" @onclick="DeleteImage">Deleteting</FluentButton>
+        }
+    }
+</div>
 
 @code {
     [Parameter]
     public Uri? UserImageUrl { get; set; } 
+    
+    [Parameter]
+    public EventCallback RefreshUserInformation { get; set; }
+    
+    private StreamContent fileContent;
+    private string fileName;
+    private string? imgUrl;     
+    private string imageType;
+
+    private bool RequestingDeleteImage;
+    
+    private async Task SelectFile(InputFileChangeEventArgs  e)
+    {
+        //ErrorMessage = null;
+        string[] imageTypes = { "image/jpeg", "image/png" };
+        if (imageTypes.Contains(e.File.ContentType))
+        {
+            // setting the max size for the file 
+            long maxFileSize = 1024 * 1024 * 5; //5MB
+            // Provide the HTTP Content based Stream
+            // and open the stream for reading the uploaded file
+            if (e.File.Size > maxFileSize)
+            {
+                //ErrorMessage = "File is too big, max size is 5 MB";
+                return;
+            }
+            var resized = await e.File.RequestImageFileAsync(e.File.ContentType, 300, int.MaxValue);
+            fileContent = new StreamContent(resized.OpenReadStream(maxFileSize));
+            // read file name
+            fileName = resized.Name;
+            var fileSize = new byte[resized.Size];
+            // read the file bytes in sequence
+            await resized.OpenReadStream(maxFileSize).ReadAsync(fileSize);
+            // read file content type
+            imageType = resized.ContentType;
+            // create URL
+            imgUrl = $"data:{imageType};base64,{Convert.ToBase64String(fileSize)}";
+
+            StateHasChanged();
+        }
+        else
+        {
+            //toastService.ShowToast(ToastLevel.Warning, "Only jpeg and png files are allowed.", "Upload Image failed");
+        }
+    }
+    
+    private void DeleteLocalImage()
+    {
+        imgUrl = null;
+    }   
+    
+    private async Task DeleteImage()    
+    {
+        RequestingDeleteImage = true;
+        await Http.DeleteAsync("User/image");
+        imgUrl = null;
+        await RefreshUserInformation.InvokeAsync();
+        RequestingDeleteImage = false;
+    }   
+
+    private async Task UploadImage()    
+    {
+        //RequestingUploadImage = true;
+        using var content = new MultipartFormDataContent();
+        content.Add(content: fileContent, name: "\"file\"", fileName:fileName);
+        await Http.PostAsync("User/image", content);
+        
+        imgUrl = null;
+    // RequestingUploadImage = false;
+    }   
 }

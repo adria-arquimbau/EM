@@ -3,7 +3,7 @@ using EventsManager.Shared.Exceptions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
-namespace EventsManager.Server.Handlers.Commands.UpdateMyUser;
+namespace EventsManager.Server.Handlers.Commands.User.UpdateMyUser;
 
 public class UpdateMyUserCommandHandler : AsyncRequestHandler<UpdateMyUserCommandRequest>
 {
