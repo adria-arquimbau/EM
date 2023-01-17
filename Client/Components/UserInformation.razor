@@ -10,6 +10,9 @@
 @if (user != null)
 {
     <h3>My basic information</h3>
+    <FluentSwitch>
+        Edit
+    </FluentSwitch>
     <div class="basic-info-container">
         <div class="basic-info-field">
             <FluentTextField Appearance="Appearance.Filled" Size="GetEmailSize()" Readonly="true" Value="@user.Email">Email</FluentTextField>
@@ -20,34 +23,33 @@
         </div>
         
         <div class="basic-info-field">
-            <FluentTextField Appearance="GetAppearance(user.Name)" Placeholder="Name" Value="@user.Name" ValueChanged="v => user.Name = v" @onchange="() => user.IsChanged = true">Name</FluentTextField>
+            <FluentTextField Appearance="Appearance.Filled" Readonly="true" Placeholder="Name" Value="@user.Name" ValueChanged="v => user.Name = v" @onchange="() => user.IsChanged = true">Name</FluentTextField>
         </div>
         
         <div class="basic-info-field">
-            <FluentTextField Appearance="GetAppearance(user.FamilyName)" Placeholder="Family name" Value="@user.FamilyName" ValueChanged="v => user.FamilyName = v" @onchange="() => user.IsChanged = true">Family name</FluentTextField>
+            <FluentTextField Appearance="Appearance.Filled" Readonly="true" Placeholder="Family name" Value="@user.FamilyName" ValueChanged="v => user.FamilyName = v" @onchange="() => user.IsChanged = true">Family name</FluentTextField>
         </div>
         
         <div class="basic-info-field">
-            <FluentTextField Appearance="GetAppearance(user.Address)" Placeholder="Address" Value="@user.Address" ValueChanged="v => user.Address = v" @onchange="() => user.IsChanged = true">Address</FluentTextField>
+            <FluentTextField Appearance="Appearance.Filled" Readonly="true" Placeholder="Address" Value="@user.Address" ValueChanged="v => user.Address = v" @onchange="() => user.IsChanged = true">Address</FluentTextField>
         </div>
         
         <div class="basic-info-field">
-            <FluentTextField Appearance="GetAppearance(user.City)" Placeholder="City" Value="@user.City" ValueChanged="v => user.City = v" @onchange="() => user.IsChanged = true">City</FluentTextField>
+            <FluentTextField Appearance="Appearance.Filled" Readonly="true" Placeholder="City" Value="@user.City" ValueChanged="v => user.City = v" @onchange="() => user.IsChanged = true">City</FluentTextField>
         </div>
         
         <div class="basic-info-field">
-            <FluentTextField Appearance="GetAppearance(user.Country)" Placeholder="Country" Value="@user.Country" ValueChanged="v => user.Country = v" @onchange="() => user.IsChanged = true">Country</FluentTextField>
+            <FluentTextField Appearance="Appearance.Filled" Readonly="true" Placeholder="Country" Value="@user.Country" ValueChanged="v => user.Country = v" @onchange="() => user.IsChanged = true">Country</FluentTextField>
         </div>
         
         <div class="basic-info-field">
-            <FluentTextField Appearance="GetAppearance(user.PostalCode)" Placeholder="Postal code" Value="@user.PostalCode" ValueChanged="v => user.PostalCode = v" @onchange="() => user.IsChanged = true">Postal code</FluentTextField>
+            <FluentTextField Appearance="Appearance.Filled" Readonly="true" Placeholder="Postal code" Value="@user.PostalCode" ValueChanged="v => user.PostalCode = v" @onchange="() => user.IsChanged = true">Postal code</FluentTextField>
         </div>
-        
         
         <div class="basic-info-field">
             @if (!user.RequestingUpdate && user.IsChanged)
             {
-                <FluentButton Appearance="Appearance.Accent" @onclick="SaveAccount">Save</FluentButton>
+                <FluentButton Appearance="Appearance.Accent" @onclick="SaveAccountInformation">Save</FluentButton>
             }
             @if (user.RequestingUpdate)
             {
@@ -76,7 +78,7 @@
         return user!.Email.Length + 2;
     }
 
-    private async Task SaveAccount()
+    private async Task SaveAccountInformation()
     {
         user!.RequestingUpdate = true;
         var userToString = JsonSerializer.Serialize(user);
@@ -85,10 +87,5 @@
         user.IsChanged = false;
     }
 
-    private Appearance GetAppearance(string? input)
-    {
-        return input == null ? Appearance.Filled : Appearance.Outline;
-    }   
-    
 }   
     
