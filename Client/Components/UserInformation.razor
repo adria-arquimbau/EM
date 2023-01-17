@@ -23,6 +23,10 @@
         </div>
         
         <div class="basic-info-field">
+            <FluentTextField Appearance="TextFieldAppearance" Readonly="ReadOnly" Placeholder="Phone number" Value="@user.PhoneNumber" ValueChanged="v => user.PhoneNumber = v">Phone number</FluentTextField>
+        </div>
+        
+        <div class="basic-info-field">
             <FluentTextField Appearance="TextFieldAppearance" Readonly="ReadOnly" Placeholder="Name" Value="@user.Name" ValueChanged="v => user.Name = v">Name</FluentTextField>
         </div>
         
@@ -46,6 +50,10 @@
             <FluentTextField Appearance="TextFieldAppearance" Readonly="ReadOnly" Placeholder="Postal code" Value="@user.PostalCode" ValueChanged="v => user.PostalCode = v">Postal code</FluentTextField>
         </div>
     </div>
+}
+@if (user == null)
+{
+    <FluentProgressRing></FluentProgressRing>
 }
 
 @code {

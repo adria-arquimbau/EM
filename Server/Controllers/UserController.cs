@@ -47,6 +47,7 @@ public class UserController : ControllerBase
         userEntity.City = user.City;
         userEntity.Country = user.Country;
         userEntity.PostalCode = user.PostalCode;
+        userEntity.PhoneNumber = user.PhoneNumber;
         await _dbContext.SaveChangesAsync();
         
         return Ok();
