@@ -10,7 +10,8 @@ namespace EventsManager.Server.Models
         public virtual string? City { get; set; }
         public virtual string? PostalCode { get; set; }
         public virtual string? Address { get; set; }
-        public virtual string? PhoneNumber { get; set; }
+        public virtual string? PhoneNumber { get; set; }    
+        public virtual Uri? ImageUrl { get; set; }
         public virtual DateTime? LastLoginTime { get; set; }
         public virtual DateTime? RegistrationDate { get; set; }
         

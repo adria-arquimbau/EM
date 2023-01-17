@@ -37,7 +37,8 @@ public class GetMyUserCommandHandler : IRequestHandler<GetMyUserCommandRequest, 
             City = user.City,
             Country = user.Country,
             PostalCode = user.PostalCode,
-            PhoneNumber = user.PhoneNumber
+            PhoneNumber = user.PhoneNumber,
+            ImageUrl = user.ImageUrl
         };
     }
 }

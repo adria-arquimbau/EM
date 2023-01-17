@@ -1,6 +1,4 @@
-﻿@using EventsManager.Shared
-@using System.Net
-@using System.Text
+﻿@using System.Text
 @using System.Text.Json
 @using EventsManager.Shared.Dtos
 
@@ -79,10 +77,8 @@
 
     private async Task SaveAccountInformation()
     {
-        user!.RequestingUpdate = true;
         var userToString = JsonSerializer.Serialize(user);
         await Http.PutAsync("User", new StringContent(userToString, Encoding.UTF8, "application/json"));
-        user.RequestingUpdate = false;
     }
 
     private async Task AllowEdit()
