@@ -1,11 +1,13 @@
 ﻿@using System.Text
 @using System.Text.Json
 @using EventsManager.Shared.Dtos
+@using Microsoft.AspNetCore.Authorization
 
 @inject HttpClient Http
-@inject AuthenticationStateProvider authenticationStateProvider
 
-@if (user != null)
+@attribute [Authorize(Roles = "User")] 
+
+@if (User != null)
 {
     <h3>My basic information</h3>
     <FluentSwitch ValueChanged="_ => AllowEdit()">
@@ -13,71 +15,63 @@
     </FluentSwitch>
     <div class="basic-info-container">
         <div class="basic-info-field">
-            <FluentTextField Appearance="Appearance.Filled" Disabled="Disabled" Size="GetEmailSize()" Readonly="true" Value="@user.Email">Email</FluentTextField>
+            <FluentTextField Appearance="Appearance.Filled" Disabled="Disabled" Size="GetEmailSize()" Readonly="true" Value="@User.Email">Email</FluentTextField>
         </div>
         
         <div class="basic-info-field">
-            <FluentTextField Appearance="Appearance.Filled" Disabled="Disabled" Readonly="true" Value="@user.UserName">User name</FluentTextField>
+            <FluentTextField Appearance="Appearance.Filled" Disabled="Disabled" Readonly="true" Value="@User.UserName">User name</FluentTextField>
         </div>
         
         <div class="basic-info-field">
-            <FluentTextField Appearance="TextFieldAppearance" Readonly="ReadOnly" Placeholder="Phone number" Value="@user.PhoneNumber" ValueChanged="v => user.PhoneNumber = v">Phone number</FluentTextField>
+            <FluentTextField Appearance="TextFieldAppearance" Readonly="ReadOnly" Placeholder="Phone number" Value="@User.PhoneNumber" ValueChanged="v => User.PhoneNumber = v">Phone number</FluentTextField>
         </div>
         
         <div class="basic-info-field">
-            <FluentTextField Appearance="TextFieldAppearance" Readonly="ReadOnly" Placeholder="Name" Value="@user.Name" ValueChanged="v => user.Name = v">Name</FluentTextField>
+            <FluentTextField Appearance="TextFieldAppearance" Readonly="ReadOnly" Placeholder="Name" Value="@User.Name" ValueChanged="v => User.Name = v">Name</FluentTextField>
         </div>
         
         <div class="basic-info-field">
-            <FluentTextField Appearance="TextFieldAppearance" Readonly="ReadOnly" Placeholder="Family name" Value="@user.FamilyName" ValueChanged="v => user.FamilyName = v">Family name</FluentTextField>
+            <FluentTextField Appearance="TextFieldAppearance" Readonly="ReadOnly" Placeholder="Family name" Value="@User.FamilyName" ValueChanged="v => User.FamilyName = v">Family name</FluentTextField>
         </div>
         
         <div class="basic-info-field">
-            <FluentTextField Appearance="TextFieldAppearance" Readonly="ReadOnly" Placeholder="Address" Value="@user.Address" ValueChanged="v => user.Address = v" >Address</FluentTextField>
+            <FluentTextField Appearance="TextFieldAppearance" Readonly="ReadOnly" Placeholder="Address" Value="@User.Address" ValueChanged="v => User.Address = v" >Address</FluentTextField>
         </div>
         
         <div class="basic-info-field">
-            <FluentTextField Appearance="TextFieldAppearance" Readonly="ReadOnly" Placeholder="City" Value="@user.City" ValueChanged="v => user.City = v">City</FluentTextField>
+            <FluentTextField Appearance="TextFieldAppearance" Readonly="ReadOnly" Placeholder="City" Value="@User.City" ValueChanged="v => User.City = v">City</FluentTextField>
         </div>
         
         <div class="basic-info-field">
-            <FluentTextField Appearance="TextFieldAppearance" Readonly="ReadOnly" Placeholder="Country" Value="@user.Country" ValueChanged="v => user.Country = v">Country</FluentTextField>
+            <FluentTextField Appearance="TextFieldAppearance" Readonly="ReadOnly" Placeholder="Country" Value="@User.Country" ValueChanged="v => User.Country = v">Country</FluentTextField>
         </div>
         
         <div class="basic-info-field">
-            <FluentTextField Appearance="TextFieldAppearance" Readonly="ReadOnly" Placeholder="Postal code" Value="@user.PostalCode" ValueChanged="v => user.PostalCode = v">Postal code</FluentTextField>
+            <FluentTextField Appearance="TextFieldAppearance" Readonly="ReadOnly" Placeholder="Postal code" Value="@User.PostalCode" ValueChanged="v => User.PostalCode = v">Postal code</FluentTextField>
         </div>
     </div>
 }
-@if (user == null)
+@if (User == null)
 {
     <FluentProgressRing></FluentProgressRing>
 }
 
-@code {
-    private UserDto? user { get; set; }
+@code { 
+    [Parameter]
+    public UserDto? User { get; set; }
 
     private bool ReadOnly { get; set; } = true;
     private bool Disabled { get; set; } = false;
     private Appearance TextFieldAppearance { get; set; } = Appearance.Filled;
-        
-    protected override async Task OnInitializedAsync()
-    {
-        var authState = await authenticationStateProvider.GetAuthenticationStateAsync();
-        if (authState.User.Identity?.IsAuthenticated == true)
-        {
-            user = await Http.GetFromJsonAsync<UserDto>("User");
-        }
-    }
 
     private int GetEmailSize()
     {
-        return user!.Email.Length + 2;
+        return User!.Email.Length + 2;
     }
 
     private async Task SaveAccountInformation()
     {
-        var userToString = JsonSerializer.Serialize(user);
+        var userToString = JsonSerializer.Serialize(User);
         await Http.PutAsync("User", new StringContent(userToString, Encoding.UTF8, "application/json"));
     }
 

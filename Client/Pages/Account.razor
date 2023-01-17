@@ -1,15 +1,30 @@
 ﻿@page "/Account"
 
 @using EventsManager.Client.Components.User
+@using EventsManager.Shared.Dtos
+@using Microsoft.AspNetCore.Authorization
+
+@inject HttpClient Http
+@inject AuthenticationStateProvider authenticationStateProvider
+
+@attribute [Authorize(Roles = "User")] 
 
 <h3>My account</h3>
-
 <FluentDivider></FluentDivider>
-    <UserInformation></UserInformation>
+    <UserImage UserImageUrl="@user?.ImageUrl"></UserImage>
 <FluentDivider></FluentDivider>
-    <UserImage></UserImage>
+    <UserInformation User="@user"></UserInformation>
 <FluentDivider></FluentDivider>
 
 @code {
+    private UserDto? user { get; set; }
     
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await authenticationStateProvider.GetAuthenticationStateAsync();
+        if (authState.User.Identity?.IsAuthenticated == true)
+        {
+            user = await Http.GetFromJsonAsync<UserDto>("User");
+        }
+    }
 }

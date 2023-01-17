@@ -1,9 +1,23 @@
-﻿<h3>My Image</h3>
+﻿@using EventsManager.Shared.Dtos
+@using Microsoft.AspNetCore.Authorization
 
-<div>
-    
-</div>
+@inject HttpClient Http
+@inject AuthenticationStateProvider authenticationStateProvider
+
+@attribute [Authorize(Roles = "User")] 
+
+@if(UserImageUrl != null)
+{
+    <div>
+        <img href="" alt="" width="200" src="@UserImageUrl"/>
+    </div>
+}
+@if (UserImageUrl == null)
+{
+    <FluentProgressRing></FluentProgressRing>
+}
 
 @code {
-    
+    [Parameter]
+    public Uri? UserImageUrl { get; set; } 
 }
