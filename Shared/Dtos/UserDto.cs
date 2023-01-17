@@ -13,6 +13,5 @@ public class UserDto
     public string? Name { get; set; }
     
     public bool RequestingUpdate { get; set; }
-    public bool IsChanged { get; set; }
 }
  
