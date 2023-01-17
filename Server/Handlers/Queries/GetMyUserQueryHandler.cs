@@ -6,17 +6,17 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EventsManager.Server.Handlers.Queries;
 
-public class GetMyUserCommandHandler : IRequestHandler<GetMyUserCommandRequest, UserDto>
+public class GetMyUserQueryHandler : IRequestHandler<GetMyUserQueryRequest, UserDto>
 {
     private readonly ApplicationDbContext _dbContext;
 
-    public GetMyUserCommandHandler(ApplicationDbContext dbContext)
+    public GetMyUserQueryHandler(ApplicationDbContext dbContext)
     {
         _dbContext = dbContext;
     }
 
 
-    public async Task<UserDto> Handle(GetMyUserCommandRequest request, CancellationToken cancellationToken)
+    public async Task<UserDto> Handle(GetMyUserQueryRequest request, CancellationToken cancellationToken)
     {
         var user = await _dbContext.Users
             .SingleAsync(x => x.Id == request.UserId, cancellationToken);

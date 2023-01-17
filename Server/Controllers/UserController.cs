@@ -1,11 +1,10 @@
 ﻿using System.Security.Claims;
-using EventsManager.Server.Data;
+using EventsManager.Server.Handlers.Commands.UpdateMyUser;
 using EventsManager.Server.Handlers.Queries;
 using EventsManager.Shared.Dtos;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace EventsManager.Server.Controllers;
 
@@ -14,12 +13,10 @@ namespace EventsManager.Server.Controllers;
 [Route("[controller]")]
 public class UserController : ControllerBase
 {
-    private readonly ApplicationDbContext _dbContext;
     private readonly IMediator _mediator;
 
-    public UserController(ApplicationDbContext dbContext, IMediator mediator)
+    public UserController(IMediator mediator)
     {
-        _dbContext = dbContext;
         _mediator = mediator;
     }   
     
@@ -27,29 +24,15 @@ public class UserController : ControllerBase
     public async Task<IActionResult> GetMyUser()
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        var response = await _mediator.Send(new GetMyUserCommandRequest(userId));
+        var response = await _mediator.Send(new GetMyUserQueryRequest(userId));
         return Ok(response); 
     }
     
     [HttpPut]   
-    public async Task<IActionResult> UpdateUser([FromBody] UserDto user)
+    public async Task<IActionResult> UpdateUser([FromBody] UserDto request)
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        if (userId != user.Id)
-        {
-            return BadRequest();
-        }
-
-        var userEntity = await _dbContext.Users.SingleAsync(x => x.Id == user.Id);
-        userEntity.Name = user.Name;
-        userEntity.FamilyName = user.FamilyName;
-        userEntity.Address = user.Address;
-        userEntity.City = user.City;
-        userEntity.Country = user.Country;
-        userEntity.PostalCode = user.PostalCode;
-        userEntity.PhoneNumber = user.PhoneNumber;
-        await _dbContext.SaveChangesAsync();
-        
+        await _mediator.Send(new UpdateMyUserCommandRequest(userId, request));
         return Ok();
     }
 }

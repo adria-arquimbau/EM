@@ -4,11 +4,11 @@ using MediatR;
 
 namespace EventsManager.Server.Handlers.Queries;
 
-public class GetMyUserCommandRequest : IRequest<UserDto>
+public class GetMyUserQueryRequest : IRequest<UserDto>
 {
     public readonly string UserId;
 
-    public GetMyUserCommandRequest(string userId)
+    public GetMyUserQueryRequest(string userId)
     {
         UserId = userId;
     }

@@ -63,7 +63,7 @@ public class Startup {
         services.AddControllersWithViews();
         services.AddRazorPages();
         
-        services.AddMediatR(typeof(GetMyUserCommandHandler).GetTypeInfo().Assembly);
+        services.AddMediatR(typeof(GetMyUserQueryHandler).GetTypeInfo().Assembly);
     }
     
     public void Configure(WebApplication app, IWebHostEnvironment env, IServiceProvider services) {
