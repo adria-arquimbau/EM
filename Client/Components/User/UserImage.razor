@@ -1,17 +1,11 @@
 ﻿@using EventsManager.Shared.Dtos
+
 @inject HttpClient Http
 @inject AuthenticationStateProvider authenticationStateProvider
 
-@if (RequestingImage)
+if (UserImageUrl != null)
 {
-    <FluentProgressRing></FluentProgressRing>
-}
-@if (!RequestingImage)
-{
-    if (UserImageUrl != null)
-    {
-        <img class="user-image" src="@UserImageUrl" alt=""/>
-    }
+    <img class="user-image" src="@UserImageUrl" alt=""/>
 }
 
 @code {
