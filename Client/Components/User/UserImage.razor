@@ -2,19 +2,24 @@
 @inject HttpClient Http
 @inject AuthenticationStateProvider authenticationStateProvider
 
-@if (UserImageUrl == null)
+@if (RequestingImage)
 {
     <FluentProgressRing></FluentProgressRing>
 }
-else
+@if (!RequestingImage)
 {
-    <img class="user-image" src="@UserImageUrl" alt=""/>
+    if (UserImageUrl != null)
+    {
+        <img class="user-image" src="@UserImageUrl" alt=""/>
+    }
 }
 
 
 @code {
     [Parameter]
     public Uri? UserImageUrl { get; set; } 
+    
+    public bool RequestingImage;
     
     protected override async Task OnInitializedAsync()
     {
@@ -27,7 +32,9 @@ else
 
     private async Task GetUserInformation()
     {
+        RequestingImage = true;
         var user = await Http.GetFromJsonAsync<UserDto>("User");
         UserImageUrl = user?.ImageUrl;
+        RequestingImage = false;
     }
 }
