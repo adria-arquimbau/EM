@@ -1,6 +1,7 @@
 .user-image {
+    margin-top: -8px;
     border-radius: 50%;
-    width: 40px;
-    height: 40px;
+    width: 35px;
+    height: 35px;
     object-fit: cover;
 }

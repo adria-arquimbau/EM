@@ -24,3 +24,14 @@
     height: 200px;
     object-fit: cover;
 }
+
+.user-image-manage{
+    display: flex;
+    flex-direction: column;
+    align-content: center;
+    align-items: center;
+}
+
+.user-image-manage-button{
+    margin-top: 5px;
+}

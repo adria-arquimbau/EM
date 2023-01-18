@@ -22,20 +22,23 @@
     }
     @if (UserImageUrl != null)
     {
-        @if (!RequestingDeleteImage)
-        {
-            <div>
-                <FluentButton Appearance="Appearance.Accent" @onclick="DeleteImage">Delete image</FluentButton>
-            </div>
-        }
-        else
-        {
-            <div>
-                <FluentButton Disabled="true" Appearance="Appearance.Accent" @onclick="DeleteImage">Deleteting</FluentButton>
-            </div>
-        }
-        
-        <img class="user-image-picture" size="" src="@UserImageUrl" alt="Event image" height="200" width="200"/>
+        <div class="user-image-manage">
+            
+            <img class="user-image-picture" size="" src="@UserImageUrl" alt="Event image" height="200" width="200"/>
+            
+            @if (!RequestingDeleteImage)
+            {
+                <div class="user-image-manage-button">
+                    <FluentButton Appearance="Appearance.Accent" @onclick="DeleteImage">Delete image</FluentButton>
+                </div>
+            }
+            else
+            {
+                <div class="user-image-manage-button">
+                    <FluentButton Disabled="true" Appearance="Appearance.Accent" @onclick="DeleteImage">Deleteting</FluentButton>
+                </div>
+            }
+        </div>
     }
 </div>
 
@@ -57,16 +60,17 @@
     {
         RequestingUploadImage = true;
         ErrorMessage = null;
-        
         using var content = new MultipartFormDataContent();
-        var resizedFile = await e.File.RequestImageFileAsync(e.File.ContentType, 300, int.MaxValue);
 
         if (!imageTypes.Contains(e.File.ContentType))
         {
             ErrorMessage = "Only JPEG, JPG, PNG and GIF images are allowed.";
+            RequestingUploadImage = false;
             return;
         }
-
+        
+        var resizedFile = await e.File.RequestImageFileAsync(e.File.ContentType, 300, int.MaxValue);
+        
         var fileContent = new StreamContent(resizedFile.OpenReadStream());
         fileContent.Headers.ContentType = new MediaTypeHeaderValue(resizedFile.ContentType);
         

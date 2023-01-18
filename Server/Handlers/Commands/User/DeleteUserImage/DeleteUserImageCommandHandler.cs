@@ -1,5 +1,6 @@
 ﻿using Azure.Storage.Blobs;
 using EventsManager.Server.Data;
+using EventsManager.Shared.Exceptions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -21,9 +22,14 @@ public class DeleteUserImageCommandHandler : AsyncRequestHandler<DeleteUserImage
     {
         var user = await _dbContext.Users
             .SingleAsync(x => x.Id == request.UserId, cancellationToken: cancellationToken);
+
+        if (user.ImageUrl == null)
+        {
+            throw new UserDoesNotHavePictureException();
+        }
         
-        var fileName = user.ImageUrl.ToString().Split('-').Last();
-        var blobClient = new BlobClient(_blobStorageOptions.ConnectionString, _blobStorageOptions.ContainerName, user.Id + "-user-picture" + "-" + fileName);
+        var fileName = user.ImageUrl.ToString().Split("-user-picture-").Last();
+        var blobClient = new BlobClient(_blobStorageOptions.ConnectionString, _blobStorageOptions.ContainerName, user.Id + "-user-picture");
 
         await blobClient.DeleteAsync(cancellationToken: cancellationToken);
         user.ImageUrl = null;
