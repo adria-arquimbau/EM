@@ -71,12 +71,12 @@
 
     private async Task AllowEdit()
     {
+        ReadOnly = !ReadOnly;
+        TextFieldAppearance = ReadOnly ? Appearance.Filled : Appearance.Outline;
         if (ReadOnly == false)
         {
             await SaveAccountInformation();
         }
-        ReadOnly = !ReadOnly;
-        TextFieldAppearance = ReadOnly ? Appearance.Filled : Appearance.Outline;
         Disabled = !Disabled;
     }   
 }   
