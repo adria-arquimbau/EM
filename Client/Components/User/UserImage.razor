@@ -3,7 +3,7 @@
 @inject HttpClient Http
 @inject AuthenticationStateProvider authenticationStateProvider
 
-if (UserImageUrl != null)
+@if (UserImageUrl != null)
 {
     <img class="user-image" src="@UserImageUrl" alt=""/>
 }
