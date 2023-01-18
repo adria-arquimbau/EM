@@ -22,11 +22,11 @@ public class DeleteUserImageCommandHandler : AsyncRequestHandler<DeleteUserImage
         var user = await _dbContext.Users
             .SingleAsync(x => x.Id == request.UserId, cancellationToken: cancellationToken);
         
-        user.ImageUrl = null;
-        
-        var blobClient = new BlobClient(_blobStorageOptions.ConnectionString, _blobStorageOptions.ContainerName, user.Id + "-user-picture");
+        var fileName = user.ImageUrl.ToString().Split('-').Last();
+        var blobClient = new BlobClient(_blobStorageOptions.ConnectionString, _blobStorageOptions.ContainerName, user.Id + "-user-picture" + "-" + fileName);
 
         await blobClient.DeleteAsync(cancellationToken: cancellationToken);
+        user.ImageUrl = null;
         
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
