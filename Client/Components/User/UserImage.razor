@@ -13,8 +13,11 @@
 <div class="user-image-container">
     @if (UserImageUrl == null)
     {
-        <InputFile OnChange="@OnInputFileChange">Select a picture</InputFile>
-        
+        if (RequestingUploadImage)
+        {
+            <FluentProgressRing></FluentProgressRing>
+        }
+        <InputFile style="@inputStyle" OnChange="@OnInputFileChange">Select a picture</InputFile>
         @ErrorMessage
     }
     @if (UserImageUrl != null)
@@ -43,18 +46,21 @@
     [Parameter]
     public EventCallback RefreshUserInformation { get; set; }
     
-    private int maxAllowedFiles = 1;
-    private int maxAllowedFileSize = 10 * 1024 * 1024; // 10 MB
     private string? ErrorMessage = null;
-    private UploadResult uploadResult = new();
     
     string[] imageTypes = new[] { "image/jpeg", "image/png", "image/gif", "image/jpg" };
     
+    private string hiddeInput = "visibility:hidden;"; 
+    private string? inputStyle; 
     private bool RequestingDeleteImage; 
-
+    private bool RequestingUploadImage;         
+    
     private async Task OnInputFileChange(InputFileChangeEventArgs e)
     {
+        RequestingUploadImage = true;
+        inputStyle = hiddeInput;
         ErrorMessage = null;
+        
         using var content = new MultipartFormDataContent();
         var resizedFile = await e.File.RequestImageFileAsync(e.File.ContentType, 300, int.MaxValue);
 
@@ -64,33 +70,16 @@
             return;
         }
 
-        if (resizedFile.Size > maxAllowedFileSize)
-        {
-            ErrorMessage = "File size is too big, should be less than 15MB.";
-            return;
-        }
-        
         var fileContent = new StreamContent(resizedFile.OpenReadStream());
         fileContent.Headers.ContentType = new MediaTypeHeaderValue(resizedFile.ContentType);
         
         content.Add(content: fileContent, name: "\"file\"", fileName: resizedFile.Name);
         
         var response = await Http.PostAsync("User/image", content);
-        var newUploadResult = await response.Content.ReadFromJsonAsync<UploadResult>();
-        if (newUploadResult != null)
-        {
-            uploadResult = newUploadResult;
-        }
+      
         await RefreshUserInformation.InvokeAsync();
-    }
-
-    private string? GetStoredFileName(string fileName)
-    {
-        if (uploadResult != null)
-        {
-            return uploadResult.StoredFileName;
-        }
-        return "FIle not found.";
+        RequestingUploadImage = false;
+        inputStyle = null;
     }
     
     private async Task DeleteImage()    
