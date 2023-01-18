@@ -8,25 +8,16 @@
 
 @attribute [Authorize(Roles = "User")] 
 
+<h4>My picture</h4>
 <div class="user-image-container">
     @if (UserImageUrl == null)
     {
-        <InputFile OnChange="@OnInputFileChange"/>
+        <InputFile OnChange="@OnInputFileChange">Select a picture</InputFile>
         
-        <ul>
-            <li>
-                File: @fileName
-                <span>
-                    Stored File Name: @GetStoredFileName(fileName)
-                </span>
-            </li>
-        </ul>
-        
+        @ErrorMessage
     }
     @if (UserImageUrl != null)
     {
-        <img size="" src="@UserImageUrl" alt="Event image" height="200" width="200"/>
-
         @if (!RequestingDeleteImage)
         {
             <div>
@@ -39,6 +30,8 @@
                 <FluentButton Disabled="true" Appearance="Appearance.Accent" @onclick="DeleteImage">Deleteting</FluentButton>
             </div>
         }
+        
+        <img class="user-image-picture" size="" src="@UserImageUrl" alt="Event image" height="200" width="200"/>
     }
 </div>
 
@@ -50,21 +43,33 @@
     public EventCallback RefreshUserInformation { get; set; }
     
     private int maxAllowedFiles = 1;
-    private long maxFileSize = long.MaxValue;
-    private string fileName;
+    private int maxAllowedFileSize = 10 * 1024 * 1024; // 10 MB
+    private string? ErrorMessage = null;
     private UploadResult uploadResult = new();
     
     private bool RequestingDeleteImage; 
 
     private async Task OnInputFileChange(InputFileChangeEventArgs e)
     {
+        ErrorMessage = null;
         using var content = new MultipartFormDataContent();
         var file = e.GetMultipleFiles(maxAllowedFiles).First();
       
-        var fileContent = new StreamContent(file.OpenReadStream(maxFileSize));
+        if (!file.Name.EndsWith(".jpg") && !file.Name.EndsWith(".png") && !file.Name.EndsWith(".gif") && !file.Name.EndsWith(".jpeg"))
+        {
+            ErrorMessage = "Only .jpeg, .png and .gif files are allowed.";
+            return;
+        }
+        
+        if (file.Size > maxAllowedFileSize)
+        {
+            ErrorMessage = "File size is too big, should be less than 15MB.";
+            return;
+        }
+        
+        var fileContent = new StreamContent(file.OpenReadStream());
         fileContent.Headers.ContentType = new MediaTypeHeaderValue(file.ContentType);
         
-        fileName = file.Name;
         content.Add(content: fileContent, name: "\"file\"", fileName: file.Name);
         
         var response = await Http.PostAsync("User/image", content);

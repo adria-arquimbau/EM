@@ -1,5 +1,6 @@
 .user-image-container{
     display: flex;
+    align-content: center;
     flex-direction: column;
     margin: 10px 0 10px 0;
 }
@@ -15,4 +16,11 @@
 
 .user-image-options-button{
     margin-right: 5px;
+}
+
+.user-image-picture {
+    border-radius: 50%;
+    width: 300px;
+    height: 300px;
+    object-fit: cover;
 }
