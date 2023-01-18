@@ -3,6 +3,7 @@ using EventsManager.Server.Handlers.Commands.User.DeleteUserImage;
 using EventsManager.Server.Handlers.Commands.User.UpdateMyUser;
 using EventsManager.Server.Handlers.Commands.User.UploadUserImage;
 using EventsManager.Server.Handlers.Queries;
+using EventsManager.Shared;
 using EventsManager.Shared.Dtos;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -39,10 +40,10 @@ public class UserController : ControllerBase
     }
     
     [HttpPost("image")]
-    public async Task<IActionResult> UploadUserImage(IFormFile files) 
+    public async Task<ActionResult<UploadResult>> UploadUserImage(IFormFile file) 
     {   
-        await _mediator.Send(new UploadUserImageCommandRequest(files, User.FindFirst(ClaimTypes.NameIdentifier)?.Value));
-        return Ok();  
+        var response = await _mediator.Send(new UploadUserImageCommandRequest(file, User.FindFirst(ClaimTypes.NameIdentifier)?.Value));
+        return Ok(response);    
     }
     
     [HttpDelete("image")]   

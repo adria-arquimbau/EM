@@ -1,5 +1,7 @@
 ﻿@using EventsManager.Shared.Dtos
 @using Microsoft.AspNetCore.Authorization
+@using System.Net.Http.Headers
+@using EventsManager.Shared
 
 @inject HttpClient Http
 @inject AuthenticationStateProvider authenticationStateProvider
@@ -9,21 +11,17 @@
 <div class="user-image-container">
     @if (UserImageUrl == null)
     {
-        <form class="user-image-upload" @onsubmit="@UploadImage" enctype="multipart/form-data">
-            @if (imgUrl != null)
-            {
-                <img size="" src="@imgUrl" alt="User image" height="200" width="200"/>
-                <div class="user-image-upload-options">
-                    @* <input type="submit" value="Upload"> *@
-                    <FluentButton Type="ButtonType.Submit" Appearance="Appearance.Accent" @onclick="DeleteLocalImage">Upload</FluentButton>
-                    <FluentButton Appearance="Appearance.Accent" @onclick="DeleteLocalImage">Delete preview</FluentButton>
-                </div>
-            }
-            else
-            {
-                <InputFile OnChange="@SelectFile">Select an image</InputFile>
-            }
-        </form>
+        <InputFile OnChange="@OnInputFileChange"/>
+        
+        <ul>
+            <li>
+                File: @fileName
+                <span>
+                    Stored File Name: @GetStoredFileName(fileName)
+                </span>
+            </li>
+        </ul>
+        
     }
     @if (UserImageUrl != null)
     {
@@ -37,7 +35,9 @@
         }
         else
         {
-            <FluentButton Disabled="true" Appearance="Appearance.Accent" @onclick="DeleteImage">Deleteting</FluentButton>
+            <div>
+                <FluentButton Disabled="true" Appearance="Appearance.Accent" @onclick="DeleteImage">Deleteting</FluentButton>
+            </div>
         }
     }
 </div>
@@ -49,70 +49,47 @@
     [Parameter]
     public EventCallback RefreshUserInformation { get; set; }
     
-    private StreamContent fileContent;
+    private int maxAllowedFiles = 1;
+    private long maxFileSize = long.MaxValue;
     private string fileName;
-    private string? imgUrl;     
-    private string imageType;
-
-    private bool RequestingDeleteImage;
+    private UploadResult uploadResult = new();
     
-    private async Task SelectFile(InputFileChangeEventArgs  e)
-    {
-        //ErrorMessage = null;
-        string[] imageTypes = { "image/jpeg", "image/png" };
-        if (imageTypes.Contains(e.File.ContentType))
-        {
-            // setting the max size for the file 
-            long maxFileSize = 1024 * 1024 * 5; //5MB
-            // Provide the HTTP Content based Stream
-            // and open the stream for reading the uploaded file
-            if (e.File.Size > maxFileSize)
-            {
-                //ErrorMessage = "File is too big, max size is 5 MB";
-                return;
-            }
-            var resized = await e.File.RequestImageFileAsync(e.File.ContentType, 300, int.MaxValue);
-            fileContent = new StreamContent(resized.OpenReadStream(maxFileSize));
-            // read file name
-            fileName = resized.Name;
-            var fileSize = new byte[resized.Size];
-            // read the file bytes in sequence
-            await resized.OpenReadStream(maxFileSize).ReadAsync(fileSize);
-            // read file content type
-            imageType = resized.ContentType;
-            // create URL
-            imgUrl = $"data:{imageType};base64,{Convert.ToBase64String(fileSize)}";
+    private bool RequestingDeleteImage; 
 
-            StateHasChanged();
-        }
-        else
+    private async Task OnInputFileChange(InputFileChangeEventArgs e)
+    {
+        using var content = new MultipartFormDataContent();
+        var file = e.GetMultipleFiles(maxAllowedFiles).First();
+      
+        var fileContent = new StreamContent(file.OpenReadStream(maxFileSize));
+        fileContent.Headers.ContentType = new MediaTypeHeaderValue(file.ContentType);
+        
+        fileName = file.Name;
+        content.Add(content: fileContent, name: "\"file\"", fileName: file.Name);
+        
+        var response = await Http.PostAsync("User/image", content);
+        var newUploadResult = await response.Content.ReadFromJsonAsync<UploadResult>();
+        if (newUploadResult != null)
         {
-            //toastService.ShowToast(ToastLevel.Warning, "Only jpeg and png files are allowed.", "Upload Image failed");
+            uploadResult = newUploadResult;
         }
+        await RefreshUserInformation.InvokeAsync();
     }
-    
-    private void DeleteLocalImage()
+
+    private string? GetStoredFileName(string fileName)
     {
-        imgUrl = null;
-    }   
+        if (uploadResult != null)
+        {
+            return uploadResult.StoredFileName;
+        }
+        return "FIle not found.";
+    }
     
     private async Task DeleteImage()    
     {
         RequestingDeleteImage = true;
         await Http.DeleteAsync("User/image");
-        imgUrl = null;
         await RefreshUserInformation.InvokeAsync();
         RequestingDeleteImage = false;
-    }   
-
-    private async Task UploadImage()    
-    {
-        //RequestingUploadImage = true;
-        using var content = new MultipartFormDataContent();
-        content.Add(content: fileContent, name: "\"file\"", fileName:fileName);
-        await Http.PostAsync("User/image", content);
-        
-        imgUrl = null;
-    // RequestingUploadImage = false;
     }   
 }
