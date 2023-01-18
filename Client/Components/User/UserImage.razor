@@ -2,6 +2,7 @@
 @using Microsoft.AspNetCore.Authorization
 @using System.Net.Http.Headers
 @using EventsManager.Shared
+@using System.Drawing
 
 @inject HttpClient Http
 @inject AuthenticationStateProvider authenticationStateProvider
@@ -47,30 +48,32 @@
     private string? ErrorMessage = null;
     private UploadResult uploadResult = new();
     
+    string[] imageTypes = new[] { "image/jpeg", "image/png", "image/gif", "image/jpg" };
+    
     private bool RequestingDeleteImage; 
 
     private async Task OnInputFileChange(InputFileChangeEventArgs e)
     {
         ErrorMessage = null;
         using var content = new MultipartFormDataContent();
-        var file = e.GetMultipleFiles(maxAllowedFiles).First();
-      
-        if (!file.Name.EndsWith(".jpg") && !file.Name.EndsWith(".png") && !file.Name.EndsWith(".gif") && !file.Name.EndsWith(".jpeg"))
+        var resizedFile = await e.File.RequestImageFileAsync(e.File.ContentType, 300, int.MaxValue);
+
+        if (!imageTypes.Contains(e.File.ContentType))
         {
-            ErrorMessage = "Only .jpeg, .png and .gif files are allowed.";
+            ErrorMessage = "Only JPEG, JPG, PNG and GIF images are allowed.";
             return;
         }
-        
-        if (file.Size > maxAllowedFileSize)
+
+        if (resizedFile.Size > maxAllowedFileSize)
         {
             ErrorMessage = "File size is too big, should be less than 15MB.";
             return;
         }
         
-        var fileContent = new StreamContent(file.OpenReadStream());
-        fileContent.Headers.ContentType = new MediaTypeHeaderValue(file.ContentType);
+        var fileContent = new StreamContent(resizedFile.OpenReadStream());
+        fileContent.Headers.ContentType = new MediaTypeHeaderValue(resizedFile.ContentType);
         
-        content.Add(content: fileContent, name: "\"file\"", fileName: file.Name);
+        content.Add(content: fileContent, name: "\"file\"", fileName: resizedFile.Name);
         
         var response = await Http.PostAsync("User/image", content);
         var newUploadResult = await response.Content.ReadFromJsonAsync<UploadResult>();
