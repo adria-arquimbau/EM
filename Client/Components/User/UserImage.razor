@@ -1,92 +1,33 @@
 ﻿@using EventsManager.Shared.Dtos
-@using Microsoft.AspNetCore.Authorization
-@using System.Net.Http.Headers
-@using EventsManager.Shared
-@using System.Drawing
-
 @inject HttpClient Http
 @inject AuthenticationStateProvider authenticationStateProvider
 
-@attribute [Authorize(Roles = "User")] 
+@if (UserImageUrl == null)
+{
+    <FluentProgressRing></FluentProgressRing>
+}
+else
+{
+    <img class="user-image" src="@UserImageUrl" alt=""/>
+}
 
-<h4>My picture</h4>
-<div class="user-image-container">
-    @if (UserImageUrl == null)
-    {
-        if (RequestingUploadImage)
-        {
-            <FluentProgressRing></FluentProgressRing>
-        }
-        <InputFile style="@inputStyle" OnChange="@OnInputFileChange">Select a picture</InputFile>
-        @ErrorMessage
-    }
-    @if (UserImageUrl != null)
-    {
-        @if (!RequestingDeleteImage)
-        {
-            <div>
-                <FluentButton Appearance="Appearance.Accent" @onclick="DeleteImage">Delete image</FluentButton>
-            </div>
-        }
-        else
-        {
-            <div>
-                <FluentButton Disabled="true" Appearance="Appearance.Accent" @onclick="DeleteImage">Deleteting</FluentButton>
-            </div>
-        }
-        
-        <img class="user-image-picture" size="" src="@UserImageUrl" alt="Event image" height="200" width="200"/>
-    }
-</div>
 
 @code {
     [Parameter]
     public Uri? UserImageUrl { get; set; } 
     
-    [Parameter]
-    public EventCallback RefreshUserInformation { get; set; }
-    
-    private string? ErrorMessage = null;
-    
-    string[] imageTypes = new[] { "image/jpeg", "image/png", "image/gif", "image/jpg" };
-    
-    private string hiddeInput = "visibility:hidden;"; 
-    private string? inputStyle; 
-    private bool RequestingDeleteImage; 
-    private bool RequestingUploadImage;         
-    
-    private async Task OnInputFileChange(InputFileChangeEventArgs e)
+    protected override async Task OnInitializedAsync()
     {
-        RequestingUploadImage = true;
-        inputStyle = hiddeInput;
-        ErrorMessage = null;
-        
-        using var content = new MultipartFormDataContent();
-        var resizedFile = await e.File.RequestImageFileAsync(e.File.ContentType, 300, int.MaxValue);
-
-        if (!imageTypes.Contains(e.File.ContentType))
+        var authState = await authenticationStateProvider.GetAuthenticationStateAsync();
+        if (authState.User.Identity?.IsAuthenticated == true)
         {
-            ErrorMessage = "Only JPEG, JPG, PNG and GIF images are allowed.";
-            return;
+            await GetUserInformation();
         }
-
-        var fileContent = new StreamContent(resizedFile.OpenReadStream());
-        fileContent.Headers.ContentType = new MediaTypeHeaderValue(resizedFile.ContentType);
-        
-        content.Add(content: fileContent, name: "\"file\"", fileName: resizedFile.Name);
-        
-        var response = await Http.PostAsync("User/image", content);
-      
-        await RefreshUserInformation.InvokeAsync();
-        RequestingUploadImage = false;
-        inputStyle = null;
     }
-    
-    private async Task DeleteImage()    
+
+    private async Task GetUserInformation()
     {
-        RequestingDeleteImage = true;
-        await Http.DeleteAsync("User/image");
-        await RefreshUserInformation.InvokeAsync();
-        RequestingDeleteImage = false;
-    }   
+        var user = await Http.GetFromJsonAsync<UserDto>("User");
+        UserImageUrl = user?.ImageUrl;
+    }
 }

@@ -1,5 +1,5 @@
 ﻿@page "/"
-@using EventsManager.Client.Components
+@using EventsManager.Client.Components.User
 
 
 
@@ -7,7 +7,7 @@
 
 <AuthorizeView>
     <Authorized>
-        <h1>Hello, @context.User.Identity?.Name!</h1> Welcome to Events Manager.
+        <h1>Hello, @context.User.Identity?.Name! <UserImage></UserImage></h1> Welcome to Events Manager.
         <FluentDivider></FluentDivider>
         <FluentCalendar Readonly=true />
     </Authorized>

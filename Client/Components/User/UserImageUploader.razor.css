@@ -1,0 +1,26 @@
+.user-image-container{
+    display: flex;
+    align-content: center;
+    flex-direction: column;
+    margin: 10px 0 10px 0;
+}
+
+.user-image-upload{
+    display: flex;
+    flex-direction: column;
+}
+
+.user-image-upload-options{
+    margin-top: 5px;
+}
+
+.user-image-options-button{
+    margin-right: 5px;
+}
+
+.user-image-picture {
+    border-radius: 50%;
+    width: 200px;
+    height: 200px;
+    object-fit: cover;
+}

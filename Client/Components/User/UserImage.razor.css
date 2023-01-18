@@ -1,26 +1,6 @@
-.user-image-container{
-    display: flex;
-    align-content: center;
-    flex-direction: column;
-    margin: 10px 0 10px 0;
-}
-
-.user-image-upload{
-    display: flex;
-    flex-direction: column;
-}
-
-.user-image-upload-options{
-    margin-top: 5px;
-}
-
-.user-image-options-button{
-    margin-right: 5px;
-}
-
-.user-image-picture {
+.user-image {
     border-radius: 50%;
-    width: 300px;
-    height: 300px;
+    width: 40px;
+    height: 40px;
     object-fit: cover;
 }

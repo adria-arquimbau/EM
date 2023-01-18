@@ -1,0 +1,88 @@
+﻿@using EventsManager.Shared.Dtos
+@using Microsoft.AspNetCore.Authorization
+@using System.Net.Http.Headers
+@using EventsManager.Shared
+@using System.Drawing
+
+@inject HttpClient Http
+@inject AuthenticationStateProvider authenticationStateProvider
+
+@attribute [Authorize(Roles = "User")] 
+
+<h4>My picture</h4>
+<div class="user-image-container">
+    @if (UserImageUrl == null)
+    {
+        if (RequestingUploadImage)
+        {
+            <FluentProgressRing></FluentProgressRing>
+        }
+        <InputFile OnChange="@OnInputFileChange">Select a picture</InputFile>
+        @ErrorMessage
+    }
+    @if (UserImageUrl != null)
+    {
+        @if (!RequestingDeleteImage)
+        {
+            <div>
+                <FluentButton Appearance="Appearance.Accent" @onclick="DeleteImage">Delete image</FluentButton>
+            </div>
+        }
+        else
+        {
+            <div>
+                <FluentButton Disabled="true" Appearance="Appearance.Accent" @onclick="DeleteImage">Deleteting</FluentButton>
+            </div>
+        }
+        
+        <img class="user-image-picture" size="" src="@UserImageUrl" alt="Event image" height="200" width="200"/>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public Uri? UserImageUrl { get; set; } 
+    
+    [Parameter]
+    public EventCallback RefreshUserInformation { get; set; }
+    
+    private string? ErrorMessage = null;
+    
+    string[] imageTypes = new[] { "image/jpeg", "image/png", "image/gif", "image/jpg" };
+    
+    private bool RequestingDeleteImage; 
+    private bool RequestingUploadImage;         
+    
+    private async Task OnInputFileChange(InputFileChangeEventArgs e)
+    {
+        RequestingUploadImage = true;
+        ErrorMessage = null;
+        
+        using var content = new MultipartFormDataContent();
+        var resizedFile = await e.File.RequestImageFileAsync(e.File.ContentType, 300, int.MaxValue);
+
+        if (!imageTypes.Contains(e.File.ContentType))
+        {
+            ErrorMessage = "Only JPEG, JPG, PNG and GIF images are allowed.";
+            return;
+        }
+
+        var fileContent = new StreamContent(resizedFile.OpenReadStream());
+        fileContent.Headers.ContentType = new MediaTypeHeaderValue(resizedFile.ContentType);
+        
+        content.Add(content: fileContent, name: "\"file\"", fileName: resizedFile.Name);
+        
+        var response = await Http.PostAsync("User/image", content);
+      
+        await RefreshUserInformation.InvokeAsync();
+        RequestingUploadImage = false;
+    }
+    
+    private async Task DeleteImage()    
+    {
+        RequestingDeleteImage = true;
+        await Http.DeleteAsync("User/image");
+        await RefreshUserInformation.InvokeAsync();
+        RequestingDeleteImage = false;
+    }   
+}
