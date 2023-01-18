@@ -13,5 +13,6 @@ public class UserDto
     public string? Name { get; set; }
     public string? PhoneNumber { get; set; }
     public Uri? ImageUrl { get; set; }
+    public bool RequestingUpdate { get; set; }
 }
             

@@ -65,16 +65,23 @@
 
     private async Task SaveAccountInformation()
     {
+        User.RequestingUpdate = true;
         var userToString = JsonSerializer.Serialize(User);
         await Http.PutAsync("User", new StringContent(userToString, Encoding.UTF8, "application/json"));
+        User.RequestingUpdate = false;
     }
 
     private async Task AllowEdit()
     {
         if (ReadOnly == false)
         {
+            ReadOnly = !ReadOnly;
+            TextFieldAppearance = ReadOnly ? Appearance.Filled : Appearance.Outline;
+            Disabled = !Disabled;
             await SaveAccountInformation();
+            return;
         }
+        
         ReadOnly = !ReadOnly;
         TextFieldAppearance = ReadOnly ? Appearance.Filled : Appearance.Outline;
         Disabled = !Disabled;
