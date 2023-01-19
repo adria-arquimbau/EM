@@ -1,5 +1,4 @@
-﻿using System.Net;
-using Azure.Storage.Blobs;
+﻿using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using EventsManager.Server.Data;
 using EventsManager.Shared;

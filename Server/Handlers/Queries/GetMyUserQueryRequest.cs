@@ -1,5 +1,4 @@
-﻿using EventsManager.Shared;
-using EventsManager.Shared.Dtos;
+﻿using EventsManager.Shared.Dtos;
 using MediatR;
 
 namespace EventsManager.Server.Handlers.Queries;
