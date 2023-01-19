@@ -28,8 +28,8 @@ public class DeleteUserImageCommandHandler : AsyncRequestHandler<DeleteUserImage
             throw new UserDoesNotHavePictureException();
         }
         
-        var fileName = user.ImageUrl.ToString().Split("-user-picture-").Last();
-        var blobClient = new BlobClient(_blobStorageOptions.ConnectionString, _blobStorageOptions.ContainerName, user.Id + "-user-picture");
+        var fileName = user.ImageUrl.ToString().Split("-user-picture").Last();
+        var blobClient = new BlobClient(_blobStorageOptions.ConnectionString, _blobStorageOptions.ContainerName, user.Id + "-user-picture" + fileName);
 
         await blobClient.DeleteAsync(cancellationToken: cancellationToken);
         user.ImageUrl = null;
