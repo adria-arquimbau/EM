@@ -1,10 +1,8 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Reflection;
-using System.Security.Claims;
 using EventsManager.Server.Data;
 using EventsManager.Server.Handlers.Queries;
 using EventsManager.Server.Models;
-using EventsManager.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
