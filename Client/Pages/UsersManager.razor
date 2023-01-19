@@ -1,9 +1,15 @@
 ﻿@page "/users-manager"
 @using Microsoft.AspNetCore.Authorization
+@using EventsManager.Shared.Dtos
+@using EventsManager.Client.Components.User
+
+
 
 @attribute [Authorize(Roles = "Administrator")] 
 
 <h3>Users Manager</h3>
+<FluentDivider></FluentDivider>
+<UsersList></UsersList>
 
 @code {
     
