@@ -1,4 +1,4 @@
-﻿namespace EventsManager.Server;
+﻿namespace EventsManager.Server.Settings;
 
 public class BlobStorageSettings
 {

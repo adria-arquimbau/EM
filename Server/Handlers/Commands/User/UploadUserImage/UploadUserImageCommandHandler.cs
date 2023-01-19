@@ -1,6 +1,7 @@
 ﻿using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using EventsManager.Server.Data;
+using EventsManager.Server.Settings;
 using EventsManager.Shared;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
