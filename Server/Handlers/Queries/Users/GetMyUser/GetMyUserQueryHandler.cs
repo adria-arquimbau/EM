@@ -1,10 +1,10 @@
-﻿using EventsManager.Server.Data;
+using EventsManager.Server.Data;
 using EventsManager.Shared.Dtos;
 using EventsManager.Shared.Exceptions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
-namespace EventsManager.Server.Handlers.Queries;
+namespace EventsManager.Server.Handlers.Queries.Users.GetMyUser;
 
 public class GetMyUserQueryHandler : IRequestHandler<GetMyUserQueryRequest, UserDto>
 {

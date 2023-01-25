@@ -1,15 +1,17 @@
 ﻿using System.Security.Claims;
-using EventsManager.Server.Data;
+using EventsManager.Server.Handlers.Commands.User.ConfirmEmail;
+using EventsManager.Server.Handlers.Commands.User.DeleteUser;
 using EventsManager.Server.Handlers.Commands.User.DeleteUserImage;
 using EventsManager.Server.Handlers.Commands.User.UpdateMyUser;
 using EventsManager.Server.Handlers.Commands.User.UploadUserImage;
 using EventsManager.Server.Handlers.Queries;
+using EventsManager.Server.Handlers.Queries.Users.GetAll;
+using EventsManager.Server.Handlers.Queries.Users.GetMyUser;
 using EventsManager.Shared;
 using EventsManager.Shared.Dtos;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace EventsManager.Server.Controllers;
 
@@ -67,38 +69,20 @@ public class UserController : ControllerBase
         var response = await _mediator.Send(new GetAllUsersQueryRequest(userId));
         return Ok(response);
     }
-}
-
-public class GetAllUsersQueryRequest : IRequest<List<UserDto>>
-{
-    public readonly string? UserId;
-
-    public GetAllUsersQueryRequest(string? userId)
+    
+    [HttpPut("confirm-email")]   
+    [Authorize(Roles = "Administrator")] 
+    public async Task<IActionResult> ConfirmEmail([FromBody] ConfirmEmailDto request)
     {
-        UserId = userId;
-    }
-}   
-
-public class GetAllUsersQueryHandler : IRequestHandler<GetAllUsersQueryRequest, List<UserDto>>
-{
-    private readonly ApplicationDbContext _dbContext;
-
-    public GetAllUsersQueryHandler(ApplicationDbContext dbContext)
-    {
-        _dbContext = dbContext;
+        await _mediator.Send(new ConfirmEmailCommandRequest(request.IdToConfirm));
+        return Ok();
     }
     
-    public async Task<List<UserDto>> Handle(GetAllUsersQueryRequest request, CancellationToken cancellationToken)
+    [HttpDelete("{userId}")]   
+    [Authorize(Roles = "Administrator")] 
+    public async Task<IActionResult> DeleteUser([FromRoute] string userId)
     {
-        var users = await _dbContext.Users.Select(x => new UserDto
-            {
-                Id = x.Id,
-                UserName = x.UserName,
-                Email = x.Email,
-                ImageUrl = x.ImageUrl
-            })
-            .ToListAsync(cancellationToken: cancellationToken);
-
-        return users;
+        await _mediator.Send(new DeleteUserCommandRequest(userId));
+        return Ok();
     }
-}   
+}

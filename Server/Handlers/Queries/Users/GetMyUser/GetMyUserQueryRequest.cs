@@ -1,7 +1,7 @@
 ﻿using EventsManager.Shared.Dtos;
 using MediatR;
 
-namespace EventsManager.Server.Handlers.Queries;
+namespace EventsManager.Server.Handlers.Queries.Users.GetMyUser;
 
 public class GetMyUserQueryRequest : IRequest<UserDto>
 {
