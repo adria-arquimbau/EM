@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EventsManager.Server.Handlers.Commands.User.UpdateMyUser;
 
-public class UpdateMyUserCommandHandler : AsyncRequestHandler<UpdateMyUserCommandRequest>
+public class UpdateMyUserCommandHandler : IRequestHandler<UpdateMyUserCommandRequest>
 {
     private readonly ApplicationDbContext _dbContext;
 
@@ -14,7 +14,7 @@ public class UpdateMyUserCommandHandler : AsyncRequestHandler<UpdateMyUserComman
         _dbContext = dbContext;
     }
     
-    protected override async Task Handle(UpdateMyUserCommandRequest request, CancellationToken cancellationToken)
+    public async Task Handle(UpdateMyUserCommandRequest request, CancellationToken cancellationToken)
     {
         if (request.UserId != request.UserDto.Id)
         {

@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EventsManager.Server.Handlers.Commands.User.DeleteUser;
 
-public class DeleteUserCommandHandler : AsyncRequestHandler<DeleteUserCommandRequest>
+public class DeleteUserCommandHandler : IRequestHandler<DeleteUserCommandRequest>
 {
     private readonly ApplicationDbContext _dbContext;
 
@@ -13,7 +13,7 @@ public class DeleteUserCommandHandler : AsyncRequestHandler<DeleteUserCommandReq
         _dbContext = dbContext;
     }
     
-    protected override async Task Handle(DeleteUserCommandRequest request, CancellationToken cancellationToken)
+    public async Task Handle(DeleteUserCommandRequest request, CancellationToken cancellationToken)
     {
         await _dbContext.Users
             .Where(x => x.Id == request.UserId)

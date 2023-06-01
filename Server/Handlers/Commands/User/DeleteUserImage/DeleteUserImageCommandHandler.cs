@@ -8,7 +8,7 @@ using Microsoft.Extensions.Options;
 
 namespace EventsManager.Server.Handlers.Commands.User.DeleteUserImage;
 
-public class DeleteUserImageCommandHandler : AsyncRequestHandler<DeleteUserImageCommandRequest>
+public class DeleteUserImageCommandHandler : IRequestHandler<DeleteUserImageCommandRequest>
 {
     private readonly ApplicationDbContext _dbContext;
     private readonly BlobStorageSettings _blobStorageOptions;
@@ -19,7 +19,7 @@ public class DeleteUserImageCommandHandler : AsyncRequestHandler<DeleteUserImage
         _blobStorageOptions = blobStorageOptions.Value;
     }
     
-    protected override async Task Handle(DeleteUserImageCommandRequest request, CancellationToken cancellationToken)
+    public async Task Handle(DeleteUserImageCommandRequest request, CancellationToken cancellationToken)
     {
         var user = await _dbContext.Users
             .SingleAsync(x => x.Id == request.UserId, cancellationToken: cancellationToken);

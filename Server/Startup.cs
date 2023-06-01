@@ -63,7 +63,12 @@ public class Startup {
         services.AddControllersWithViews();
         services.AddRazorPages();
         
-        services.AddMediatR(typeof(GetMyUserQueryHandler).GetTypeInfo().Assembly);
+        services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(GetMyUserQueryHandler).Assembly));
+        services.AddMediatR(config =>
+        {
+            config.RegisterServicesFromAssemblyContaining<GetMyUserQueryHandler>();
+        });
+        
         var blobStorageSection = configuration.GetSection("BlobStorage");
         services.Configure<BlobStorageSettings>(blobStorageSection);    
     }

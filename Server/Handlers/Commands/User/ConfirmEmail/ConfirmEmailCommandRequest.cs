@@ -15,7 +15,7 @@ public class ConfirmEmailCommandRequest : IRequest
     }
 }
 
-public class ConfirmEmailCommandHandler : AsyncRequestHandler<ConfirmEmailCommandRequest>
+public class ConfirmEmailCommandHandler : IRequestHandler<ConfirmEmailCommandRequest>
 {
     private readonly ApplicationDbContext _dbContext;
 
@@ -24,7 +24,7 @@ public class ConfirmEmailCommandHandler : AsyncRequestHandler<ConfirmEmailComman
         _dbContext = dbContext;
     }
 
-    protected override async Task Handle(ConfirmEmailCommandRequest request, CancellationToken cancellationToken)
+    public async Task Handle(ConfirmEmailCommandRequest request, CancellationToken cancellationToken)
     {
         var user = await _dbContext.Users.SingleOrDefaultAsync(u => u.Id == request.UserId, cancellationToken: cancellationToken);
         if (user == null)
