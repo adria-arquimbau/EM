@@ -5,62 +5,68 @@
 
 @inject HttpClient Http
 
-@attribute [Authorize(Roles = "User")] 
+@attribute [Authorize(Roles = "User")]
 
 <h4>Basic information</h4>
-<FluentSwitch @onchange="AllowEdit">
-    Edit
-</FluentSwitch>
-<div class="basic-info-container">
-    <div class="basic-info-field">
-        <FluentTextField Appearance="Appearance.Filled" Disabled="Disabled" Size="GetEmailSize()" Readonly="true" Value="@User.Email">Email</FluentTextField>
-    </div>
-    
-    <div class="basic-info-field">
-        <FluentTextField Appearance="Appearance.Filled" Disabled="Disabled" Readonly="true" Value="@User.UserName">User name</FluentTextField>
-    </div>
-    
-    <div class="basic-info-field">
-        <FluentTextField Appearance="TextFieldAppearance" Readonly="ReadOnly" Placeholder="Phone number" Value="@User.PhoneNumber" ValueChanged="v => User.PhoneNumber = v">Phone number</FluentTextField>
-    </div>
-    
-    <div class="basic-info-field">
-        <FluentTextField Appearance="TextFieldAppearance" Readonly="ReadOnly" Placeholder="Name" Value="@User.Name" ValueChanged="v => User.Name = v">Name</FluentTextField>
-    </div>
-    
-    <div class="basic-info-field">
-        <FluentTextField Appearance="TextFieldAppearance" Readonly="ReadOnly" Placeholder="Family name" Value="@User.FamilyName" ValueChanged="v => User.FamilyName = v">Family name</FluentTextField>
-    </div>
-    
-    <div class="basic-info-field">
-        <FluentTextField Appearance="TextFieldAppearance" Readonly="ReadOnly" Placeholder="Address" Value="@User.Address" ValueChanged="v => User.Address = v" >Address</FluentTextField>
-    </div>
-    
-    <div class="basic-info-field">
-        <FluentTextField Appearance="TextFieldAppearance" Readonly="ReadOnly" Placeholder="City" Value="@User.City" ValueChanged="v => User.City = v">City</FluentTextField>
-    </div>
-    
-    <div class="basic-info-field">
-        <FluentTextField Appearance="TextFieldAppearance" Readonly="ReadOnly" Placeholder="Country" Value="@User.Country" ValueChanged="v => User.Country = v">Country</FluentTextField>
-    </div>
-    
-    <div class="basic-info-field">
-        <FluentTextField Appearance="TextFieldAppearance" Readonly="ReadOnly" Placeholder="Postal code" Value="@User.PostalCode" ValueChanged="v => User.PostalCode = v">Postal code</FluentTextField>
-    </div>
-</div>
 
+@RenderButtons
+
+<form>
+    <div class="mb-3">
+        <label class="form-label">Email</label>
+        <input type="email" class="form-control" value="@User.Email" readonly />
+    </div>
+    <div class="mb-3">
+        <label class="form-label">User name</label>
+        <input type="text" class="form-control" value="@User.UserName" readonly />
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Phone number</label>
+        <input type="text" class="form-control" @bind="@User.PhoneNumber" readonly="@ReadOnly" />
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Name</label>
+        <input type="text" class="form-control" @bind="@User.Name" readonly="@ReadOnly" />
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Family name</label>
+        <input type="text" class="form-control" @bind="@User.FamilyName" readonly="@ReadOnly" />
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Address</label>
+        <input type="text" class="form-control" @bind="@User.Address" readonly="@ReadOnly" />
+    </div>
+    <div class="mb-3">
+        <label class="form-label">City</label>
+        <input type="text" class="form-control" @bind="@User.City" readonly="@ReadOnly" />
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Country</label>
+        <input type="text" class="form-control" @bind="@User.Country" readonly="@ReadOnly" />
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Postal code</label>
+        <input type="text" class="form-control" @bind="@User.PostalCode" readonly="@ReadOnly" />
+    </div>
+</form>
+
+@RenderButtons
 
 @code { 
     [Parameter]
     public UserDto? User { get; set; }
 
     private bool ReadOnly { get; set; } = true;
-    private bool Disabled { get; set; } = false;
-    private Appearance TextFieldAppearance { get; set; } = Appearance.Filled;
 
-    private int GetEmailSize()
+    private void SwitchToEditMode()
     {
-        return User!.Email.Length + 2;
+        ReadOnly = false;
+    }
+
+    private async Task CancelEdit()
+    {
+        User = await Http.GetFromJsonAsync<UserDto>("User");
+        ReadOnly = true;
     }
 
     private async Task SaveAccountInformation()
@@ -69,22 +75,32 @@
         var userToString = JsonSerializer.Serialize(User);
         await Http.PutAsync("User", new StringContent(userToString, Encoding.UTF8, "application/json"));
         User.RequestingUpdate = false;
+        ReadOnly = true;
     }
 
-    private async Task AllowEdit()
+    private RenderFragment RenderButtons => builder =>
     {
-        if (ReadOnly == false)
+        if (ReadOnly)
         {
-            ReadOnly = !ReadOnly;
-            TextFieldAppearance = ReadOnly ? Appearance.Filled : Appearance.Outline;
-            Disabled = !Disabled;
-            await SaveAccountInformation();
-            return;
+            builder.OpenElement(0, "button");
+            builder.AddAttribute(1, "class", "btn btn-primary");
+            builder.AddAttribute(2, "onclick", EventCallback.Factory.Create(this, SwitchToEditMode));
+            builder.AddContent(3, "Edit");
+            builder.CloseElement();
         }
-        
-        ReadOnly = !ReadOnly;
-        TextFieldAppearance = ReadOnly ? Appearance.Filled : Appearance.Outline;
-        Disabled = !Disabled;
-    }   
-}   
-    
+        else
+        {
+            builder.OpenElement(0, "button");
+            builder.AddAttribute(1, "class", "btn btn-primary");
+            builder.AddAttribute(2, "onclick", EventCallback.Factory.Create(this, SaveAccountInformation));
+            builder.AddContent(3, "Save");
+            builder.CloseElement();
+
+            builder.OpenElement(4, "button");
+            builder.AddAttribute(5, "class", "btn btn-secondary");
+            builder.AddAttribute(6, "onclick", EventCallback.Factory.Create(this, CancelEdit));
+            builder.AddContent(7, "Cancel");
+            builder.CloseElement();
+        }
+    };
+}
