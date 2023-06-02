@@ -87,6 +87,8 @@
                         <dt class="col-sm-4">Email Confirmed:</dt>
                         <dd class="col-sm-8">@selectedUser.EmailConfirmed</dd>
 
+                        <dt class="col-sm-4">Is Organizer:</dt>
+                        <dd class="col-sm-8">@(selectedUser.IsOrganizer == false ? "No" : "Yes")</dd>
                     </dl>
                 </div>
                 <div class="modal-footer">
@@ -94,7 +96,15 @@
                     {
                         <button type="button" class="btn btn-primary" @onclick="@(() => ConfirmEmail(selectedUser.Id))">Confirm Email</button>
                     }
-                    <button type="button" class="btn btn-danger" @onclick="@(() => SetAsOrganizer(selectedUser.Id))">Set as Organizer</button>
+                    @if ((bool)!selectedUser.IsOrganizer)
+                    {
+                        <button type="button" class="btn btn-primary" @onclick="@(() => SetAsOrganizer(selectedUser.Id))">Set as Organizer</button>
+                    }
+                    @if ((bool)selectedUser.IsOrganizer)
+                    {
+                        <button type="button" class="btn btn-danger" @onclick="@(() => RemoveOrganizerRole(selectedUser.Id))">Remove Organizer role</button>
+                    }
+                    
                     <button type="button" class="btn btn-danger" @onclick="@(() => DeleteUser(selectedUser.Id))">Delete User</button>
                 </div>
             </div>
@@ -153,6 +163,14 @@
     private async Task SetAsOrganizer(string id)    
     {
         await Http.PutAsync($"User/{id}/set-organizer", null);
+        await GetAllUsers();
+        await CloseModal();
+    }
+        
+    private async Task RemoveOrganizerRole(string id)    
+    {
+        await Http.PutAsync($"User/{id}/remove-organizer", null);
+        await GetAllUsers();
         await CloseModal();
     }
     

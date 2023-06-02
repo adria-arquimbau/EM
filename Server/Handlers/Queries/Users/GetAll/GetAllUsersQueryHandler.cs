@@ -17,14 +17,15 @@ public class GetAllUsersQueryHandler : IRequestHandler<GetAllUsersQueryRequest, 
     public async Task<List<UserDto>> Handle(GetAllUsersQueryRequest request, CancellationToken cancellationToken)
     {
         var users = await _dbContext.Users.Select(x => new UserDto
-            {
-                Id = x.Id,
-                UserName = x.UserName,
-                Email = x.Email,
-                EmailConfirmed = x.EmailConfirmed,
-                ImageUrl = x.ImageUrl
-            })
-            .ToListAsync(cancellationToken: cancellationToken);
+        {
+            Id = x.Id,
+            UserName = x.UserName,
+            Email = x.Email,
+            EmailConfirmed = x.EmailConfirmed,
+            ImageUrl = x.ImageUrl,
+            IsOrganizer = _dbContext.UserRoles.Any(ur => ur.UserId == x.Id && ur.RoleId == "2")
+        })
+        .ToListAsync(cancellationToken: cancellationToken);
 
         return users;
     }
