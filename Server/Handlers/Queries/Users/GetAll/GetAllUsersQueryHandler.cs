@@ -23,7 +23,14 @@ public class GetAllUsersQueryHandler : IRequestHandler<GetAllUsersQueryRequest, 
             Email = x.Email,
             EmailConfirmed = x.EmailConfirmed,
             ImageUrl = x.ImageUrl,
-            IsOrganizer = _dbContext.UserRoles.Any(ur => ur.UserId == x.Id && ur.RoleId == "2")
+            IsOrganizer = _dbContext.UserRoles.Any(ur => ur.UserId == x.Id && ur.RoleId == "2"),
+            Address = x.Address,
+            City = x.City,
+            Country = x.Country,
+            PhoneNumber = x.PhoneNumber,
+            PostalCode = x.PostalCode,
+            FamilyName = x.FamilyName,
+            Name = x.Name
         })
         .ToListAsync(cancellationToken: cancellationToken);
 

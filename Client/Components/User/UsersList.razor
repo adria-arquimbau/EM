@@ -11,22 +11,29 @@
 <div class="table-responsive">
     <table class="table">
         <thead>
-            <tr>
-                <th scope="col">User Name</th>
-                <th scope="col">Email</th>
-            </tr>
+        <tr>
+            <th scope="col">User Name</th>
+            <th scope="col">Email</th>
+        </tr>
         </thead>
         <tbody>
-            @foreach (var user in filteredUsers)
-            {
-                <tr @onclick="@(() => OpenModal(user))">
-                    <td>@user.UserName</td>
-                    <td>@user.Email</td>
-                </tr>
-            }
+        @foreach (var user in filteredUsers)
+        {
+            <tr class="@((bool)user.IsOrganizer ? "organizer" : "regular-user")" @onclick="@(() => OpenModal(user))">
+                <td>@user.UserName</td>
+                <td>@user.Email</td>
+            </tr>
+        }
         </tbody>
     </table>
+    
+    <div class="legend">
+        <span class="organizer">Organizer</span>
+        <span class="regular-user">Regular User</span>
+    </div>
 </div>
+
+<p>Total: <strong>@numResults results found</strong></p>
 
 @if (selectedUser != null)
 {
@@ -57,33 +64,36 @@
                 </div>
                 <div class="modal-body">
                     <dl class="row">
+                        <dt class="col-sm-4">User Id:</dt>
+                        <dd class="col-sm-8">@selectedUser.Id</dd>
+                        
                         <dt class="col-sm-4">User Name:</dt>
-                        <dd class="col-sm-8">@(string.IsNullOrWhiteSpace(selectedUser.UserName) ? "-" : selectedUser.UserName)</dd>
-                        
+                        <dd class="col-sm-8">@selectedUser.UserName</dd>
+
                         <dt class="col-sm-4">Email:</dt>
-                        <dd class="col-sm-8">@(string.IsNullOrWhiteSpace(selectedUser.Email) ? "-" : selectedUser.Email)</dd>
-                        
+                        <dd class="col-sm-8">@selectedUser.Email</dd>
+
                         <dt class="col-sm-4">Postal Code:</dt>
                         <dd class="col-sm-8">@(string.IsNullOrWhiteSpace(selectedUser.PostalCode) ? "-" : selectedUser.PostalCode)</dd>
-                        
+
                         <dt class="col-sm-4">Country:</dt>
                         <dd class="col-sm-8">@(string.IsNullOrWhiteSpace(selectedUser.Country) ? "-" : selectedUser.Country)</dd>
-                        
+
                         <dt class="col-sm-4">City:</dt>
                         <dd class="col-sm-8">@(string.IsNullOrWhiteSpace(selectedUser.City) ? "-" : selectedUser.City)</dd>
-                        
+
                         <dt class="col-sm-4">Address:</dt>
                         <dd class="col-sm-8">@(string.IsNullOrWhiteSpace(selectedUser.Address) ? "-" : selectedUser.Address)</dd>
-                        
+
                         <dt class="col-sm-4">Family Name:</dt>
                         <dd class="col-sm-8">@(string.IsNullOrWhiteSpace(selectedUser.FamilyName) ? "-" : selectedUser.FamilyName)</dd>
-                        
+
                         <dt class="col-sm-4">Name:</dt>
                         <dd class="col-sm-8">@(string.IsNullOrWhiteSpace(selectedUser.Name) ? "-" : selectedUser.Name)</dd>
-                        
+
                         <dt class="col-sm-4">Phone Number:</dt>
                         <dd class="col-sm-8">@(string.IsNullOrWhiteSpace(selectedUser.PhoneNumber) ? "-" : selectedUser.PhoneNumber)</dd>
-                        
+
                         <dt class="col-sm-4">Email Confirmed:</dt>
                         <dd class="col-sm-8">@selectedUser.EmailConfirmed</dd>
 
@@ -111,9 +121,6 @@
         </div>
     </div>
 }
-
-
-<p>Total: <strong>@numResults results found</strong></p>
 
 @code {
     List<UserDto> users = new List<UserDto>();

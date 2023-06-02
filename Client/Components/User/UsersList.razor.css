@@ -17,3 +17,29 @@ tbody tr {
 tbody tr:hover {
     background-color: #f8f9fa;
 }
+
+.organizer {
+    background-color: #ADD8E6; /* Light Blue */
+}
+
+.regular-user {
+    background-color: #FFFFFF; /* White */
+}
+
+.legend .organizer:before {
+    content: "";
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    margin-right: 5px;
+    background-color: #ADD8E6;
+}
+
+.legend .regular-user:before {
+    content: "";
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    margin-right: 5px;
+    background-color: #FFFFFF;
+}
