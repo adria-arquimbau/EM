@@ -32,6 +32,24 @@
 
 @if (selectedUser != null)
 {
+    <div class="modal" tabindex="-1" id="deleteUserModal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirm Delete</h5>
+                    <button type="button" class="btn-close" @onclick="CloseDeleteModal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to delete user '@selectedUser.UserName'? This action cannot be undone.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" @onclick="@(() => DeleteUserConfirmed(selectedUser.Id))">Delete User</button>
+                    <button type="button" class="btn btn-secondary" @onclick="CloseDeleteModal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
     <div class="modal" tabindex="-1" id="userModal">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -127,10 +145,24 @@
     
     private async Task DeleteUser(string idToDelete)
     {
+        selectedUser = users.FirstOrDefault(u => u.Id == idToDelete);
+        await CloseModal();
+        await JSRuntime.InvokeVoidAsync("eval", "$('#deleteUserModal').modal('show');");
+    }
+
+    
+    private async Task DeleteUserConfirmed(string idToDelete)
+    {
         await Http.DeleteAsync($"User/{idToDelete}");
         await GetAllUsers();
-        await CloseModal();
+        await CloseDeleteModal();
     }
+
+    private async Task CloseDeleteModal()
+    {
+        await JSRuntime.InvokeVoidAsync("eval", "$('#deleteUserModal').modal('hide');");
+    }
+
     
     private async Task OpenModal(UserDto user)
     {
