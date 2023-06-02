@@ -5,52 +5,55 @@
 @inject HttpClient Http
 @inject NavigationManager NavManager
 
-<div style="height: 434px; overflow:auto;" tabindex="-1">
-    <FluentDataGrid RowsDataProvider="foodRecallProvider" Virtualize="true" GenerateHeader="GenerateHeaderOption.Sticky" TGridItem="UserDto" >
-        <PropertyColumn Title="User name" Property="@(c => c!.UserName)" />
-        <PropertyColumn Title="Email" Property="@(c => c!.Email)" />
-        <TemplateColumn Title="Email confirmed">
-            @if (context?.EmailConfirmed ?? false)
+<input type="text" class="form-control" placeholder="Search..." @oninput="OnSearch" />
+
+<div class="table-responsive">
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">User Name</th>
+                <th scope="col">Email</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var user in filteredUsers)
             {
-                <span>Confirmed</span>
+                <tr>
+                    <td>@user.UserName</td>
+                    <td>@user.Email</td>
+                </tr>
             }
-            else
-            {
-                <button class="btn btn-primary" @onclick="@(() => ConfirmEmail(context.Id))">Confirm Email</button>
-            }
-        </TemplateColumn>
-        <TemplateColumn Title="Delete user">
-            <button class="btn btn-primary" @onclick="@(() => DeleteUser(context.Id))">Delete</button>
-        </TemplateColumn>
-    </FluentDataGrid>
+        </tbody>
+    </table>
 </div>
 
 <p>Total: <strong>@numResults results found</strong></p>
 
 @code {
-    GridItemsProvider<UserDto> foodRecallProvider = default!;
-    int numResults;
+    List<UserDto> users = new List<UserDto>();
+    List<UserDto> filteredUsers = new List<UserDto>();
+    int numResults = 0;
+    string selectedUserId = "";
 
     protected override async Task OnInitializedAsync()
     {
-    // Define the GridRowsDataProvider. Its job is to convert QuickGrid's GridRowsDataProviderRequest into a query against
-        // an arbitrary data soure. In this example, we need to translate query parameters into the particular URL format
-        // supported by the external JSON API. It's only possible to perform whatever sorting/filtering/etc is supported
-        // by the external API.
         await GetAllUsers();
+    }
+    
+    private void OnSearch(ChangeEventArgs e)
+    {
+        var value = e.Value.ToString().ToLower();
+        filteredUsers = users.Where(user => user.UserName.ToLower().Contains(value) || user.Email.ToLower().Contains(value)).ToList();
+        numResults = filteredUsers.Count;
+        StateHasChanged();
     }
 
     private async Task GetAllUsers()
     {
-        
-        foodRecallProvider = async req =>
-        {
-            var response = await Http.GetFromJsonAsync<List<UserDto>>("User/all-users");
-            numResults = response.Count;
-            return GridItemsProviderResult.From(
-                items: response,
-                totalItemCount: response.Count);
-        };
+        var response = await Http.GetFromJsonAsync<List<UserDto>>("User/all-users");
+        users = response;
+        numResults = users.Count;
+        filteredUsers = new List<UserDto>(users); // Here, filteredUsers is set to the full list of users
     }
 
     private async Task ConfirmEmail(string idToConfirm)
