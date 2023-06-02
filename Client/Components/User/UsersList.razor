@@ -94,6 +94,7 @@
                     {
                         <button type="button" class="btn btn-primary" @onclick="@(() => ConfirmEmail(selectedUser.Id))">Confirm Email</button>
                     }
+                    <button type="button" class="btn btn-danger" @onclick="@(() => SetAsOrganizer(selectedUser.Id))">Set as Organizer</button>
                     <button type="button" class="btn btn-danger" @onclick="@(() => DeleteUser(selectedUser.Id))">Delete User</button>
                 </div>
             </div>
@@ -148,7 +149,12 @@
         await CloseModal();
         await JSRuntime.InvokeVoidAsync("eval", "$('#deleteUserModal').modal('show');");
     }
-
+    
+    private async Task SetAsOrganizer(string id)    
+    {
+        await Http.PutAsync($"User/{id}/set-organizer", null);
+        await CloseModal();
+    }
     
     private async Task DeleteUserConfirmed(string idToDelete)
     {

@@ -2,6 +2,7 @@
 using EventsManager.Server.Handlers.Commands.User.ConfirmEmail;
 using EventsManager.Server.Handlers.Commands.User.DeleteUser;
 using EventsManager.Server.Handlers.Commands.User.DeleteUserImage;
+using EventsManager.Server.Handlers.Commands.User.SetAsOrganizer;
 using EventsManager.Server.Handlers.Commands.User.UpdateMyUser;
 using EventsManager.Server.Handlers.Commands.User.UploadUserImage;
 using EventsManager.Server.Handlers.Queries;
@@ -77,6 +78,14 @@ public class UserController : ControllerBase
         await _mediator.Send(new ConfirmEmailCommandRequest(request.IdToConfirm));
         return Ok();
     }
+    
+    [HttpPut("{userId:guid}/set-organizer")]   
+    [Authorize(Roles = "Administrator")] 
+    public async Task<IActionResult> SetUserAsOrganizer([FromRoute]Guid userId)
+    {   
+        await _mediator.Send(new SetUserAsOrganizerCommandRequest(userId));
+        return Ok();    
+    }   
     
     [HttpDelete("{userId}")]   
     [Authorize(Roles = "Administrator")] 
