@@ -29,10 +29,10 @@ public class DeleteUserImageCommandHandler : IRequestHandler<DeleteUserImageComm
             throw new UserDoesNotHavePictureException();
         }
         
-        var fileName = user.ImageUrl.ToString().Split("-user-picture").Last();
-        var blobClient = new BlobClient(_blobStorageOptions.ConnectionString, _blobStorageOptions.ContainerName, user.Id + "-user-picture" + fileName);
-
+        var blobClient = new BlobClient(_blobStorageOptions.ConnectionString, _blobStorageOptions.ProfileImageContainerName, user.Id + "-user-picture");
+        
         await blobClient.DeleteAsync(cancellationToken: cancellationToken);
+            
         user.ImageUrl = null;
         
         await _dbContext.SaveChangesAsync(cancellationToken);

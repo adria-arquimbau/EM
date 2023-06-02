@@ -24,8 +24,8 @@
     {
         <div class="user-image-manage">
             
-            <img class="user-image-picture" size="" src="@UserImageUrl" alt="Event image" height="200" width="200"/>
-            
+            <img class="user-image-picture" src="@($"{UserImageUrl}?v={imageUpdateCount}")" alt="User image" />
+
             @if (!RequestingDeleteImage)
             {
                 <div class="user-image-manage-button">
@@ -45,6 +45,8 @@
 @code {
     [Parameter]
     public Uri? UserImageUrl { get; set; } 
+    
+    private int imageUpdateCount = 0;
     
     [Parameter]
     public EventCallback RefreshUserInformation { get; set; }
@@ -79,6 +81,7 @@
         var response = await Http.PostAsync("User/image", content);
       
         await RefreshUserInformation.InvokeAsync();
+        imageUpdateCount++;
         RequestingUploadImage = false;
     }
     
@@ -87,6 +90,7 @@
         RequestingDeleteImage = true;
         await Http.DeleteAsync("User/image");
         await RefreshUserInformation.InvokeAsync();
+        imageUpdateCount++;
         RequestingDeleteImage = false;
     }   
 }
