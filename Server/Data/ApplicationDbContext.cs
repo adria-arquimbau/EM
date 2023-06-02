@@ -4,17 +4,17 @@ using Microsoft.AspNetCore.ApiAuthorization.IdentityServer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
-namespace EventsManager.Server.Data
+namespace EventsManager.Server.Data;
+
+public class ApplicationDbContext : ApiAuthorizationDbContext<ApplicationUser>
 {
-    public class ApplicationDbContext : ApiAuthorizationDbContext<ApplicationUser>
+    public DbSet<Event> Events { get; set; }
+    public ApplicationDbContext(DbContextOptions options, IOptions<OperationalStoreOptions> operationalStoreOptions) : base(options, operationalStoreOptions)
     {
-        public ApplicationDbContext(DbContextOptions options, IOptions<OperationalStoreOptions> operationalStoreOptions) : base(options, operationalStoreOptions)
-        {
-        }
+    }
         
-        protected override void OnModelCreating(ModelBuilder builder)
-        {
-            base.OnModelCreating(builder);
-        }
+    protected override void OnModelCreating(ModelBuilder builder)
+    {
+        base.OnModelCreating(builder);
     }
 }
