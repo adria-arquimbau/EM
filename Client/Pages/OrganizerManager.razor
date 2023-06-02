@@ -1,0 +1,11 @@
+﻿@page "/organizer-manager"
+@using Microsoft.AspNetCore.Authorization
+
+@attribute [Authorize(Roles = "Administrator")] 
+@inject HttpClient Http
+
+<h3>OrganizerManager</h3>
+
+@code {
+    
+}
