@@ -1,6 +1,7 @@
 ﻿@using EventsManager.Shared.Dtos
 @using System.Text.Json
 @using System.Text
+@using EventsManager.Shared.Requests
 
 @inject HttpClient Http
 @inject NavigationManager NavManager
@@ -151,7 +152,7 @@
 
     private async Task ConfirmEmail(string idToConfirm)
     {
-        var request = JsonSerializer.Serialize(new ConfirmEmailDto
+        var request = JsonSerializer.Serialize(new ConfirmEmailRequest
         {
             IdToConfirm = idToConfirm
         });

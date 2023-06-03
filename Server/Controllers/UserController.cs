@@ -6,11 +6,11 @@ using EventsManager.Server.Handlers.Commands.User.RemoveOrganizer;
 using EventsManager.Server.Handlers.Commands.User.SetAsOrganizer;
 using EventsManager.Server.Handlers.Commands.User.UpdateMyUser;
 using EventsManager.Server.Handlers.Commands.User.UploadUserImage;
-using EventsManager.Server.Handlers.Queries;
 using EventsManager.Server.Handlers.Queries.Users.GetAll;
 using EventsManager.Server.Handlers.Queries.Users.GetMyUser;
 using EventsManager.Shared;
 using EventsManager.Shared.Dtos;
+using EventsManager.Shared.Requests;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -74,7 +74,7 @@ public class UserController : ControllerBase
     
     [HttpPut("confirm-email")]   
     [Authorize(Roles = "Administrator")] 
-    public async Task<IActionResult> ConfirmEmail([FromBody] ConfirmEmailDto request)
+    public async Task<IActionResult> ConfirmEmail([FromBody] ConfirmEmailRequest request)
     {
         await _mediator.Send(new ConfirmEmailCommandRequest(request.IdToConfirm));
         return Ok();
@@ -98,7 +98,7 @@ public class UserController : ControllerBase
         
     [HttpDelete("{userId}")]   
     [Authorize(Roles = "Administrator")] 
-    public async Task<IActionResult> DeleteUser([FromRoute] string userId)
+    public async Task<IActionResult> DeleteUser([FromRoute]string userId)
     {
         await _mediator.Send(new DeleteUserCommandRequest(userId));
         return Ok();
