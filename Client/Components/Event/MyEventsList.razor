@@ -19,12 +19,25 @@ else
                     </div>
                     <div class="card-body">
                         <h5 class="card-title">@sportEvent.Name</h5>
-                        <p class="card-text">@sportEvent.Description</p>
-                        <p class="card-text"><small class="text-muted">Location: @sportEvent.Location</small></p>
-                        <!-- ... rest of your event details here ... -->
+                          <p class="card-text">@sportEvent.Description</p>
+                          <p class="card-text"><small class="text-muted">Location: @sportEvent.Location</small></p>
+                          <p class="card-text"><small class="text-muted">Start date: @sportEvent.StartDate.ToShortDateString()</small></p>
+                          <p class="card-text"><small class="text-muted">End date: @sportEvent.FinishDate.ToShortDateString()</small></p>
+                          <p class="card-text"><small class="text-muted">Open registrations: @sportEvent.OpenRegistrationsDate.ToShortDateString()</small></p>
+                          <p class="card-text"><small class="text-muted">Close registrations: @sportEvent.CloseRegistrationsDate.ToShortDateString()</small></p>
+                        <p class="card-text"><small class="text-muted">Max Registrations: @sportEvent.MaxRegistrations</small></p>
                     </div>
                     <div class="card-footer">
-                        <!-- ... rest of your footer here ... -->
+                        <small class="text-muted">
+                            @if (sportEvent.IsPublic)
+                            {
+                                <span class="text-success">Public <i class="bi bi-check-circle-fill"></i></span>
+                            }
+                            else
+                            {
+                                <span class="text-danger">Private <i class="bi bi-x-circle-fill"></i></span>
+                            }
+                        </small>
                         <button class="btn btn-danger" @onclick="() => ConfirmDelete(sportEvent.Id)">Delete</button>
                     </div>
                 </div>
