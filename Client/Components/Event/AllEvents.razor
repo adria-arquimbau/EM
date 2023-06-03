@@ -1,4 +1,16 @@
-﻿@using EventsManager.Shared.Dtos
+﻿<style>
+    .image-container {
+        height: 200px;
+        width: 100%;
+        overflow: hidden;
+    }
+    .image-container img {
+        width: 100%;
+        height: auto;
+    }
+</style>
+
+@using EventsManager.Shared.Dtos
 @inject HttpClient Http
 
 <h3>Next Events</h3>
@@ -20,7 +32,9 @@ else
     {
         <div class="col-sm-6 col-md-4 col-lg-3">
             <div class="card mb-4">
-                <img class="card-img-top" src="@sportEvent.ImageUrl" alt="@sportEvent.Name">
+                <div class="image-container">
+                    <img src="@sportEvent.ImageUrl" alt="@sportEvent.Name">
+                </div>
                 <div class="card-body">
                     <h5 class="card-title">@sportEvent.Name</h5>
                     <p class="card-text">@sportEvent.Description</p>
@@ -52,4 +66,3 @@ else
     private IEnumerable<EventDto> FilteredEvents => Events
         .Where(e => e.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase));
 }
-

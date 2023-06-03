@@ -16,14 +16,16 @@ public class GetAllEventsQueryHandler : IRequestHandler<GetAllEventsQueryRequest
     
     public async Task<List<EventDto>> Handle(GetAllEventsQueryRequest request, CancellationToken cancellationToken)
     {
-        return await _context.Events.Select(x => new EventDto
-        {
-            Id = x.Id,
-            StartDate = x.StartDate,    
-            Name = x.Name,
-            Description = x.Description,
-            Location = x.Location,
-            ImageUrl = x.ImageUrl
-        }).ToListAsync(cancellationToken: cancellationToken);
+        return await _context.Events
+            .Where(x => x.IsPublic)
+            .Select(x => new EventDto
+            {
+                Id = x.Id,
+                StartDate = x.StartDate,    
+                Name = x.Name,
+                Description = x.Description,
+                Location = x.Location,
+                ImageUrl = x.ImageUrl
+            }).ToListAsync(cancellationToken: cancellationToken);
     }
 }

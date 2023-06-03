@@ -1,6 +1,7 @@
 ﻿using System.Security.Claims;
 using EventsManager.Server.Handlers.Commands.Events.Create;
 using EventsManager.Server.Handlers.Queries.Events.GetAll;
+using EventsManager.Server.Handlers.Queries.Events.GetMyEvents;
 using EventsManager.Shared.Requests;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -23,6 +24,15 @@ public class EventController : ControllerBase
     public async Task<IActionResult> GetAllEvents()
     {
         var response = await _mediator.Send(new GetAllEventsQueryRequest());
+        return Ok(response); 
+    }
+    
+    [HttpGet("my-events")]
+    [Authorize(Roles = "Organizer")] 
+    public async Task<IActionResult> GetMyEventsAsOrganizer()
+    {   
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        var response = await _mediator.Send(new GetMyEventsAsOrganizerQueryRequest(userId));
         return Ok(response); 
     }
     

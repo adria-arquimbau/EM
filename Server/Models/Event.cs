@@ -6,12 +6,12 @@ public class Event
     public DateTime CreationDate { get; private set; }
     public DateTime StartDate { get; private set; }
     public DateTime FinishDate { get; private set; }
-    public ApplicationUser? Owner { get; private set;  }
+    public ApplicationUser Owner { get; private set;  }
     public string Name { get; private set; }    
     public string Description { get; private set; }
     public string Location { get; private set; }
     public Uri? ImageUrl { get; private set; }   
-    public int MaxRegistrations { get; private set; }   
+    public int MaxRegistrations { get; private set; }       
     public bool IsPublic { get; private set; }  
     public DateTime OpenRegistrationsDate { get; private set; }  
     public DateTime CloseRegistrationsDate { get; private set; }

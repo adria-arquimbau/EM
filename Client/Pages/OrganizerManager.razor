@@ -6,8 +6,10 @@
 @inject HttpClient Http
 
 <h3>OrganizerManager</h3>
-
+<FluentDivider></FluentDivider>
 <button class="btn btn-primary" @onclick="OpenModal">Create Event</button>
+<FluentDivider></FluentDivider>
+<MyEventsList></MyEventsList>
 
 @if (showModal)
 {

@@ -1,0 +1,56 @@
+﻿@using EventsManager.Shared.Dtos
+@inject HttpClient Http
+
+<h3>My events</h3>
+
+@if (myEvents is null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="row">
+        @foreach (var sportEvent in myEvents)
+        {
+            <div class="col-sm-12 col-md-6 col-lg-4 mb-4">
+                <div class="card h-100">
+                    <div style="height: 15rem; overflow: hidden;">
+                        <img src="@sportEvent.ImageUrl" class="card-img-top img-fluid" alt="@sportEvent.Name"/>
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title">@sportEvent.Name</h5>
+                        <p class="card-text">@sportEvent.Description</p>
+                        <p class="card-text"><small class="text-muted">Location: @sportEvent.Location</small></p>
+                        <p class="card-text"><small class="text-muted">Start date: @sportEvent.StartDate.ToShortDateString()</small></p>
+                        <p class="card-text"><small class="text-muted">End date: @sportEvent.FinishDate.ToShortDateString()</small></p>
+                        <p class="card-text"><small class="text-muted">Open registrations: @sportEvent.OpenRegistrationsDate.ToShortDateString()</small></p>
+                        <p class="card-text"><small class="text-muted">Close registrations: @sportEvent.CloseRegistrationsDate.ToShortDateString()</small></p>
+                        <p class="card-text"><small class="text-muted">Max Registrations: @sportEvent.MaxRegistrations</small></p>
+                        <!-- Add more details here as needed -->
+                    </div>
+                    <div class="card-footer">
+                        <small class="text-muted">
+                            @if (sportEvent.IsPublic)
+                            {
+                                <span class="text-success">Public <i class="bi bi-check-circle-fill"></i></span>
+                            }
+                            else
+                            {
+                                <span class="text-danger">Private <i class="bi bi-x-circle-fill"></i></span>
+                            }
+                        </small>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@code {
+    private List<MyEventDto> myEvents;
+
+    protected override async Task OnInitializedAsync()
+    {
+        myEvents = await Http.GetFromJsonAsync<List<MyEventDto>>("Event/my-events");
+    }
+}
