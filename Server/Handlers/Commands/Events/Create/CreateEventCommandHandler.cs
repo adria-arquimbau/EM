@@ -17,8 +17,11 @@ public class CreateEventCommandHandler : IRequestHandler<CreateEventCommandReque
     public async Task Handle(CreateEventCommandRequest request, CancellationToken cancellationToken)
     {
         var owner = await _context.Users.SingleAsync(x => x.Id == request.UserId, cancellationToken);
+
+        var newEvent = new Event(request.Request.Name, request.Request.Description, request.Request.Location, request.Request.MaxRegistrations, owner, request.Request.StartDate, request.Request.FinishDate, request.Request.OpenRegistrationsDate, request.Request.CloseRegistrationsDate);
         
-        await _context.Events.AddAsync(new Event(request.Request.Name, request.Request.Description, request.Request.Location, 
-            request.Request.MaxRegistrations, owner, request.Request.StartDate, request.Request.FinishDate, request.Request.OpenRegistrationsDate, request.Request.CloseRegistrationsDate), cancellationToken);
+        _context.Events.Add(newEvent);
+        await _context.SaveChangesAsync(cancellationToken);
     }
 }
+    

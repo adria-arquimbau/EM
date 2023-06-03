@@ -1,11 +1,42 @@
 ﻿@page "/organizer-manager"
 @using Microsoft.AspNetCore.Authorization
+@using EventsManager.Client.Components.Event
 
-@attribute [Authorize(Roles = "Organizer")] 
+@attribute [Authorize(Roles = "Organizer")]
 @inject HttpClient Http
 
 <h3>OrganizerManager</h3>
 
+<button class="btn btn-primary" @onclick="OpenModal">Create Event</button>
+
+@if (showModal)
+{
+    <div class="modal show d-block" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Create Event</h5>
+                    <button type="button" class="btn-close" @onclick="CloseModal"></button>
+                </div>
+                <div class="modal-body">
+                    <CreateEvent OnEventCreated="CloseModal"/>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-backdrop show"></div>
+}
+
 @code {
-    
+    private bool showModal = false;
+
+    private void OpenModal()
+    {
+        showModal = true;
+    }
+
+    private void CloseModal()
+    {
+        showModal = false;
+    }
 }

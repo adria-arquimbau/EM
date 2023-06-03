@@ -1,0 +1,71 @@
+﻿@using EventsManager.Shared.Requests
+@inject HttpClient Http
+
+<h3>Create Event</h3>
+
+<EditForm Model="createEventRequest" OnValidSubmit="CreateEventCall">
+    <DataAnnotationsValidator />
+
+    <div class="form-group">
+        <label>Event Name:</label>
+        <InputText class="form-control" @bind-Value="createEventRequest.Name" />
+    </div>
+
+    <div class="form-group">
+        <label>Description:</label>
+        <InputTextArea class="form-control" @bind-Value="createEventRequest.Description" />
+    </div>
+
+    <div class="form-group">
+        <label>Location:</label>
+        <InputText class="form-control" @bind-Value="createEventRequest.Location" />
+    </div>
+
+    <div class="form-group">
+        <label>Max Registrations:</label>
+        <InputNumber class="form-control" @bind-Value="createEventRequest.MaxRegistrations" />
+    </div>
+
+    <div class="form-group">
+        <label>Start Date:</label>
+        <InputDate class="form-control" @bind-Value="createEventRequest.StartDate" />
+    </div>
+
+    <div class="form-group">
+        <label>Finish Date:</label>
+        <InputDate class="form-control" @bind-Value="createEventRequest.FinishDate" />
+    </div>
+
+    <div class="form-group">
+        <label>Open Registrations Date:</label>
+        <InputDate class="form-control" @bind-Value="createEventRequest.OpenRegistrationsDate" />
+    </div>
+
+    <div class="form-group">
+        <label>Close Registrations Date:</label>
+        <InputDate class="form-control" @bind-Value="createEventRequest.CloseRegistrationsDate" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Create Event</button>
+</EditForm>
+
+@code {
+    private CreateEventRequest createEventRequest = new();
+
+    private async Task CreateEventCall()
+    {
+        var response = await Http.PostAsJsonAsync("Event", createEventRequest);
+
+        if (response.IsSuccessStatusCode)
+        {
+            await OnEventCreated.InvokeAsync(true);
+        }
+        else
+        {
+            // handle errors
+        }
+    }
+
+    [Parameter]
+    public EventCallback<bool> OnEventCreated { get; set; }
+}
