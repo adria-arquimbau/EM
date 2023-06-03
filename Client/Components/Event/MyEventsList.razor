@@ -1,5 +1,6 @@
 ﻿@using EventsManager.Shared.Dtos
 @inject HttpClient Http
+@inject NavigationManager NavigationManager
 
 <h3>My events</h3>
 
@@ -13,7 +14,7 @@ else
         @foreach (var sportEvent in myEvents)
         {
             <div class="col-sm-12 col-md-6 col-lg-4 mb-4">
-                <div class="card h-100">
+                <div class="card h-100 clickable" @onclick="() => NavigateToEventDetail(sportEvent.Id)">
                     <div style="height: 15rem; overflow: hidden;">
                         <img src="@sportEvent.ImageUrl" class="card-img-top img-fluid" alt="@sportEvent.Name"/>
                     </div>
@@ -90,5 +91,10 @@ else
         await Http.DeleteAsync($"Event/{eventId}");
         showConfirmDeleteModal = false;
         myEvents = await Http.GetFromJsonAsync<List<MyEventDto>>("Event/my-events");
+    }
+    
+    private void NavigateToEventDetail(Guid eventId)
+    {
+        NavigationManager.NavigateTo($"/event-detail-organizer/{eventId}");
     }
 }

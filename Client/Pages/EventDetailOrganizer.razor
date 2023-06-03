@@ -1,0 +1,36 @@
+﻿@page "/event-detail-organizer/{EventId:guid}"
+
+@using EventsManager.Shared.Dtos
+@using Microsoft.AspNetCore.Authorization
+@inject HttpClient Http
+
+@attribute [Authorize(Roles = "Organizer")]
+
+<PageTitle>Event @eventDetail?.Name</PageTitle>
+
+@if (eventDetail == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <!-- Add the fields you want to display/edit here -->
+    <h3>@eventDetail.Name</h3>
+    <p>@eventDetail.Description</p>
+    <!-- More fields -->
+    <!-- Add edit form or button here -->
+}
+
+@code {
+    [Parameter]
+    public Guid? EventId { get; set; }
+
+    private MyEventDto eventDetail;
+
+    protected override async Task OnInitializedAsync()
+    {
+        eventDetail = await Http.GetFromJsonAsync<MyEventDto>($"Event/{EventId}");
+    }
+
+    // Add your methods for editing the event here. 
+}
