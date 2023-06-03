@@ -3,6 +3,12 @@
 
 <h3>Next Events</h3>
 
+<div class="row">
+    <div class="col-sm-12 col-md-4 col-lg-3">
+        <input type="text" class="form-control mb-3" placeholder="Search..." @oninput="UpdateSearchTerm" />
+    </div>
+</div>
+
 @if (Events == null)
 {
     <p><em>Loading...</em></p>
@@ -10,30 +16,40 @@
 else
 {
     <div class="row">
-        @foreach (var sportEvent in Events)
-        {
-            <div class="col-sm-6 col-md-4 col-lg-3">
-                <div class="card mb-4">
-                    <img class="card-img-top" src="@sportEvent.ImageUrl" alt="@sportEvent.Name">
-                    <div class="card-body">
-                        <h5 class="card-title">@sportEvent.Name</h5>
-                        <p class="card-text">@sportEvent.Description</p>
-                    </div>
-                    <div class="card-footer">
-                        <small class="text-muted">@sportEvent.StartDate.ToString("g")</small>
-                        <div>@sportEvent.Location</div>
-                    </div>
+        @foreach (var sportEvent in FilteredEvents)
+    {
+        <div class="col-sm-6 col-md-4 col-lg-3">
+            <div class="card mb-4">
+                <img class="card-img-top" src="@sportEvent.ImageUrl" alt="@sportEvent.Name">
+                <div class="card-body">
+                    <h5 class="card-title">@sportEvent.Name</h5>
+                    <p class="card-text">@sportEvent.Description</p>
+                </div>
+                <div class="card-footer">
+                    <small class="text-muted">@sportEvent.StartDate.ToString("g")</small>
+                    <div>@sportEvent.Location</div>
                 </div>
             </div>
-        }
+        </div>
+    }
     </div>
 }
 
 @code {
     private List<EventDto> Events;
+    private string searchTerm = string.Empty;
 
     protected override async Task OnInitializedAsync()
     {
         Events = await Http.GetFromJsonAsync<List<EventDto>>("Event");
     }
+
+    private void UpdateSearchTerm(ChangeEventArgs e)
+    {
+        searchTerm = e.Value.ToString();
+    }
+
+    private IEnumerable<EventDto> FilteredEvents => Events
+        .Where(e => e.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase));
 }
+
