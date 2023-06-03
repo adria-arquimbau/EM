@@ -14,23 +14,76 @@
 }
 else
 {
-    <!-- Add the fields you want to display/edit here -->
-    <h3>@eventDetail.Name</h3>
-    <p>@eventDetail.Description</p>
-    <!-- More fields -->
-    <!-- Add edit form or button here -->
+    <div class="card">
+        <div class="card-header">
+            <h3>@eventDetail.Name</h3>
+        </div>
+        <div class="card-body">
+            <p><strong>Description:</strong> @eventDetail.Description</p>
+            <p><strong>Location:</strong> @eventDetail.Location</p>
+            <p><strong>Max Registrations:</strong> @eventDetail.MaxRegistrations</p>
+            <p><strong>Is Public:</strong> @eventDetail.IsPublic</p>
+            <p><strong>Open Registrations Date:</strong> @eventDetail.OpenRegistrationsDate</p>
+            <p><strong>Close Registrations Date:</strong> @eventDetail.CloseRegistrationsDate</p>
+        </div>
+        <div class="card-footer">
+            <button class="btn btn-primary" @onclick="ToggleEditMode">Edit</button>
+        </div>
+    </div>
 }
+
+<div class="card-body">
+    @if (!isEditMode)
+    {
+        <p><strong>Description:</strong> @eventDetail.Description</p>
+        <p><strong>Location:</strong> @eventDetail.Location</p>
+        <p><strong>Max Registrations:</strong> @eventDetail.MaxRegistrations</p>
+        <p><strong>Is Public:</strong> @eventDetail.IsPublic</p>
+        <p><strong>Open Registrations Date:</strong> @eventDetail.OpenRegistrationsDate</p>
+        <p><strong>Close Registrations Date:</strong> @eventDetail.CloseRegistrationsDate</p>
+    }
+    else
+    {
+        <EditForm Model="eventDetail" OnValidSubmit="HandleValidSubmit">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+
+            <InputText id="name" @bind-Value="eventDetail.Name" class="form-control" placeholder="Name" />
+            <InputTextArea id="description" @bind-Value="eventDetail.Description" class="form-control" placeholder="Description" />
+            <InputText id="location" @bind-Value="eventDetail.Location" class="form-control" placeholder="Location" />
+            <InputNumber id="maxRegistrations" @bind-Value="eventDetail.MaxRegistrations" class="form-control" placeholder="Max Registrations" />
+            <InputCheckbox id="isPublic" @bind-Value="eventDetail.IsPublic" class="form-check-input" /> Public Event
+            <InputDate id="openRegistrationsDate" @bind-Value="eventDetail.OpenRegistrationsDate" class="form-control" placeholder="Open Registrations Date" />
+            <InputDate id="closeRegistrationsDate" @bind-Value="eventDetail.CloseRegistrationsDate" class="form-control" placeholder="Close Registrations Date" />
+
+            <button type="submit" class="btn btn-primary mt-2">Save</button>
+        </EditForm>
+    }
+</div>
+
+
 
 @code {
     [Parameter]
     public Guid? EventId { get; set; }
 
     private MyEventDto eventDetail;
+    private bool isEditMode = false;
 
     protected override async Task OnInitializedAsync()
     {
         eventDetail = await Http.GetFromJsonAsync<MyEventDto>($"Event/{EventId}");
     }
 
-    // Add your methods for editing the event here. 
+    private void ToggleEditMode()
+    {
+        isEditMode = !isEditMode;
+    }
+    
+    private async Task HandleValidSubmit()
+    {
+        await Http.PutAsJsonAsync($"Event/{EventId}", eventDetail);
+        isEditMode = false;
+    }
+
 }
