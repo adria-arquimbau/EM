@@ -1,4 +1,5 @@
-﻿using MediatR;
+﻿using EventsManager.Server.Handlers.Queries.Events.GetAll;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EventsManager.Server.Controllers;
@@ -13,4 +14,11 @@ public class EventController : ControllerBase
     {
         _mediator = mediator;
     }   
+    
+    [HttpGet]
+    public async Task<IActionResult> GetAllEvents()
+    {
+        var response = await _mediator.Send(new GetAllEventsQueryRequest());
+        return Ok(response); 
+    }
 }
