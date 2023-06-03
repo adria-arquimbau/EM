@@ -1,7 +1,7 @@
 ﻿@page "/"
+
 @using EventsManager.Client.Components.User
-
-
+@using EventsManager.Client.Components.Event
 
 <PageTitle>Welcome</PageTitle>
 
@@ -9,12 +9,14 @@
     <Authorized>
         <h1>Hello, @context.User.Identity?.Name! <UserImage></UserImage></h1> Welcome to Events Manager.
         <FluentDivider></FluentDivider>
-        <FluentCalendar Readonly=true />
     </Authorized>
     <NotAuthorized>
         <h1>Hello, anonymous user! Please register or log in ;)</h1> Welcome to Events Manager.
     </NotAuthorized>
 </AuthorizeView>
+<FluentCalendar Readonly=true />
+<FluentDivider></FluentDivider>
+<AllEvents></AllEvents>
 
 
 
