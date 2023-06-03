@@ -14,11 +14,11 @@ else
         @foreach (var sportEvent in myEvents)
         {
             <div class="col-sm-12 col-md-6 col-lg-4 mb-4">
-                <div class="card h-100 clickable" @onclick="() => NavigateToEventDetail(sportEvent.Id)">
+                <div class="card h-100">
                     <div style="height: 15rem; overflow: hidden;">
-                        <img src="@sportEvent.ImageUrl" class="card-img-top img-fluid" alt="@sportEvent.Name"/>
+                        <img src="@sportEvent.ImageUrl" class="card-img-top img-fluid clickable" @onclick="() => NavigateToEventDetail(sportEvent.Id)" alt="@sportEvent.Name"/>
                     </div>
-                    <div class="card-body">
+                    <div class="card-body clickable" @onclick="() => NavigateToEventDetail(sportEvent.Id)">
                         <h5 class="card-title">@sportEvent.Name</h5>
                           <p class="card-text">@sportEvent.Description</p>
                           <p class="card-text"><small class="text-muted">Location: @sportEvent.Location</small></p>
