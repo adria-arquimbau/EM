@@ -1,5 +1,6 @@
 ﻿using System.Security.Claims;
 using EventsManager.Server.Handlers.Commands.Events.Create;
+using EventsManager.Server.Handlers.Commands.Events.Delete;
 using EventsManager.Server.Handlers.Queries.Events.GetAll;
 using EventsManager.Server.Handlers.Queries.Events.GetMyEvents;
 using EventsManager.Shared.Requests;
@@ -44,4 +45,13 @@ public class EventController : ControllerBase
         await _mediator.Send(new CreateEventCommandRequest(request, userId));
         return Ok(); 
     }
+    
+    [HttpDelete("{eventId:guid}")]
+    [Authorize(Roles = "Organizer")] 
+    public async Task<IActionResult> DeleteAnEvent([FromRoute] Guid eventId)
+    {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        await _mediator.Send(new DeleteEventCommandRequest(eventId, userId));
+        return Ok(); 
+    }   
 }

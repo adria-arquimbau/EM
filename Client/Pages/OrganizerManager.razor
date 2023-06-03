@@ -1,15 +1,16 @@
 ﻿@page "/organizer-manager"
 @using Microsoft.AspNetCore.Authorization
 @using EventsManager.Client.Components.Event
+@using EventsManager.Shared.Dtos
+@inject HttpClient Http
 
 @attribute [Authorize(Roles = "Organizer")]
-@inject HttpClient Http
 
 <h3>OrganizerManager</h3>
 <FluentDivider></FluentDivider>
 <button class="btn btn-primary" @onclick="OpenModal">Create Event</button>
 <FluentDivider></FluentDivider>
-<MyEventsList></MyEventsList>
+<MyEventsList myEvents="myEvents"></MyEventsList>
 
 @if (showModal)
 {
@@ -31,14 +32,16 @@
 
 @code {
     private bool showModal = false;
-
+    private List<MyEventDto> myEvents { get; set; }
+    
     private void OpenModal()
     {
         showModal = true;
     }
 
-    private void CloseModal()
+    private async Task CloseModal()
     {
+        myEvents = await Http.GetFromJsonAsync<List<MyEventDto>>("Event/my-events");
         showModal = false;
     }
 }

@@ -21,24 +21,11 @@ else
                         <h5 class="card-title">@sportEvent.Name</h5>
                         <p class="card-text">@sportEvent.Description</p>
                         <p class="card-text"><small class="text-muted">Location: @sportEvent.Location</small></p>
-                        <p class="card-text"><small class="text-muted">Start date: @sportEvent.StartDate.ToShortDateString()</small></p>
-                        <p class="card-text"><small class="text-muted">End date: @sportEvent.FinishDate.ToShortDateString()</small></p>
-                        <p class="card-text"><small class="text-muted">Open registrations: @sportEvent.OpenRegistrationsDate.ToShortDateString()</small></p>
-                        <p class="card-text"><small class="text-muted">Close registrations: @sportEvent.CloseRegistrationsDate.ToShortDateString()</small></p>
-                        <p class="card-text"><small class="text-muted">Max Registrations: @sportEvent.MaxRegistrations</small></p>
-                        <!-- Add more details here as needed -->
+                        <!-- ... rest of your event details here ... -->
                     </div>
                     <div class="card-footer">
-                        <small class="text-muted">
-                            @if (sportEvent.IsPublic)
-                            {
-                                <span class="text-success">Public <i class="bi bi-check-circle-fill"></i></span>
-                            }
-                            else
-                            {
-                                <span class="text-danger">Private <i class="bi bi-x-circle-fill"></i></span>
-                            }
-                        </small>
+                        <!-- ... rest of your footer here ... -->
+                        <button class="btn btn-danger" @onclick="() => ConfirmDelete(sportEvent.Id)">Delete</button>
                     </div>
                 </div>
             </div>
@@ -46,11 +33,49 @@ else
     </div>
 }
 
+@if (showConfirmDeleteModal)
+{
+    <div class="modal show d-block" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirm Delete</h5>
+                    <button type="button" class="btn-close" @onclick="() => showConfirmDeleteModal = false"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to delete this event?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="() => showConfirmDeleteModal = false">No</button>
+                    <button type="button" class="btn btn-danger" @onclick="() => DeleteEvent(eventToDeleteId)">Yes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-backdrop show"></div>
+}
+
 @code {
-    private List<MyEventDto> myEvents;
+    private bool showConfirmDeleteModal = false;
+    private Guid eventToDeleteId;
+    [Parameter] 
+    public List<MyEventDto>? myEvents { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
+        myEvents = await Http.GetFromJsonAsync<List<MyEventDto>>("Event/my-events");
+    }
+
+    private void ConfirmDelete(Guid eventId)
+    {
+        eventToDeleteId = eventId;  
+        showConfirmDeleteModal = true;  
+    }
+
+    private async Task DeleteEvent(Guid eventId)
+    {
+        await Http.DeleteAsync($"Event/{eventId}");
+        showConfirmDeleteModal = false;
         myEvents = await Http.GetFromJsonAsync<List<MyEventDto>>("Event/my-events");
     }
 }
