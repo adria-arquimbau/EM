@@ -2,6 +2,7 @@
 using EventsManager.Server.Handlers.Commands.Events.Create;
 using EventsManager.Server.Handlers.Commands.Events.Delete;
 using EventsManager.Server.Handlers.Commands.Events.Update;
+using EventsManager.Server.Handlers.Queries.Events.Get;
 using EventsManager.Server.Handlers.Queries.Events.GetAll;
 using EventsManager.Server.Handlers.Queries.Events.GetMyEvent;
 using EventsManager.Server.Handlers.Queries.Events.GetMyEvents;
@@ -32,6 +33,14 @@ public class EventController : ControllerBase
     }
     
     [HttpGet("{eventId:guid}")]
+    [Authorize(Roles = "Organizer")] 
+    public async Task<IActionResult> GetEvent([FromRoute] Guid eventId)
+    {
+        var response = await _mediator.Send(new GetEventQueryRequest(eventId));
+        return Ok(response); 
+    }
+    
+    [HttpGet("{eventId:guid}-organizer")]
     [Authorize(Roles = "Organizer")] 
     public async Task<IActionResult> GetMyEventAsOrganizer([FromRoute] Guid eventId)
     {   

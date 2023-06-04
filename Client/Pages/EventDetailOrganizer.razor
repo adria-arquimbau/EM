@@ -96,19 +96,19 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        eventDetail = await Http.GetFromJsonAsync<MyEventDto>($"Event/{EventId}");
+        eventDetail = await Http.GetFromJsonAsync<MyEventDto>($"Event/{EventId}-organizer");
     }
 
     private async Task ToggleEditMode()
     {
-        eventDetail = await Http.GetFromJsonAsync<MyEventDto>($"Event/{EventId}");
+        eventDetail = await Http.GetFromJsonAsync<MyEventDto>($"Event/{EventId}-organizer");
         isEditMode = !isEditMode;
     }
     
     private async Task HandleValidSubmit()
     {
         await Http.PutAsJsonAsync($"Event", eventDetail);
-        eventDetail = await Http.GetFromJsonAsync<MyEventDto>($"Event/{EventId}");
+        eventDetail = await Http.GetFromJsonAsync<MyEventDto>($"Event/{EventId}-organizer");
         isEditMode = false;
     }
 }

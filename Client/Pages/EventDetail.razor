@@ -1,0 +1,59 @@
+﻿@page "/event-detail/{EventId:guid}"
+
+@using EventsManager.Shared.Dtos
+@inject HttpClient Http
+
+<PageTitle>@eventDetail?.Name</PageTitle>
+
+@if (eventDetail == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="card">
+        <div class="card-header">
+            <h5>@eventDetail.Name</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="image-container">
+                        <img src="@eventDetail.ImageUrl" alt="@eventDetail.Name" class="img-fluid">
+                    </div>
+                </div>
+                <div class="col-md-8">
+                    <p>@eventDetail.Description</p>
+                    <p><strong>Start Date:</strong> @eventDetail.StartDate.ToString("g")</p>
+                    <p><strong>Location:</strong> @eventDetail.Location</p>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<style>
+    .image-container {
+        height: 200px;
+        overflow: hidden;
+    }
+
+    .image-container img {
+        width: 100%;
+        height: auto;
+        object-fit: cover;
+    }
+</style>
+
+@code {
+    [Parameter]
+    public Guid? EventId { get; set; }
+
+    private EventDto eventDetail;
+
+    protected override async Task OnInitializedAsync()
+    {
+    // Fetch the event detail from the API using the EventId
+        eventDetail = await Http.GetFromJsonAsync<EventDto>($"Event/{EventId}");
+    }
+}
