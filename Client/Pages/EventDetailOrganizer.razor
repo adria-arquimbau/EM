@@ -59,17 +59,18 @@ else
                         <label for="maxRegistrations">Max Registrations:</label>
                         <InputNumber id="maxRegistrations" @bind-Value="eventDetail.MaxRegistrations" class="form-control my-2" />
 
-                        <label for="openRegistrationsDate">Open Registrations Date:</label>
-                        <InputDate id="openRegistrationsDate" @bind-Value="eventDetail.OpenRegistrationsDate" class="form-control my-2" />
+                        <label for="openRegistrationsDate" class="form-label">Open Registrations Date/Time:</label>
+                        <input type="datetime-local" id="openRegistrationsDate" @bind="@eventDetail.OpenRegistrationsDate" />
+                        
+                        <label for="closeRegistrationsDate" class="form-label">Close Registrations Date/Time:</label>
+                        <input type="datetime-local" id="closeRegistrationsDate" @bind="@eventDetail.CloseRegistrationsDate" />
+                        
+                        <label for="startDate" class="form-label">Start Date/Time:</label>
+                        <input type="datetime-local" id="startDate" @bind="@eventDetail.StartDate" />
+                        
+                        <label for="finishDate" class="form-label">Finish Date/Time:</label>
+                        <input type="datetime-local" id="finishDate" @bind="@eventDetail.FinishDate" />
 
-                        <label for="closeRegistrationsDate">Close Registrations Date:</label>
-                        <InputDate id="closeRegistrationsDate" @bind-Value="eventDetail.CloseRegistrationsDate" class="form-control my-2" />
-
-                        <label for="startDate">Start Date:</label>
-                        <InputDate id="startDate" @bind-Value="eventDetail.StartDate" class="form-control my-2" />
-
-                        <label for="finishDate">Finish Date:</label>
-                        <InputDate id="finishDate" @bind-Value="eventDetail.FinishDate" class="form-control my-2" />
                         
                         <label for="isPublic">Public Event:</label>
                         <InputCheckbox id="isPublic" @bind-Value="eventDetail.IsPublic" class="form-check-input my-2" />
@@ -106,7 +107,7 @@ else
     
     private async Task HandleValidSubmit()
     {
-        await Http.PutAsJsonAsync($"Event/{EventId}", eventDetail);
+        await Http.PutAsJsonAsync($"Event", eventDetail);
         eventDetail = await Http.GetFromJsonAsync<MyEventDto>($"Event/{EventId}");
         isEditMode = false;
     }

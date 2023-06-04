@@ -32,4 +32,18 @@ public class Event
         OpenRegistrationsDate = openRegistrationsDate;
         CloseRegistrationsDate = closeRegistrationsDate;
     }
-}
+
+    public void Update(string name, string description, string location, int maxRegistrations, DateTime startDate, DateTime finishDate, DateTime openRegistrationsDate, DateTime closeRegistrationsDate, bool isPublic)
+    {
+        Name = name;    
+        Description = description;    
+        CreationDate = DateTime.UtcNow;
+        Location = location;
+        MaxRegistrations = maxRegistrations;
+        StartDate = startDate;
+        FinishDate = finishDate;
+        IsPublic = isPublic;
+        OpenRegistrationsDate = openRegistrationsDate;
+        CloseRegistrationsDate = closeRegistrationsDate;
+    }
+}       

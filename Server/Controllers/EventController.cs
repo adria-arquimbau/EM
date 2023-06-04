@@ -1,9 +1,11 @@
 ﻿using System.Security.Claims;
 using EventsManager.Server.Handlers.Commands.Events.Create;
 using EventsManager.Server.Handlers.Commands.Events.Delete;
+using EventsManager.Server.Handlers.Commands.Events.Update;
 using EventsManager.Server.Handlers.Queries.Events.GetAll;
 using EventsManager.Server.Handlers.Queries.Events.GetMyEvent;
 using EventsManager.Server.Handlers.Queries.Events.GetMyEvents;
+using EventsManager.Shared.Dtos;
 using EventsManager.Shared.Requests;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -62,6 +64,15 @@ public class EventController : ControllerBase
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         await _mediator.Send(new DeleteEventCommandRequest(eventId, userId));
+        return Ok(); 
+    }   
+    
+    [HttpPut]
+    [Authorize(Roles = "Organizer")] 
+    public async Task<IActionResult> UpdateAnEvent([FromBody] MyEventDto eventDto)
+    {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;  
+        await _mediator.Send(new UpdateEventCommandRequest(eventDto, userId));
         return Ok(); 
     }   
 }
