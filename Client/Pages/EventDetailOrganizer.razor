@@ -59,9 +59,6 @@ else
                         <label for="maxRegistrations">Max Registrations:</label>
                         <InputNumber id="maxRegistrations" @bind-Value="eventDetail.MaxRegistrations" class="form-control my-2" />
 
-                        <label for="isPublic">Public Event:</label>
-                        <InputCheckbox id="isPublic" @bind-Value="eventDetail.IsPublic" class="form-check-input my-2" />
-
                         <label for="openRegistrationsDate">Open Registrations Date:</label>
                         <InputDate id="openRegistrationsDate" @bind-Value="eventDetail.OpenRegistrationsDate" class="form-control my-2" />
 
@@ -73,6 +70,9 @@ else
 
                         <label for="finishDate">Finish Date:</label>
                         <InputDate id="finishDate" @bind-Value="eventDetail.FinishDate" class="form-control my-2" />
+                        
+                        <label for="isPublic">Public Event:</label>
+                        <InputCheckbox id="isPublic" @bind-Value="eventDetail.IsPublic" class="form-check-input my-2" />
 
                     </EditForm>
                 </div>
@@ -98,8 +98,9 @@ else
         eventDetail = await Http.GetFromJsonAsync<MyEventDto>($"Event/{EventId}");
     }
 
-    private void ToggleEditMode()
+    private async Task ToggleEditMode()
     {
+        eventDetail = await Http.GetFromJsonAsync<MyEventDto>($"Event/{EventId}");
         isEditMode = !isEditMode;
     }
     
