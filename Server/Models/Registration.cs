@@ -13,7 +13,7 @@ public class Registration
     public string RegisteredUserId { get; set; }
     public ApplicationUser RegisteredUser { get; set; }
     
-    public Registration()
+    private Registration()
     {
     }
     
