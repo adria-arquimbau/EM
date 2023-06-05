@@ -25,13 +25,13 @@ public class RegistrationController : ControllerBase
     
     [HttpPost("event/{eventId:guid}")]
     [Authorize(Roles = "User")] 
-    public async Task<IActionResult> Register([FromRoute] Guid eventId)
+    public async Task<IActionResult> Register([FromRoute] Guid eventId, CancellationToken cancellationToken)
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        var user = await _context.Users.SingleAsync(x => x.Id == userId);
+        var user = await _context.Users.SingleAsync(x => x.Id == userId, cancellationToken: cancellationToken);
         var eventToRegister = await _context.Events
             .Include(x => x.Registrations)
-            .SingleAsync(x => x.Id == eventId);
+            .SingleAsync(x => x.Id == eventId, cancellationToken: cancellationToken);
 
         if (eventToRegister.Registrations.Any(x => x.RegisteredUser.Id == userId))
             return BadRequest("User already registered for this event");
@@ -39,8 +39,21 @@ public class RegistrationController : ControllerBase
         var registration = new Registration(user.Id, RegistrationRole.Rider, RegistrationState.PreRegistered, eventToRegister.Id);
         
         _context.Registrations.Add(registration);
-        await _context.SaveChangesAsync();
+        await _context.SaveChangesAsync(cancellationToken);
         
         return Ok(); 
+    }
+    
+    [HttpGet("event/{eventId:guid}/iam-registered")]
+    [Authorize(Roles = "User")]
+    public async Task<IActionResult> IAmRegistered([FromRoute] Guid eventId, CancellationToken cancellationToken)
+    {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        
+        var registration = await _context.Registrations
+            .Where(x => x.EventId == eventId && x.RegisteredUserId == userId)
+            .SingleOrDefaultAsync(cancellationToken: cancellationToken);
+
+        return registration != null ? Ok() : NotFound();
     }
 }

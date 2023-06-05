@@ -1,4 +1,5 @@
 ﻿using EventsManager.Server.Data;
+using EventsManager.Server.Models;
 using EventsManager.Shared.Dtos;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -18,6 +19,7 @@ public class GetMyEventAsOrganizerQueryHandler : IRequestHandler<GetMyEventAsOrg
     {
         var eventEntity = await _context.Events
             .Include(e => e.Owner)
+            .Include(e => e.Registrations)
             .SingleAsync(e => e.Id == request.EventId, cancellationToken: cancellationToken);
 
         if (eventEntity.Owner.Id != request.UserId)
@@ -38,7 +40,8 @@ public class GetMyEventAsOrganizerQueryHandler : IRequestHandler<GetMyEventAsOrg
             OpenRegistrationsDate = eventEntity.OpenRegistrationsDate,  
             CloseRegistrationsDate = eventEntity.CloseRegistrationsDate,
             StartDate = eventEntity.StartDate,
-            FinishDate = eventEntity.FinishDate
+            FinishDate = eventEntity.FinishDate,
+            PreRegistrationsCount = eventEntity.Registrations.Count(r => r.State == RegistrationState.PreRegistered)
         };
     }
 }

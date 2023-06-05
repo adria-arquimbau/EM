@@ -12,6 +12,7 @@ public class MyEventDto
     public Uri? ImageUrl { get; set; }   
     public int MaxRegistrations { get; set; }       
     public bool IsPublic { get; set; }  
+    public int PreRegistrationsCount { get; set; }
     public DateTime OpenRegistrationsDate { get; set; }  
     public DateTime CloseRegistrationsDate { get; set; }
 }

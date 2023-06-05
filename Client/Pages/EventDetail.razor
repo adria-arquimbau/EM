@@ -29,15 +29,28 @@ else
                     <p>@eventDetail.Description</p>
                     <p><strong>Start Date:</strong> @eventDetail.StartDate.ToString("g")</p>
                     <p><strong>Location:</strong> @eventDetail.Location</p>
+                    <p><strong>Registrations:</strong> @eventDetail.PreRegistrationsCount</p>
+                    <AuthorizeView>
+                            <Authorized>
+                                @if(iAmPreRegistered)
+                                {
+                                    <p><strong>You are already Pre-Registered in this event!</strong></p>
+                                }
+                            </Authorized>
+                        </AuthorizeView>
                 </div>
             </div>
         </div>
     </div>
 
-    @if (isAuthenticated)
-    {
-        <button class="btn btn-primary" @onclick="() => isModalOpen = true">Pre-Register</button>
-    }
+    <AuthorizeView>
+        <Authorized>
+            @if(!iAmPreRegistered)
+            {
+                <button class="btn btn-primary" @onclick="() => isModalOpen = true">Pre-Register</button>
+            }
+        </Authorized>
+    </AuthorizeView>
 
     @if (isModalOpen)
     {
@@ -82,22 +95,33 @@ else
 
     private EventDto eventDetail;
     private bool isModalOpen;
-    private bool isAuthenticated;
+    private bool iAmPreRegistered;
     private ClaimsPrincipal user;
 
     protected override async Task OnInitializedAsync()
+    {
+        await GetBasicInfoAboutEventDetails();
+    }
+
+    private async Task GetBasicInfoAboutEventDetails()
     {
         var http = HttpClientFactory.CreateClient("EventsManager.ServerAPI.Anonymous");
         eventDetail = await http.GetFromJsonAsync<EventDto>($"Event/{EventId}");
 
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         user = authState.User;
-        isAuthenticated = user.Identity?.IsAuthenticated ?? false;
+        var isAuthenticated = user.Identity?.IsAuthenticated ?? false;
+        if (isAuthenticated)
+        {
+            var response = await Http.GetAsync($"Registration/event/{EventId}/iam-registered");
+            iAmPreRegistered = response.IsSuccessStatusCode;
+        }
     }
 
     private async Task PreRegister()
     {
         await Http.PostAsync($"Registration/event/{EventId}", null);
+        await GetBasicInfoAboutEventDetails();
         isModalOpen = false;
     }
 }

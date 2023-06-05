@@ -8,4 +8,6 @@ public class EventDto
     public string Description { get; set; }
     public string Location { get; set; }
     public Uri? ImageUrl { get; set; }
+    
+    public int PreRegistrationsCount { get; set; }
 }

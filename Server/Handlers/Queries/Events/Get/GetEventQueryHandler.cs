@@ -1,4 +1,5 @@
 ﻿using EventsManager.Server.Data;
+using EventsManager.Server.Models;
 using EventsManager.Shared.Dtos;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -25,7 +26,8 @@ public class GetEventQueryHandler : IRequestHandler<GetEventQueryRequest, EventD
                 Name = x.Name,
                 Description = x.Description,
                 Location = x.Location,
-                ImageUrl = x.ImageUrl
+                ImageUrl = x.ImageUrl,
+                PreRegistrationsCount = x.Registrations.Count(r => r.State == RegistrationState.PreRegistered)
             })
             .SingleAsync(cancellationToken: cancellationToken);
     }
