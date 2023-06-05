@@ -3,6 +3,8 @@
 @using EventsManager.Shared.Dtos
 @inject IHttpClientFactory HttpClientFactory
 @inject HttpClient Http
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@using System.Security.Claims
 
 <PageTitle>@eventDetail?.Name</PageTitle>
 
@@ -30,30 +32,35 @@ else
                 </div>
             </div>
         </div>
-        <div class="card-footer">
-            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#preRegisterModal">Pre-register</button>
-        </div>
     </div>
 
-    <div class="modal fade @(isModalOpen ? "show d-block" : "")" id="preRegisterModal" tabindex="-1" role="dialog">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Pre-register for @eventDetail?.Name</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <p>Are you sure you want to pre-register for this event?</p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary" @onclick="PreRegister">Pre-register</button>
+    @if (isAuthenticated)
+    {
+        <button class="btn btn-primary" @onclick="() => isModalOpen = true">Pre-Register</button>
+    }
+
+    @if (isModalOpen)
+    {
+        <div class="modal" tabindex="-1" role="dialog" style="display: block;">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Confirmation</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close" @onclick="() => isModalOpen = false">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Are you sure you want to pre-register for this event?</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal" @onclick="() => isModalOpen = false">Cancel</button>
+                        <button type="button" class="btn btn-primary" @onclick="PreRegister">Confirm</button>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
+    }
 }
 
 <style>
@@ -75,26 +82,22 @@ else
 
     private EventDto eventDetail;
     private bool isModalOpen;
+    private bool isAuthenticated;
+    private ClaimsPrincipal user;
 
     protected override async Task OnInitializedAsync()
     {
         var http = HttpClientFactory.CreateClient("EventsManager.ServerAPI.Anonymous");
         eventDetail = await http.GetFromJsonAsync<EventDto>($"Event/{EventId}");
-    }
 
-    private void OpenModal()
-    {
-        isModalOpen = true;
-    }
-
-    private void CloseModal()
-    {
-        isModalOpen = false;
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        user = authState.User;
+        isAuthenticated = user.Identity?.IsAuthenticated ?? false;
     }
 
     private async Task PreRegister()
     {
         await Http.PostAsync($"Registration/event/{EventId}", null);
-        CloseModal();
+        isModalOpen = false;
     }
 }
