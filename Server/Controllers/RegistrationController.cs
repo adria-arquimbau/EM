@@ -3,6 +3,7 @@ using Duende.IdentityServer;
 using EventsManager.Server.Data;
 using EventsManager.Server.Handlers.Commands.Events.Create;
 using EventsManager.Server.Models;
+using EventsManager.Shared.Dtos;
 using EventsManager.Shared.Requests;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -55,5 +56,32 @@ public class RegistrationController : ControllerBase
             .SingleOrDefaultAsync(cancellationToken: cancellationToken);
 
         return registration != null ? Ok() : NotFound();
+    }
+    
+    [HttpGet("event/{eventId:guid}")]
+    [Authorize(Roles = "Organizer")]
+    public async Task<IActionResult> GetAllByEventId([FromRoute] Guid eventId, CancellationToken cancellationToken)
+    {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        
+        var eventRegistrations = await _context.Events
+            .Where(x => x.Id == eventId)
+            .Include(x => x.Owner)
+            .SingleAsync(cancellationToken: cancellationToken);
+
+        if (eventRegistrations.Owner.Id != userId)
+        {
+            throw new UnauthorizedAccessException("You are not the owner of this event");
+        }
+        
+        var registrations = await _context.Registrations 
+            .Where(x => x.EventId == eventId)
+            .Select(x => new RegistrationDto
+            {
+                
+            })
+            .ToListAsync(cancellationToken: cancellationToken);
+
+            return Ok(registrations);
     }
 }
