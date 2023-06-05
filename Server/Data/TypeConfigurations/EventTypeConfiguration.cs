@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace EventsManager.Server.Data.TypeConfigurations;
 
-public class EventConfiguration : IEntityTypeConfiguration<Event>
+public class EventTypeConfiguration : IEntityTypeConfiguration<Event>
 {
     public void Configure(EntityTypeBuilder<Event> builder)
     {

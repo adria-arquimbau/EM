@@ -313,6 +313,9 @@ namespace EventsManager.Server.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("ApplicationUserId")
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<int?>("Bib")
                         .HasColumnType("int");
 
@@ -325,19 +328,28 @@ namespace EventsManager.Server.Data.Migrations
                     b.Property<Guid>("EventId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid?>("EventId1")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("RegisteredUserId")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<int>("Role")
-                        .HasColumnType("int");
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("State")
-                        .HasColumnType("int");
+                    b.Property<string>("State")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
+                    b.HasIndex("ApplicationUserId");
+
                     b.HasIndex("EventId");
+
+                    b.HasIndex("EventId1");
 
                     b.HasIndex("RegisteredUserId");
 
@@ -492,14 +504,22 @@ namespace EventsManager.Server.Data.Migrations
 
             modelBuilder.Entity("EventsManager.Server.Models.Registration", b =>
                 {
-                    b.HasOne("EventsManager.Server.Models.Event", "Event")
+                    b.HasOne("EventsManager.Server.Models.ApplicationUser", null)
                         .WithMany("Registrations")
+                        .HasForeignKey("ApplicationUserId");
+
+                    b.HasOne("EventsManager.Server.Models.Event", "Event")
+                        .WithMany()
                         .HasForeignKey("EventId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("EventsManager.Server.Models.ApplicationUser", "RegisteredUser")
+                    b.HasOne("EventsManager.Server.Models.Event", null)
                         .WithMany("Registrations")
+                        .HasForeignKey("EventId1");
+
+                    b.HasOne("EventsManager.Server.Models.ApplicationUser", "RegisteredUser")
+                        .WithMany()
                         .HasForeignKey("RegisteredUserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
