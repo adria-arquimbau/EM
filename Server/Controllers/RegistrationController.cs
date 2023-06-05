@@ -29,8 +29,13 @@ public class RegistrationController : ControllerBase
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         var user = await _context.Users.SingleAsync(x => x.Id == userId);
-        var eventToRegister = await _context.Events.SingleAsync(x => x.Id == eventId);
+        var eventToRegister = await _context.Events
+            .Include(x => x.Registrations)
+            .SingleAsync(x => x.Id == eventId);
 
+        if (eventToRegister.Registrations.Any(x => x.RegisteredUser.Id == userId))
+            return BadRequest("User already registered for this event");
+        
         var registration = new Registration(user.Id, RegistrationRole.Rider, RegistrationState.PreRegistered, eventToRegister.Id);
         
         _context.Registrations.Add(registration);

@@ -2,6 +2,7 @@
 
 @using EventsManager.Shared.Dtos
 @inject IHttpClientFactory HttpClientFactory
+@inject HttpClient Http
 
 <PageTitle>@eventDetail?.Name</PageTitle>
 
@@ -29,6 +30,29 @@ else
                 </div>
             </div>
         </div>
+        <div class="card-footer">
+            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#preRegisterModal">Pre-register</button>
+        </div>
+    </div>
+
+    <div class="modal fade @(isModalOpen ? "show d-block" : "")" id="preRegisterModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Pre-register for @eventDetail?.Name</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to pre-register for this event?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" @onclick="PreRegister">Pre-register</button>
+                </div>
+            </div>
+        </div>
     </div>
 }
 
@@ -50,11 +74,27 @@ else
     public Guid? EventId { get; set; }
 
     private EventDto eventDetail;
+    private bool isModalOpen;
 
     protected override async Task OnInitializedAsync()
     {
-    // Fetch the event detail from the API using the EventId
         var http = HttpClientFactory.CreateClient("EventsManager.ServerAPI.Anonymous");
         eventDetail = await http.GetFromJsonAsync<EventDto>($"Event/{EventId}");
+    }
+
+    private void OpenModal()
+    {
+        isModalOpen = true;
+    }
+
+    private void CloseModal()
+    {
+        isModalOpen = false;
+    }
+
+    private async Task PreRegister()
+    {
+        await Http.PostAsync($"Registration/event/{EventId}", null);
+        CloseModal();
     }
 }
