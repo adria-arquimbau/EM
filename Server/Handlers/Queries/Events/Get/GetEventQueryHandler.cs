@@ -20,6 +20,7 @@ public class GetEventQueryHandler : IRequestHandler<GetEventQueryRequest, EventD
     {
         return await _context.Events
             .Where(x => x.Id == request.EventId)
+            .Include(x => x.Registrations)
             .Select(x => new EventDto
             {
                 Id = x.Id,
@@ -28,7 +29,7 @@ public class GetEventQueryHandler : IRequestHandler<GetEventQueryRequest, EventD
                 Description = x.Description,
                 Location = x.Location,
                 ImageUrl = x.ImageUrl,
-                PreRegistrationsCount = x.Registrations.Count(r => r.State == RegistrationState.PreRegistered)
+                PreRegistrationsCount = x.Registrations.Count()
             })
             .SingleAsync(cancellationToken: cancellationToken);
     }

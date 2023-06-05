@@ -92,7 +92,7 @@ public class EventController : ControllerBase
     
     [HttpGet("{eventId:guid}/registrations")]
     [Authorize(Roles = "Organizer")]
-    public async Task<IActionResult> GetAllByEventId([FromRoute] Guid eventId, [FromQuery] string? search, CancellationToken cancellationToken)
+    public async Task<IActionResult> GetAllregistrationsByEventId([FromRoute] Guid eventId, [FromQuery] string? search, CancellationToken cancellationToken)
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         
