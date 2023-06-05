@@ -17,5 +17,11 @@ public class RegistrationTypeConfiguration : IEntityTypeConfiguration<Registrati
             .WithMany()
             .HasForeignKey(r => r.EventId)
             .IsRequired();
+        builder.Property(r => r.Role)
+            .HasConversion(v => 
+                v.ToString(), v => (RegistrationRole)Enum.Parse(typeof(RegistrationRole), v));
+        builder.Property(r => r.State)
+            .HasConversion(v => 
+                v.ToString(), v => (RegistrationState)Enum.Parse(typeof(RegistrationState), v));
     }
 }
