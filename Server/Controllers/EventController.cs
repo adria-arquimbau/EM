@@ -23,9 +23,10 @@ public class EventController : ControllerBase
     public EventController(IMediator mediator)
     {
         _mediator = mediator;
-    }   
-    
+    }
+
     [HttpGet]
+    [AllowAnonymous]
     public async Task<IActionResult> GetAllEvents()
     {
         var response = await _mediator.Send(new GetAllEventsQueryRequest());
@@ -33,7 +34,7 @@ public class EventController : ControllerBase
     }
     
     [HttpGet("{eventId:guid}")]
-    [Authorize(Roles = "Organizer")] 
+    [AllowAnonymous]
     public async Task<IActionResult> GetEvent([FromRoute] Guid eventId)
     {
         var response = await _mediator.Send(new GetEventQueryRequest(eventId));

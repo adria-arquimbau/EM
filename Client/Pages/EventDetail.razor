@@ -1,7 +1,7 @@
 ﻿@page "/event-detail/{EventId:guid}"
 
 @using EventsManager.Shared.Dtos
-@inject HttpClient Http
+@inject IHttpClientFactory HttpClientFactory
 
 <PageTitle>@eventDetail?.Name</PageTitle>
 
@@ -54,6 +54,7 @@ else
     protected override async Task OnInitializedAsync()
     {
     // Fetch the event detail from the API using the EventId
-        eventDetail = await Http.GetFromJsonAsync<EventDto>($"Event/{EventId}");
+        var http = HttpClientFactory.CreateClient("EventsManager.ServerAPI.Anonymous");
+        eventDetail = await http.GetFromJsonAsync<EventDto>($"Event/{EventId}");
     }
 }

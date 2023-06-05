@@ -11,7 +11,7 @@
 </style>
 
 @using EventsManager.Shared.Dtos
-@inject HttpClient Http
+@inject IHttpClientFactory HttpClientFactory
 @inject NavigationManager NavigationManager
 
 <h3>Next Events</h3>
@@ -56,7 +56,8 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        Events = await Http.GetFromJsonAsync<List<EventDto>>("Event");
+        var http = HttpClientFactory.CreateClient("EventsManager.ServerAPI.Anonymous");
+        Events = await http.GetFromJsonAsync<List<EventDto>>("Event");
     }
 
     private void UpdateSearchTerm(ChangeEventArgs e)
