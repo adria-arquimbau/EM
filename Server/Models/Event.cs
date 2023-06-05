@@ -15,7 +15,8 @@ public class Event
     public bool IsPublic { get; private set; }  
     public DateTime OpenRegistrationsDate { get; private set; }  
     public DateTime CloseRegistrationsDate { get; private set; }
-    
+    public List<Registration> Registrations { get; private set; } = new List<Registration>();
+
     private Event() { }
     
     public Event(string name, string description, string location, int maxRegistrations, ApplicationUser owner, DateTime startDate, DateTime finishDate, DateTime openRegistrationsDate, DateTime closeRegistrationsDate)

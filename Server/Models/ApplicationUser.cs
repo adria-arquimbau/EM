@@ -14,6 +14,7 @@ public class ApplicationUser : IdentityUser
     public virtual Uri? ImageUrl { get; set; }
     public virtual DateTime? LastLoginTime { get; set; }
     public virtual DateTime? RegistrationDate { get; set; }
+    public virtual List<Registration> Registrations { get; set; }
         
     public void UpdateLastLoginTime()   
     {
@@ -24,4 +25,4 @@ public class ApplicationUser : IdentityUser
     {
         RegistrationDate = DateTime.UtcNow;
     }
-}
+}   

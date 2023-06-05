@@ -9,6 +9,9 @@ namespace EventsManager.Server.Data;
 public class ApplicationDbContext : ApiAuthorizationDbContext<ApplicationUser>
 {
     public DbSet<Event> Events { get; set; }
+    public DbSet<Registration> Registrations { get; set; }
+    public override DbSet<ApplicationUser> Users { get; set; }
+    
     public ApplicationDbContext(DbContextOptions options, IOptions<OperationalStoreOptions> operationalStoreOptions) : base(options, operationalStoreOptions)
     {
     }
