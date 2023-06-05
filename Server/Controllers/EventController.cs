@@ -1,4 +1,5 @@
 ﻿using System.Security.Claims;
+using EventsManager.Server.Data;
 using EventsManager.Server.Handlers.Commands.Events.Create;
 using EventsManager.Server.Handlers.Commands.Events.Delete;
 using EventsManager.Server.Handlers.Commands.Events.Update;
@@ -11,6 +12,7 @@ using EventsManager.Shared.Requests;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace EventsManager.Server.Controllers;
 
@@ -19,10 +21,12 @@ namespace EventsManager.Server.Controllers;
 public class EventController : ControllerBase
 {
     private readonly IMediator _mediator;
+    private readonly ApplicationDbContext _context;
 
-    public EventController(IMediator mediator)
+    public EventController(IMediator mediator, ApplicationDbContext context)
     {
         _mediator = mediator;
+        _context = context;
     }
 
     [HttpGet]
@@ -85,4 +89,51 @@ public class EventController : ControllerBase
         await _mediator.Send(new UpdateEventCommandRequest(eventDto, userId));
         return Ok(); 
     }   
+    
+    [HttpGet("{eventId:guid}/registrations")]
+    [Authorize(Roles = "Organizer")]
+    public async Task<IActionResult> GetAllByEventId([FromRoute] Guid eventId, [FromQuery] string? search, CancellationToken cancellationToken)
+    {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        
+        var eventRegistrations = await _context.Events
+            .Where(x => x.Id == eventId)
+            .Include(x => x.Owner)
+            .SingleAsync(cancellationToken: cancellationToken);
+
+        if (eventRegistrations.Owner.Id != userId)
+        {
+            throw new UnauthorizedAccessException("You are not the owner of this event");
+        }
+        var valueToSearch = search ?? "";
+        var registrations = await _context.Registrations 
+            .Where(x => x.EventId == eventId && x.RegisteredUser.UserName.Contains(valueToSearch))
+            .Select(x => new RegistrationDto
+            {
+                Id = x.Id,
+                CreationDate = x.CreationDate,
+                Role = x.Role,
+                State = x.State,
+                Bib = x.Bib,
+                CheckedIn = x.CheckedIn,
+                RegisteredUser = new UserDto
+                {
+                    Id = x.RegisteredUser.Id,
+                    UserName = x.RegisteredUser.UserName,
+                    Email = x.RegisteredUser.Email,
+                    PostalCode = x.RegisteredUser.PostalCode,
+                    Country = x.RegisteredUser.Country,
+                    City = x.RegisteredUser.City,
+                    Address = x.RegisteredUser.Address,
+                    FamilyName = x.RegisteredUser.FamilyName,
+                    Name = x.RegisteredUser.Name,
+                    PhoneNumber = x.RegisteredUser.PhoneNumber,
+                    ImageUrl = x.RegisteredUser.ImageUrl,
+                    EmailConfirmed = x.RegisteredUser.EmailConfirmed
+                }
+            })
+            .ToListAsync(cancellationToken: cancellationToken);
+
+        return Ok(registrations);
+    }
 }

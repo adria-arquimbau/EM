@@ -1,0 +1,65 @@
+﻿@using EventsManager.Shared.Dtos
+@inject HttpClient Http
+
+@if (registrations == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <input type="search" placeholder="Search by user name" @oninput="HandleSearchInput" />
+
+    <table class="table">
+        <thead>
+        <tr>
+            <th>Registration Id</th>
+            <th>Creation Date</th>
+            <th>Role</th>
+            <th>State</th>
+            <th>Bib</th>
+            <th>Checked In</th>
+            <th>User Name</th>
+            <th>User Email</th>
+            <!-- Add more columns as necessary -->
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var registration in registrations)
+        {
+            <tr>
+                <td>@registration.Id</td>
+                <td>@registration.CreationDate</td>
+                <td>@registration.Role</td>
+                <td>@registration.State</td>
+                <td>@registration.Bib</td>
+                <td>@registration.CheckedIn</td>
+                <td>@registration.RegisteredUser.UserName</td>
+                <td>@registration.RegisteredUser.Email</td>
+                <!-- Add more cells as necessary -->
+            </tr>
+        }
+        </tbody>
+    </table>
+}
+
+@code {
+    [Parameter]
+    public Guid? EventId { get; set; }
+
+    private List<RegistrationDto> registrations;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadRegistrations();
+    }
+
+    private async Task LoadRegistrations(string? search = null)
+    {
+        registrations = await Http.GetFromJsonAsync<List<RegistrationDto>>($"Event/{EventId}/registrations?search={search}");
+    }
+
+    private async Task HandleSearchInput(ChangeEventArgs e)
+    {
+        await LoadRegistrations(e.Value.ToString());
+    }
+}

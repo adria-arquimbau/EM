@@ -1,4 +1,6 @@
-﻿namespace EventsManager.Server.Models;
+﻿using EventsManager.Shared.Enums;
+
+namespace EventsManager.Server.Models;
 
 public class Registration
 {
@@ -25,19 +27,4 @@ public class Registration
         State = state;  
         EventId = eventId;
     }
-}
-
-public enum RegistrationRole
-{   
-    Staff,
-    Rider,
-    Marshal,    
-    RiderMarshal
-}
-
-public enum RegistrationState
-{
-    PreRegistered,
-    Accepted,
-    Cancelled
 }

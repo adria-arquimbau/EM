@@ -4,6 +4,7 @@ using EventsManager.Server.Data;
 using EventsManager.Server.Handlers.Commands.Events.Create;
 using EventsManager.Server.Models;
 using EventsManager.Shared.Dtos;
+using EventsManager.Shared.Enums;
 using EventsManager.Shared.Requests;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -58,30 +59,23 @@ public class RegistrationController : ControllerBase
         return registration != null ? Ok() : NotFound();
     }
     
-    [HttpGet("event/{eventId:guid}")]
+    [HttpDelete("{registrationId:guid}")]
     [Authorize(Roles = "Organizer")]
-    public async Task<IActionResult> GetAllByEventId([FromRoute] Guid eventId, CancellationToken cancellationToken)
+    public async Task<IActionResult> Delete([FromRoute] Guid registrationId, CancellationToken cancellationToken)
     {
-        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        
-        var eventRegistrations = await _context.Events
-            .Where(x => x.Id == eventId)
-            .Include(x => x.Owner)
-            .SingleAsync(cancellationToken: cancellationToken);
+        var registration = await _context.Registrations
+            .Include(x => x.Event)
+            .ThenInclude(x => x.Owner)
+            .SingleAsync(x => x.Id == registrationId, cancellationToken: cancellationToken);
 
-        if (eventRegistrations.Owner.Id != userId)
+        if (registration.Event.Owner.Id != User.FindFirst(ClaimTypes.NameIdentifier)?.Value)
         {
-            throw new UnauthorizedAccessException("You are not the owner of this event");
+            return Forbid();
         }
         
-        var registrations = await _context.Registrations 
-            .Where(x => x.EventId == eventId)
-            .Select(x => new RegistrationDto
-            {
-                
-            })
-            .ToListAsync(cancellationToken: cancellationToken);
-
-            return Ok(registrations);
+        _context.Registrations.Remove(registration);
+        await _context.SaveChangesAsync(cancellationToken);
+        
+        return Ok();
     }
 }

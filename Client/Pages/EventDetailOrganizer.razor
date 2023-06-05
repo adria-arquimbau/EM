@@ -1,6 +1,7 @@
 ﻿@page "/event-detail-organizer/{EventId:guid}"
 
 @using EventsManager.Shared.Dtos
+@using EventsManager.Client.Components.Registration
 @using Microsoft.AspNetCore.Authorization
 @inject HttpClient Http
 
@@ -33,6 +34,7 @@ else
             <li class="list-group-item"><strong>Pre-registrations:</strong> @eventDetail.PreRegistrationsCount</li>
         </ul>
     </div>
+    <RegistrationList EventId="@EventId" />
 }
 
 @if (isEditMode)

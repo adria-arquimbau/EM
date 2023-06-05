@@ -1,4 +1,5 @@
 ﻿using EventsManager.Server.Models;
+using EventsManager.Shared.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
