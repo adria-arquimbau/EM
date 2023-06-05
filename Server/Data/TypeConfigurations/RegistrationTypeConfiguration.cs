@@ -13,5 +13,9 @@ public class RegistrationTypeConfiguration : IEntityTypeConfiguration<Registrati
             .WithMany()
             .HasForeignKey(r => r.RegisteredUserId)
             .IsRequired();
+        builder.HasOne(r => r.Event)
+            .WithMany()
+            .HasForeignKey(r => r.EventId)
+            .IsRequired();
     }
 }

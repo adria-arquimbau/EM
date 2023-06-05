@@ -48,12 +48,13 @@ public class Startup {
                 opt.ApiResources.Single().UserClaims.Add("role");
             });
         JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Remove("role");
-
+        
+        var googleAuthSection = configuration.GetSection("GoogleAuth");
         services.AddAuthentication()
             .AddGoogle(options =>
             {
-                options.ClientId = "104708052542-uqishvtn1l1kue90l72j7l8q6ciipfmc.apps.googleusercontent.com";
-                options.ClientSecret = "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";
+                options.ClientId = googleAuthSection["Settings:ClientId"];
+                options.ClientSecret = googleAuthSection["Settings:ClientSecret"];
             })
             .AddIdentityServerJwt();
 
