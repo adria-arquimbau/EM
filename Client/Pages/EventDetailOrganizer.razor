@@ -5,10 +5,17 @@
 @using EventsManager.Client.Components.Event
 @using Microsoft.AspNetCore.Authorization
 @inject HttpClient Http
+@inject IJSRuntime JSRuntime
 
 @attribute [Authorize(Roles = "Organizer")]
 
-<PageTitle>Event @eventDetail?.Name</PageTitle>
+<h3 class="mb-4">Event @eventDetail?.Name</h3>
+
+<div class="btn-group mb-4" role="group" aria-label="View options">
+    <button type="button" class="btn @(currentComponent == PageComponent.EventDetail ? "btn-primary" : "btn-outline-primary")" @onclick="(() => SetCurrentComponent(PageComponent.EventDetail))">Event Detail</button>
+    <button type="button" class="btn @(currentComponent == PageComponent.RegistrationList ? "btn-primary" : "btn-outline-primary")" @onclick="(() => SetCurrentComponent(PageComponent.RegistrationList))">Registrations</button>
+    <!-- Add more buttons as necessary -->
+</div>
 
 @if (eventDetail == null)
 {
@@ -16,38 +23,71 @@
 }
 else
 {
-    <EventOrganizerDetail Event="eventDetail" ToggleEditMode="ToggleEditMode" />
-    <FluentDivider></FluentDivider>
-    <RegistrationList EventId="@EventId" />
-}
+    <div class="card p-4">
+        @switch (currentComponent)
+        {
+            case PageComponent.EventDetail:
+                <EventOrganizerDetail Event="eventDetail" ToggleEditMode="ToggleEditMode" />
+                break;
+            case PageComponent.RegistrationList:
+                <FluentDivider></FluentDivider>
+                <RegistrationList EventId="@EventId" />
+                break;
+            // Add more cases as necessary
+        }
 
-@if (isEditMode)
-{
-    <EventEdit EventDetail="eventDetail" ToggleEditMode="ToggleEditMode" HandleValidSubmit="HandleValidSubmit" />
+        @if (isEditMode)
+        {
+            <EventEdit EventDetail="eventDetail" ToggleEditMode="ToggleEditMode" HandleValidSubmit="HandleValidSubmit" />
+        }
+    </div>
 }
 
 @code {
+    public enum PageComponent
+    {
+        EventDetail,
+        RegistrationList
+        // Add more components as necessary
+    }
+
     [Parameter]
     public Guid? EventId { get; set; }
 
     private MyEventDto eventDetail;
     private bool isEditMode;
+    private PageComponent currentComponent = PageComponent.EventDetail;
 
     protected override async Task OnInitializedAsync()
+    {
+        await LoadEventDetail();
+    }
+
+    private async Task LoadEventDetail()
     {
         eventDetail = await Http.GetFromJsonAsync<MyEventDto>($"Event/{EventId}-organizer");
     }
 
+    private void SetCurrentComponent(PageComponent component)
+    {
+        currentComponent = component;
+    }
+
     private async Task ToggleEditMode()
     {
-        eventDetail = await Http.GetFromJsonAsync<MyEventDto>($"Event/{EventId}-organizer");
         isEditMode = !isEditMode;
+
+        // If we are exiting edit mode, reload the event detail to discard any changes made
+        if (!isEditMode)
+        {
+            await LoadEventDetail();
+        }
     }
     
     private async Task HandleValidSubmit(MyEventDto updatedEvent)
     {
         await Http.PutAsJsonAsync($"Event", eventDetail);
-        eventDetail = await Http.GetFromJsonAsync<MyEventDto>($"Event/{EventId}-organizer");
+        await LoadEventDetail();
         isEditMode = false;
     }
 }
