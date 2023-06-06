@@ -164,13 +164,29 @@ public class EventController : ControllerBase
         await _context.SaveChangesAsync(cancellationToken);
 
         return Ok();
-    }
+    }   
     
-    [HttpDelete("image")]   
+    [HttpDelete("{eventId:guid}/image")]   
     [Authorize(Roles = "User")] 
-    public async Task<IActionResult> DeleteEventImage()
+    public async Task<IActionResult> DeleteEventImage([FromRoute] Guid eventId, CancellationToken cancellationToken)
     {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        var eventToDeleteImage = await _context.Events
+            .Include(x => x.Owner)
+            .SingleAsync(x => x.Id == eventId, cancellationToken);
 
+        if (eventToDeleteImage.Owner.Id != userId)
+        {
+            return Forbid();
+        }
+        
+        var blobClient = new BlobClient(_blobStorageOptions.ConnectionString, _blobStorageOptions.EventsImageContainerName, eventToDeleteImage.Id + "-event-picture");
+        
+        await blobClient.DeleteAsync(cancellationToken: cancellationToken);
+            
+        eventToDeleteImage.ImageUrl = null;
+        
+        await _context.SaveChangesAsync(cancellationToken);
         return Ok();
     }
 }
