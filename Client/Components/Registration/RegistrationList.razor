@@ -1,4 +1,6 @@
 ﻿@using EventsManager.Shared.Dtos
+@using EventsManager.Shared.Enums
+@using EventsManager.Shared.Requests
 @inject HttpClient Http
 @inject IJSRuntime JSRuntime
 
@@ -29,18 +31,24 @@ else
             <tr>
                 <td>@registration.CreationDate</td>
                 <td>@registration.Role</td>
-                <td>@registration.State</td>
+                <td>
+                    <select value="@registration.State" @onchange="((e) => UpdateRegistrationState(registration, e))">
+                        @foreach (RegistrationState state in Enum.GetValues(typeof(RegistrationState)))
+                        {
+                            <option value="@state" selected="@(state == registration.State)">@state</option>
+                        }
+                    </select>
+                </td>
                 <td>@registration.Bib</td>
                 <td>@registration.CheckedIn</td>
                 <td>@registration.RegisteredUser.UserName</td>
                 <td>@registration.RegisteredUser.Email</td>
                 <td>
-                    <button class="btn btn-danger" @onclick="(() => ConfirmDelete(registration.Id))">
-                        <i class="fa fa-trash"></i>
-                    </button>
+                    <button class="btn btn-danger" @onclick="(() => ConfirmDelete(registration.Id))">Delete</button>
                 </td>
             </tr>
         }
+
         </tbody>
     </table>
 }
@@ -81,5 +89,27 @@ else
         await Http.DeleteAsync($"Registration/{id}");
         
         await LoadRegistrations();
+    }
+    
+    private async Task UpdateRegistrationState(RegistrationDto registration, ChangeEventArgs e)
+    {
+        RegistrationState newState;
+    
+        if(Enum.TryParse(e.Value.ToString(), out newState))
+        {
+            registration.State = newState;
+        
+            var updateRequest = new RegistrationUpdateRequest
+            {
+                Id = registration.Id,
+                State = newState,
+                Bib = registration.Bib,
+                CheckedIn = registration.CheckedIn
+            };
+
+            await Http.PutAsJsonAsync($"Registration", updateRequest);
+        
+            await LoadRegistrations();
+        }
     }
 }

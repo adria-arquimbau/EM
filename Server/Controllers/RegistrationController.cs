@@ -2,6 +2,7 @@
 using EventsManager.Server.Data;
 using EventsManager.Server.Models;
 using EventsManager.Shared.Enums;
+using EventsManager.Shared.Requests;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -38,6 +39,27 @@ public class RegistrationController : ControllerBase
         var registration = new Registration(user, RegistrationRole.Rider, RegistrationState.PreRegistered, eventToRegister);
         
         _context.Registrations.Add(registration);
+        await _context.SaveChangesAsync(cancellationToken);
+        
+        return Ok(); 
+    }
+    
+    [HttpPut]
+    [Authorize(Roles = "Organizer")] 
+    public async Task<IActionResult> Update([FromBody] RegistrationUpdateRequest registrationUpdateRequest, CancellationToken cancellationToken)
+    {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        var registration = await _context.Registrations
+            .Include(x => x.Event)
+            .ThenInclude(x => x.Owner)
+            .SingleAsync(x => x.Id == registrationUpdateRequest.Id, cancellationToken: cancellationToken);
+
+        if (registration.Event.Owner.Id != userId)
+        {
+            return Forbid();
+        }
+
+        registration.Update(registrationUpdateRequest.Bib, registrationUpdateRequest.CheckedIn, registrationUpdateRequest.State);
         await _context.SaveChangesAsync(cancellationToken);
         
         return Ok(); 

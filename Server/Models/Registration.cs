@@ -26,4 +26,11 @@ public class Registration
         State = state;
         Event = sportEvent;
     }
+
+    public void Update(int? bib, bool checkedIn, RegistrationState state)
+    {
+        Bib = bib;
+        CheckedIn = checkedIn;
+        State = state;
+    }
 }
