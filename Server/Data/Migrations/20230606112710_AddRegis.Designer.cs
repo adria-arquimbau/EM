@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EventsManager.Server.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20230605190711_AddRegistration")]
-    partial class AddRegistration
+    [Migration("20230606112710_AddRegis")]
+    partial class AddRegis
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -298,6 +298,7 @@ namespace EventsManager.Server.Data.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("OwnerId")
+                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<DateTime>("StartDate")
@@ -316,9 +317,6 @@ namespace EventsManager.Server.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("ApplicationUserId")
-                        .HasColumnType("nvarchar(450)");
-
                     b.Property<int?>("Bib")
                         .HasColumnType("int");
 
@@ -331,13 +329,6 @@ namespace EventsManager.Server.Data.Migrations
                     b.Property<Guid>("EventId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("EventId1")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("RegisteredUserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
                     b.Property<string>("Role")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -346,15 +337,15 @@ namespace EventsManager.Server.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("Id");
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
-                    b.HasIndex("ApplicationUserId");
+                    b.HasKey("Id");
 
                     b.HasIndex("EventId");
 
-                    b.HasIndex("EventId1");
-
-                    b.HasIndex("RegisteredUserId");
+                    b.HasIndex("UserId");
 
                     b.ToTable("Registrations");
                 });
@@ -499,37 +490,31 @@ namespace EventsManager.Server.Data.Migrations
             modelBuilder.Entity("EventsManager.Server.Models.Event", b =>
                 {
                     b.HasOne("EventsManager.Server.Models.ApplicationUser", "Owner")
-                        .WithMany()
-                        .HasForeignKey("OwnerId");
+                        .WithMany("OwnedEvents")
+                        .HasForeignKey("OwnerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.Navigation("Owner");
                 });
 
             modelBuilder.Entity("EventsManager.Server.Models.Registration", b =>
                 {
-                    b.HasOne("EventsManager.Server.Models.ApplicationUser", null)
-                        .WithMany("Registrations")
-                        .HasForeignKey("ApplicationUserId");
-
                     b.HasOne("EventsManager.Server.Models.Event", "Event")
-                        .WithMany()
+                        .WithMany("Registrations")
                         .HasForeignKey("EventId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("EventsManager.Server.Models.Event", null)
+                    b.HasOne("EventsManager.Server.Models.ApplicationUser", "User")
                         .WithMany("Registrations")
-                        .HasForeignKey("EventId1");
-
-                    b.HasOne("EventsManager.Server.Models.ApplicationUser", "RegisteredUser")
-                        .WithMany()
-                        .HasForeignKey("RegisteredUserId")
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Event");
 
-                    b.Navigation("RegisteredUser");
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -585,6 +570,8 @@ namespace EventsManager.Server.Data.Migrations
 
             modelBuilder.Entity("EventsManager.Server.Models.ApplicationUser", b =>
                 {
+                    b.Navigation("OwnedEvents");
+
                     b.Navigation("Registrations");
                 });
 

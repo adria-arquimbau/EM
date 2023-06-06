@@ -10,21 +10,20 @@ public class Registration
     public RegistrationState State { get; private set; }
     public int? Bib { get; private set; }
     public bool CheckedIn { get; private set; }
-    public Guid EventId { get; set; }
     public Event Event { get; set; }
-    public string RegisteredUserId { get; set; }
-    public ApplicationUser RegisteredUser { get; set; }
-    
+    public string UserId { get; set; }
+    public virtual ApplicationUser User { get; set; }
+
     private Registration()
     {
     }
-    
-    public Registration(string registeredUserId, RegistrationRole role, RegistrationState state, Guid eventId)
+
+    public Registration(ApplicationUser user, RegistrationRole role, RegistrationState state, Event sportEvent)
     {
         CreationDate = DateTime.UtcNow;
-        RegisteredUserId = registeredUserId;
+        User = user;
         Role = role;
-        State = state;  
-        EventId = eventId;
+        State = state;
+        Event = sportEvent;
     }
 }

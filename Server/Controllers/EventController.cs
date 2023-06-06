@@ -107,7 +107,7 @@ public class EventController : ControllerBase
         }
         var valueToSearch = search ?? "";
         var registrations = await _context.Registrations 
-            .Where(x => x.EventId == eventId && x.RegisteredUser.UserName.Contains(valueToSearch))
+            .Where(x => x.Event.Id == eventId && x.User.UserName.Contains(valueToSearch))
             .Select(x => new RegistrationDto
             {
                 Id = x.Id,
@@ -118,18 +118,18 @@ public class EventController : ControllerBase
                 CheckedIn = x.CheckedIn,
                 RegisteredUser = new UserDto
                 {
-                    Id = x.RegisteredUser.Id,
-                    UserName = x.RegisteredUser.UserName,
-                    Email = x.RegisteredUser.Email,
-                    PostalCode = x.RegisteredUser.PostalCode,
-                    Country = x.RegisteredUser.Country,
-                    City = x.RegisteredUser.City,
-                    Address = x.RegisteredUser.Address,
-                    FamilyName = x.RegisteredUser.FamilyName,
-                    Name = x.RegisteredUser.Name,
-                    PhoneNumber = x.RegisteredUser.PhoneNumber,
-                    ImageUrl = x.RegisteredUser.ImageUrl,
-                    EmailConfirmed = x.RegisteredUser.EmailConfirmed
+                    Id = x.User.Id,
+                    UserName = x.User.UserName,
+                    Email = x.User.Email,
+                    PostalCode = x.User.PostalCode,
+                    Country = x.User.Country,
+                    City = x.User.City,
+                    Address = x.User.Address,
+                    FamilyName = x.User.FamilyName,
+                    Name = x.User.Name,
+                    PhoneNumber = x.User.PhoneNumber,
+                    ImageUrl = x.User.ImageUrl,
+                    EmailConfirmed = x.User.EmailConfirmed
                 }
             })
             .ToListAsync(cancellationToken: cancellationToken);

@@ -6,11 +6,25 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace EventsManager.Server.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class AddRegistration : Migration
+    public partial class AddRegis : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropForeignKey(
+                name: "FK_Events_AspNetUsers_OwnerId",
+                table: "Events");
+
+            migrationBuilder.AlterColumn<string>(
+                name: "OwnerId",
+                table: "Events",
+                type: "nvarchar(450)",
+                nullable: false,
+                defaultValue: "",
+                oldClrType: typeof(string),
+                oldType: "nvarchar(450)",
+                oldNullable: true);
+
             migrationBuilder.CreateTable(
                 name: "Registrations",
                 columns: table => new
@@ -22,21 +36,14 @@ namespace EventsManager.Server.Data.Migrations
                     Bib = table.Column<int>(type: "int", nullable: true),
                     CheckedIn = table.Column<bool>(type: "bit", nullable: false),
                     EventId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    RegisteredUserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    ApplicationUserId = table.Column<string>(type: "nvarchar(450)", nullable: true),
-                    EventId1 = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Registrations", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Registrations_AspNetUsers_ApplicationUserId",
-                        column: x => x.ApplicationUserId,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_Registrations_AspNetUsers_RegisteredUserId",
-                        column: x => x.RegisteredUserId,
+                        name: "FK_Registrations_AspNetUsers_UserId",
+                        column: x => x.UserId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -46,17 +53,7 @@ namespace EventsManager.Server.Data.Migrations
                         principalTable: "Events",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Registrations_Events_EventId1",
-                        column: x => x.EventId1,
-                        principalTable: "Events",
-                        principalColumn: "Id");
                 });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Registrations_ApplicationUserId",
-                table: "Registrations",
-                column: "ApplicationUserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Registrations_EventId",
@@ -64,21 +61,43 @@ namespace EventsManager.Server.Data.Migrations
                 column: "EventId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Registrations_EventId1",
+                name: "IX_Registrations_UserId",
                 table: "Registrations",
-                column: "EventId1");
+                column: "UserId");
 
-            migrationBuilder.CreateIndex(
-                name: "IX_Registrations_RegisteredUserId",
-                table: "Registrations",
-                column: "RegisteredUserId");
+            migrationBuilder.AddForeignKey(
+                name: "FK_Events_AspNetUsers_OwnerId",
+                table: "Events",
+                column: "OwnerId",
+                principalTable: "AspNetUsers",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Restrict);
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropForeignKey(
+                name: "FK_Events_AspNetUsers_OwnerId",
+                table: "Events");
+
             migrationBuilder.DropTable(
                 name: "Registrations");
+
+            migrationBuilder.AlterColumn<string>(
+                name: "OwnerId",
+                table: "Events",
+                type: "nvarchar(450)",
+                nullable: true,
+                oldClrType: typeof(string),
+                oldType: "nvarchar(450)");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_Events_AspNetUsers_OwnerId",
+                table: "Events",
+                column: "OwnerId",
+                principalTable: "AspNetUsers",
+                principalColumn: "Id");
         }
     }
 }

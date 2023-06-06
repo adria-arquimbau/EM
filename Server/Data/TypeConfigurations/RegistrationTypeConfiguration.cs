@@ -10,13 +10,12 @@ public class RegistrationTypeConfiguration : IEntityTypeConfiguration<Registrati
     public void Configure(EntityTypeBuilder<Registration> builder)
     {
         builder.HasKey(x => x.Id);
-        builder.HasOne(r => r.RegisteredUser)
-            .WithMany()
-            .HasForeignKey(r => r.RegisteredUserId)
+        builder.HasOne(r => r.User)
+            .WithMany(u => u.Registrations)
+            .HasForeignKey(r => r.UserId)
             .IsRequired();
         builder.HasOne(r => r.Event)
-            .WithMany()
-            .HasForeignKey(r => r.EventId)
+            .WithMany(e => e.Registrations) // Here, specify the inverse navigation property
             .IsRequired();
         builder.Property(r => r.Role)
             .HasConversion(v => 

@@ -1,5 +1,4 @@
 ﻿using EventsManager.Server.Data;
-using EventsManager.Server.Models;
 using EventsManager.Shared.Dtos;
 using EventsManager.Shared.Enums;
 using MediatR;

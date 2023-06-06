@@ -14,7 +14,8 @@ public class ApplicationUser : IdentityUser
     public virtual Uri? ImageUrl { get; set; }
     public virtual DateTime? LastLoginTime { get; set; }
     public virtual DateTime? RegistrationDate { get; set; }
-    public virtual List<Registration> Registrations { get; set; }
+    public virtual ICollection<Registration> Registrations { get; set; }
+    public virtual List<Event> OwnedEvents { get; set; } = new();
         
     public void UpdateLastLoginTime()   
     {

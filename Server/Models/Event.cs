@@ -6,6 +6,7 @@ public class Event
     public DateTime CreationDate { get; private set; }
     public DateTime StartDate { get; private set; }
     public DateTime FinishDate { get; private set; }
+    public string OwnerId { get; private set;  }
     public ApplicationUser Owner { get; private set;  }
     public string Name { get; private set; }    
     public string Description { get; private set; }
@@ -15,7 +16,7 @@ public class Event
     public bool IsPublic { get; private set; }  
     public DateTime OpenRegistrationsDate { get; private set; }  
     public DateTime CloseRegistrationsDate { get; private set; }
-    public List<Registration> Registrations { get; private set; } = new List<Registration>();
+    public virtual ICollection<Registration> Registrations { get; set; }
 
     private Event() { }
     

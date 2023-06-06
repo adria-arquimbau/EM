@@ -1,18 +1,12 @@
 ﻿using System.Security.Claims;
-using Duende.IdentityServer;
 using EventsManager.Server.Data;
-using EventsManager.Server.Handlers.Commands.Events.Create;
 using EventsManager.Server.Models;
-using EventsManager.Shared.Dtos;
 using EventsManager.Shared.Enums;
-using EventsManager.Shared.Requests;
-using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace EventsManager.Server.Controllers;
-
 
 [ApiController]
 [Route("[controller]")]
@@ -35,10 +29,10 @@ public class RegistrationController : ControllerBase
             .Include(x => x.Registrations)
             .SingleAsync(x => x.Id == eventId, cancellationToken: cancellationToken);
 
-        if (eventToRegister.Registrations.Any(x => x.RegisteredUser.Id == userId))
+        if (eventToRegister.Registrations.Any(x => x.User.Id == userId))
             return BadRequest("User already registered for this event");
         
-        var registration = new Registration(user.Id, RegistrationRole.Rider, RegistrationState.PreRegistered, eventToRegister.Id);
+        var registration = new Registration(user, RegistrationRole.Rider, RegistrationState.PreRegistered, eventToRegister);
         
         _context.Registrations.Add(registration);
         await _context.SaveChangesAsync(cancellationToken);
@@ -53,7 +47,7 @@ public class RegistrationController : ControllerBase
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         
         var registration = await _context.Registrations
-            .Where(x => x.EventId == eventId && x.RegisteredUserId == userId)
+            .Where(x => x.Event.Id == eventId && x.User.Id == userId)
             .SingleOrDefaultAsync(cancellationToken: cancellationToken);
 
         return registration != null ? Ok() : NotFound();
