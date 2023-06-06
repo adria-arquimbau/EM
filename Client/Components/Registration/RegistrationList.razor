@@ -10,7 +10,7 @@
 }
 else
 {
-    <ConfirmationModal Message="Are you sure you want to delete this registration?" Visible="@showConfirmModal" ConfirmationChanged="ConfirmDelete" />
+    <ConfirmationModal Title="Delete registration" Message="Are you sure you want to delete this registration?" Visible="@showConfirmModal" ConfirmationChanged="ConfirmDelete" />
 
     <input type="search" placeholder="Search by user name" @oninput="HandleSearchInput" />
 

@@ -2,7 +2,7 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Confirmation</h5>
+                <h5 class="modal-title">@Title</h5>
             </div>
             <div class="modal-body">
                 <p>@Message</p>
@@ -16,6 +16,7 @@
 </div>
 
 @code {
+    [Parameter] public string Title { get; set; }
     [Parameter] public string Message { get; set; }
     [Parameter] public bool Visible { get; set; }
     [Parameter] public EventCallback<bool> ConfirmationChanged { get; set; }
