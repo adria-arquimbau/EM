@@ -1,4 +1,6 @@
 ﻿using System.Security.Claims;
+using Azure.Storage.Blobs;
+using Azure.Storage.Blobs.Models;
 using EventsManager.Server.Data;
 using EventsManager.Server.Handlers.Commands.Events.Create;
 using EventsManager.Server.Handlers.Commands.Events.Delete;
@@ -7,12 +9,14 @@ using EventsManager.Server.Handlers.Queries.Events.Get;
 using EventsManager.Server.Handlers.Queries.Events.GetAll;
 using EventsManager.Server.Handlers.Queries.Events.GetMyEvent;
 using EventsManager.Server.Handlers.Queries.Events.GetMyEvents;
+using EventsManager.Server.Settings;
 using EventsManager.Shared.Dtos;
 using EventsManager.Shared.Requests;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 namespace EventsManager.Server.Controllers;
 
@@ -22,13 +26,15 @@ public class EventController : ControllerBase
 {
     private readonly IMediator _mediator;
     private readonly ApplicationDbContext _context;
+    private readonly BlobStorageSettings _blobStorageOptions;
 
-    public EventController(IMediator mediator, ApplicationDbContext context)
+    public EventController(IMediator mediator, ApplicationDbContext context, IOptions<BlobStorageSettings> blobStorageOptions)
     {
         _mediator = mediator;
         _context = context;
+        _blobStorageOptions = blobStorageOptions.Value;
     }
-
+    
     [HttpGet]
     [AllowAnonymous]
     public async Task<IActionResult> GetAllEvents()
@@ -92,7 +98,7 @@ public class EventController : ControllerBase
     
     [HttpGet("{eventId:guid}/registrations")]
     [Authorize(Roles = "Organizer")]
-    public async Task<IActionResult> GetAllregistrationsByEventId([FromRoute] Guid eventId, [FromQuery] string? search, CancellationToken cancellationToken)
+    public async Task<IActionResult> GetAllRegistrationsByEventId([FromRoute] Guid eventId, [FromQuery] string? search, CancellationToken cancellationToken)
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         
@@ -135,5 +141,36 @@ public class EventController : ControllerBase
             .ToListAsync(cancellationToken: cancellationToken);
 
         return Ok(registrations);
+    }
+    
+    [HttpPost("{eventId:guid}/image")]
+    [Authorize(Roles = "Organizer")]
+    public async Task<ActionResult> UploadEventImage([FromRoute] Guid eventId, IFormFile file, CancellationToken cancellationToken)
+    {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        var eventToUpload = await _context.Events
+            .Include(x => x.Owner)
+            .SingleAsync(x => x.Id == eventId, cancellationToken);
+        
+        if (eventToUpload.Owner.Id != userId)
+        {
+            return Forbid();
+        }
+        var blobClient = new BlobClient(_blobStorageOptions.ConnectionString, _blobStorageOptions.EventsImageContainerName, eventToUpload.Id + "-event-picture");
+        await blobClient.UploadAsync(file.OpenReadStream(), new BlobHttpHeaders { ContentType = file.ContentType }, conditions: null, cancellationToken: cancellationToken);
+        
+        eventToUpload.ImageUrl = blobClient.Uri;
+
+        await _context.SaveChangesAsync(cancellationToken);
+
+        return Ok();
+    }
+    
+    [HttpDelete("image")]   
+    [Authorize(Roles = "User")] 
+    public async Task<IActionResult> DeleteEventImage()
+    {
+
+        return Ok();
     }
 }

@@ -1,4 +1,8 @@
 ﻿@using EventsManager.Shared.Dtos
+@using System.Net.Http.Headers
+@using System.Net.Http.Json
+
+@inject HttpClient Http
 
 <div class="card">
     <div class="card-header">
@@ -12,8 +16,11 @@
         </div>
     </div>
     <div class="row">
-        <div class="col-md-4">
-            <img src="@Event.ImageUrl" alt="Event Image" class="img-fluid my-2 mx-auto d-block" style="max-width: 200px;" />
+        <div class="row">
+            <div class="col-md-4">
+                <img src="@Event.ImageUrl" alt="Event Image" class="img-fluid my-2 mx-auto d-block" style="max-width: 200px;" />
+                <InputFile OnChange="UploadImage" accept="image/png, image/jpeg" />
+            </div>
         </div>
         <div class="col-md-8">
             <ul class="list-group list-group-flush">
@@ -38,4 +45,31 @@
 
     [Parameter]
     public EventCallback ToggleEditMode { get; set; }
+    
+    private async Task UploadImage(InputFileChangeEventArgs e)
+    {
+        var imageFile = e.File;
+        
+    // Validate file format
+        string[] permittedTypes = { "image/jpeg", "image/png", "image/gif" };
+        if (!permittedTypes.Contains(imageFile.ContentType))
+        {
+    // Show error message
+            return;
+        }
+
+    // Resize image if necessary - Blazor does not provide native resizing capability. You may use JavaScript interop to perform image resizing before upload if required.
+
+    // Upload image
+        var ms = new MemoryStream();
+        await imageFile.OpenReadStream().CopyToAsync(ms);
+        
+        var content = new MultipartFormDataContent();
+        content.Headers.ContentDisposition = new ContentDispositionHeaderValue("form-data");
+        var streamContent = new StreamContent(new MemoryStream(ms.ToArray()));
+        streamContent.Headers.ContentType = new MediaTypeHeaderValue(imageFile.ContentType);
+        content.Add(streamContent, "file", imageFile.Name);
+        
+        await Http.PostAsync($"Event/{Event.Id}/image", content);
+    }   
 }

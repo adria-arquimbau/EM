@@ -11,7 +11,7 @@ public class Event
     public string Name { get; private set; }    
     public string Description { get; private set; }
     public string Location { get; private set; }
-    public Uri? ImageUrl { get; private set; }   
+    public Uri? ImageUrl { get; set; }   
     public int MaxRegistrations { get; private set; }       
     public bool IsPublic { get; private set; }  
     public DateTime OpenRegistrationsDate { get; private set; }  
