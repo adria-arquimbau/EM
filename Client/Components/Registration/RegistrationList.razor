@@ -1,5 +1,6 @@
 ﻿@using EventsManager.Shared.Dtos
 @inject HttpClient Http
+@inject IJSRuntime JSRuntime
 
 @if (registrations == null)
 {
@@ -19,7 +20,7 @@ else
             <th>Checked In</th>
             <th>User Name</th>
             <th>User Email</th>
-            <!-- Add more columns as necessary -->
+            <th>Action</th>
         </tr>
         </thead>
         <tbody>
@@ -33,7 +34,11 @@ else
                 <td>@registration.CheckedIn</td>
                 <td>@registration.RegisteredUser.UserName</td>
                 <td>@registration.RegisteredUser.Email</td>
-                <!-- Add more cells as necessary -->
+                <td>
+                    <button class="btn btn-danger" @onclick="(() => ConfirmDelete(registration.Id))">
+                        <i class="fa fa-trash"></i>
+                    </button>
+                </td>
             </tr>
         }
         </tbody>
@@ -59,5 +64,22 @@ else
     private async Task HandleSearchInput(ChangeEventArgs e)
     {
         await LoadRegistrations(e.Value.ToString());
+    }
+    
+    private async Task ConfirmDelete(Guid id)
+    {
+        var confirmed = await JSRuntime.InvokeAsync<bool>("confirm", "Are you sure you want to delete this registration?");
+
+        if (confirmed)
+        {
+            await DeleteRegistration(id);
+        }
+    }
+
+    private async Task DeleteRegistration(Guid id)
+    {
+        await Http.DeleteAsync($"Registration/{id}");
+        
+        await LoadRegistrations();
     }
 }
