@@ -27,11 +27,14 @@ public class RegistrationController : ControllerBase
         var user = await _context.Users.SingleAsync(x => x.Id == userId, cancellationToken: cancellationToken);
         var eventToRegister = await _context.Events
             .Include(x => x.Registrations)
+            .ThenInclude(x => x.User)
             .SingleAsync(x => x.Id == eventId, cancellationToken: cancellationToken);
 
         if (eventToRegister.Registrations.Any(x => x.User.Id == userId))
+        {
             return BadRequest("User already registered for this event");
-        
+        }
+
         var registration = new Registration(user, RegistrationRole.Rider, RegistrationState.PreRegistered, eventToRegister);
         
         _context.Registrations.Add(registration);
