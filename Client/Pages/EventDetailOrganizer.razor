@@ -2,6 +2,7 @@
 
 @using EventsManager.Shared.Dtos
 @using EventsManager.Client.Components.Registration
+@using EventsManager.Client.Components.Event
 @using Microsoft.AspNetCore.Authorization
 @inject HttpClient Http
 
@@ -15,88 +16,22 @@
 }
 else
 {
-    <div class="card">
-        <div class="card-header">
-            <h3>@eventDetail.Name</h3>
-            <img src="@eventDetail.ImageUrl" alt="Event Image" class="img-fluid" />
-            <button class="btn btn-primary float-end" @onclick="ToggleEditMode">Edit</button>
-        </div>
-        <ul class="list-group list-group-flush">
-            <li class="list-group-item"><strong>Description:</strong> @eventDetail.Description</li>
-            <li class="list-group-item"><strong>Location:</strong> @eventDetail.Location</li>
-            <li class="list-group-item"><strong>Max Registrations:</strong> @eventDetail.MaxRegistrations</li>
-            <li class="list-group-item"><strong>Is Public:</strong> @eventDetail.IsPublic</li>
-            <li class="list-group-item"><strong>Open Registrations Date:</strong> @eventDetail.OpenRegistrationsDate</li>
-            <li class="list-group-item"><strong>Close Registrations Date:</strong> @eventDetail.CloseRegistrationsDate</li>
-            <li class="list-group-item"><strong>Start Date:</strong> @eventDetail.StartDate</li>
-            <li class="list-group-item"><strong>Finish Date:</strong> @eventDetail.FinishDate</li>
-            <li class="list-group-item"><strong>Creation Date:</strong> @eventDetail.CreationDate</li>
-            <li class="list-group-item"><strong>Pre-registrations:</strong> @eventDetail.PreRegistrationsCount</li>
-        </ul>
-    </div>
+    <EventOrganizerDetail Event="eventDetail" ToggleEditMode="ToggleEditMode" />
+    <FluentDivider></FluentDivider>
     <RegistrationList EventId="@EventId" />
 }
 
 @if (isEditMode)
 {
-    <div class="modal show d-block" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Edit Event</h5>
-                    <button type="button" class="btn-close" @onclick="ToggleEditMode"></button>
-                </div>
-                <div class="modal-body">
-                    <EditForm Model="eventDetail" OnValidSubmit="HandleValidSubmit">
-                        <DataAnnotationsValidator />
-                        <ValidationSummary />
-
-                        <label for="name">Name:</label>
-                        <InputText id="name" @bind-Value="eventDetail.Name" class="form-control my-2" />
-
-                        <label for="description">Description:</label>
-                        <InputTextArea id="description" @bind-Value="eventDetail.Description" class="form-control my-2" />
-
-                        <label for="location">Location:</label>
-                        <InputText id="location" @bind-Value="eventDetail.Location" class="form-control my-2" />
-
-                        <label for="maxRegistrations">Max Registrations:</label>
-                        <InputNumber id="maxRegistrations" @bind-Value="eventDetail.MaxRegistrations" class="form-control my-2" />
-
-                        <label for="openRegistrationsDate" class="form-label">Open Registrations Date/Time:</label>
-                        <input type="datetime-local" id="openRegistrationsDate" @bind="@eventDetail.OpenRegistrationsDate" />
-                        
-                        <label for="closeRegistrationsDate" class="form-label">Close Registrations Date/Time:</label>
-                        <input type="datetime-local" id="closeRegistrationsDate" @bind="@eventDetail.CloseRegistrationsDate" />
-                        
-                        <label for="startDate" class="form-label">Start Date/Time:</label>
-                        <input type="datetime-local" id="startDate" @bind="@eventDetail.StartDate" />
-                        
-                        <label for="finishDate" class="form-label">Finish Date/Time:</label>
-                        <input type="datetime-local" id="finishDate" @bind="@eventDetail.FinishDate" />
-
-                        
-                        <label for="isPublic">Public Event:</label>
-                        <InputCheckbox id="isPublic" @bind-Value="eventDetail.IsPublic" class="form-check-input my-2" />
-
-                    </EditForm>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" @onclick="ToggleEditMode">Close</button>
-                    <button type="submit" class="btn btn-primary" @onclick="HandleValidSubmit">Save</button>
-                </div>
-            </div>
-        </div>
-    </div>
+    <EventEdit EventDetail="eventDetail" ToggleEditMode="ToggleEditMode" HandleValidSubmit="HandleValidSubmit" />
 }
-
 
 @code {
     [Parameter]
     public Guid? EventId { get; set; }
 
     private MyEventDto eventDetail;
-    private bool isEditMode = false;
+    private bool isEditMode;
 
     protected override async Task OnInitializedAsync()
     {
@@ -109,7 +44,7 @@ else
         isEditMode = !isEditMode;
     }
     
-    private async Task HandleValidSubmit()
+    private async Task HandleValidSubmit(MyEventDto updatedEvent)
     {
         await Http.PutAsJsonAsync($"Event", eventDetail);
         eventDetail = await Http.GetFromJsonAsync<MyEventDto>($"Event/{EventId}-organizer");

@@ -1,0 +1,63 @@
+﻿@using EventsManager.Shared.Dtos
+@using Microsoft.AspNetCore.Components.Forms
+
+<div class="modal show d-block" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Event</h5>
+                <button type="button" class="btn-close" @onclick="() => ToggleEditMode.InvokeAsync()"></button>
+            </div>
+            <div class="modal-body">
+                <EditForm Model="EventDetail" OnValidSubmit="() => HandleValidSubmit.InvokeAsync()">
+                    <DataAnnotationsValidator />
+                    <ValidationSummary />
+
+                       <label for="name">Name:</label>
+                        <InputText id="name" @bind-Value="EventDetail.Name" class="form-control my-2" />
+
+                        <label for="description">Description:</label>
+                        <InputTextArea id="description" @bind-Value="EventDetail.Description" class="form-control my-2" />
+
+                        <label for="location">Location:</label>
+                        <InputText id="location" @bind-Value="EventDetail.Location" class="form-control my-2" />
+
+                        <label for="maxRegistrations">Max Registrations:</label>
+                        <InputNumber id="maxRegistrations" @bind-Value="EventDetail.MaxRegistrations" class="form-control my-2" />
+
+                        <label for="openRegistrationsDate" class="form-label">Open Registrations Date/Time:</label>
+                        <input type="datetime-local" id="openRegistrationsDate" @bind="@EventDetail.OpenRegistrationsDate" />
+                        
+                        <label for="closeRegistrationsDate" class="form-label">Close Registrations Date/Time:</label>
+                        <input type="datetime-local" id="closeRegistrationsDate" @bind="@EventDetail.CloseRegistrationsDate" />
+                        
+                        <label for="startDate" class="form-label">Start Date/Time:</label>
+                        <input type="datetime-local" id="startDate" @bind="@EventDetail.StartDate" />
+                        
+                        <label for="finishDate" class="form-label">Finish Date/Time:</label>
+                        <input type="datetime-local" id="finishDate" @bind="@EventDetail.FinishDate" />
+
+                        
+                        <label for="isPublic">Public Event:</label>
+                        <InputCheckbox id="isPublic" @bind-Value="EventDetail.IsPublic" class="form-check-input my-2" />
+
+                </EditForm>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" @onclick="() => ToggleEditMode.InvokeAsync()">Close</button>
+                <button type="submit" class="btn btn-primary" @onclick="() => HandleValidSubmit.InvokeAsync()">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public MyEventDto EventDetail { get; set; }
+
+    [Parameter]
+    public EventCallback ToggleEditMode { get; set; }
+
+    [Parameter]
+    public EventCallback<MyEventDto> HandleValidSubmit { get; set; }
+}
