@@ -1,51 +1,64 @@
 ﻿@using EventsManager.Shared.Dtos
 @using EventsManager.Client.Components.ConfirmationModal
+@using EventsManager.Client.Components.Loaders
 @using System.Net.Http.Headers
 @using System.Net.Http.Json
 
 @inject HttpClient Http
 
 <div class="card">
-    <div class="card-header">
-        <div class="row">
-            <div class="col-md-9">
-                <h3>@Event.Name</h3>
-            </div>
-            <div class="col-md-3 text-end">
-                <button class="btn btn-primary" @onclick="() => ToggleEditMode.InvokeAsync()">Edit</button>
-            </div>
+    <div class="card-header bg-primary text-white">
+        <div class="d-flex justify-content-between align-items-center">
+            <h3>@Event.Name</h3>
+            <button class="btn btn-light" @onclick="() => ToggleEditMode.InvokeAsync()">Edit</button>
         </div>
     </div>
-    <div class="row">
+    <div class="card-body">
         <div class="row">
             <div class="col-md-4">
-                @if (Event.ImageUrl != null)
+                <div class="card mb-3">
+                    <div class="card-body d-flex justify-content-center align-items-center">
+                        @if (Event.ImageUrl != null)
+                        {
+                            <img src="@($"{Event.ImageUrl}?v={imageUpdateCount}")" alt="Event Image" class="img-fluid"/>
+                        }
+                        @if (Event.ImageUrl == null && !requesting)
+                        {
+                            <InputFile OnChange="UploadImage" accept="image/png, image/jpeg" class="btn btn-primary"/>
+                        }
+                        @if (requesting)
+                        {
+                            <LoadingSpinner />
+                        }
+                    </div>
+                    @if (Event.ImageUrl != null && !requesting)
+                    {
+                        <div class="card-footer text-center">
+                            <button class="btn btn-danger" @onclick="() => PromptDelete(Event.Id)">Delete image</button>
+                        </div>
+                    }
+                </div>
+                @if(!string.IsNullOrEmpty(ErrorMessage))
                 {
-                    <img  src="@($"{Event.ImageUrl}?v={imageUpdateCount}")" alt="Event Image" class="img-fluid my-2 mx-auto d-block" style="max-width: 200px;"/>
-                    <div class="user-image-manage-button">
-                        <FluentButton Appearance="Appearance.Accent" @onclick="() => PromptDelete(Event.Id)">Delete image</FluentButton>
+                    <div class="alert alert-danger" role="alert">
+                        @ErrorMessage
                     </div>
                 }
-                @if (Event.ImageUrl == null)
-                {
-                    <InputFile OnChange="UploadImage" accept="image/png, image/jpeg"/>
-                }
-                @ErrorMessage
             </div>
-        </div>
-        <div class="col-md-8">
-            <ul class="list-group list-group-flush">
-                <li class="list-group-item"><strong>Description:</strong> @Event.Description</li>
-                <li class="list-group-item"><strong>Location:</strong> @Event.Location</li>
-                <li class="list-group-item"><strong>Max Registrations:</strong> @Event.MaxRegistrations</li>
-                <li class="list-group-item"><strong>Is Public:</strong> @Event.IsPublic</li>
-                <li class="list-group-item"><strong>Open Registrations Date:</strong> @Event.OpenRegistrationsDate</li>
-                <li class="list-group-item"><strong>Close Registrations Date:</strong> @Event.CloseRegistrationsDate</li>
-                <li class="list-group-item"><strong>Start Date:</strong> @Event.StartDate</li>
-                <li class="list-group-item"><strong>Finish Date:</strong> @Event.FinishDate</li>
-                <li class="list-group-item"><strong>Creation Date:</strong> @Event.CreationDate</li>
-                <li class="list-group-item"><strong>Pre-registrations:</strong> @Event.PreRegistrationsCount</li>
-            </ul>
+            <div class="col-md-8">
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item"><strong>Description:</strong> @Event.Description</li>
+                    <li class="list-group-item"><strong>Location:</strong> @Event.Location</li>
+                    <li class="list-group-item"><strong>Max Registrations:</strong> @Event.MaxRegistrations</li>
+                    <li class="list-group-item"><strong>Is Public:</strong> @Event.IsPublic</li>
+                    <li class="list-group-item"><strong>Open Registrations Date:</strong> @Event.OpenRegistrationsDate</li>
+                    <li class="list-group-item"><strong>Close Registrations Date:</strong> @Event.CloseRegistrationsDate</li>
+                    <li class="list-group-item"><strong>Start Date:</strong> @Event.StartDate</li>
+                    <li class="list-group-item"><strong>Finish Date:</strong> @Event.FinishDate</li>
+                    <li class="list-group-item"><strong>Creation Date:</strong> @Event.CreationDate</li>
+                    <li class="list-group-item"><strong>Pre-registrations:</strong> @Event.PreRegistrationsCount</li>
+                </ul>
+            </div>
         </div>
     </div>
 </div>
@@ -61,13 +74,15 @@
     private int imageUpdateCount = 0;
     
     private bool showConfirmDeleteModal = false;
+    private bool requesting = false;
     private Guid selectedEventId;
-
+    
     [Parameter]
     public EventCallback ToggleEditMode { get; set; }
     
     private async Task UploadImage(InputFileChangeEventArgs e)
     {
+        requesting = true;
         var imageFile = e.File;
             
     // Validate file format
@@ -93,6 +108,7 @@
         await Http.PostAsync($"Event/{Event.Id}/image", content);
         imageUpdateCount++;
         Event = await Http.GetFromJsonAsync<MyEventDto>($"Event/{Event.Id}-organizer");
+        requesting = false;
     }   
     
     private void PromptDelete(Guid id)
@@ -113,8 +129,10 @@
     
     private async Task DeleteImage(Guid id)    
     {
+        requesting = true;
         await Http.DeleteAsync($"Event/{id}/image");
         imageUpdateCount++;
         Event = await Http.GetFromJsonAsync<MyEventDto>($"Event/{Event.Id}-organizer");
+        requesting = false;
     }   
 }
