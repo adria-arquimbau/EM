@@ -1,6 +1,7 @@
 ﻿@page "/Account"
 
 @using EventsManager.Client.Components.User
+@using EventsManager.Client.Components.ImageUploader
 @using EventsManager.Shared.Dtos
 @using Microsoft.AspNetCore.Authorization
 
@@ -16,7 +17,7 @@
     @* <FluentDivider></FluentDivider> *@
     @* <UserCard></UserCard> *@
     <FluentDivider></FluentDivider>
-    <UserImageUploader UserImageUrl="@user?.ImageUrl" RefreshUserInformation="GetUserInformation"></UserImageUploader>
+    <ImageUploader Type="ImageUploader.ImageType.User" ImageUrl="@user?.ImageUrl" RefreshInformation="GetUserInformation"></ImageUploader>
     <FluentDivider></FluentDivider>
     <UserInformation User="@user"></UserInformation>
     <FluentDivider></FluentDivider>

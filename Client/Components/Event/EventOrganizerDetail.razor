@@ -1,5 +1,5 @@
 ﻿@using EventsManager.Shared.Dtos
-@using EventsManager.Client.Components.ConfirmationModal
+@using EventsManager.Client.Components.ImageUploader
 @using EventsManager.Client.Components.Loaders
 @using System.Net.Http.Headers
 @using System.Net.Http.Json
@@ -17,26 +17,27 @@
         <div class="row">
             <div class="col-md-4">
                 <div class="card mb-3">
-                    <div class="card-body d-flex justify-content-center align-items-center">
-                        @if (Event.ImageUrl != null)
-                        {
-                            <img src="@($"{Event.ImageUrl}?v={imageUpdateCount}")" alt="Event Image" class="img-fluid"/>
-                        }
-                        @if (Event.ImageUrl == null && !requesting)
-                        {
-                            <InputFile OnChange="UploadImage" accept="image/png, image/jpeg" class="btn btn-primary"/>
-                        }
-                        @if (requesting)
-                        {
-                            <LoadingSpinner />
-                        }
-                    </div>
-                    @if (Event.ImageUrl != null && !requesting)
-                    {
-                        <div class="card-footer text-center">
-                            <button class="btn btn-danger" @onclick="() => PromptDelete(Event.Id)">Delete image</button>
-                        </div>
-                    }
+                    <ImageUploader RefreshInformation="RefreshEventData" EventId="@Event.Id" Type="ImageUploader.ImageType.Event" ImageUrl="@Event.ImageUrl" />
+                    @* <div class="card-body d-flex justify-content-center align-items-center"> *@
+                    @*     @if (Event.ImageUrl != null) *@
+                    @*     { *@
+                    @*         <img src="@($"{Event.ImageUrl}?v={imageUpdateCount}")" alt="Event Image" class="img-fluid"/> *@
+                    @*     } *@
+                    @*     @if (Event.ImageUrl == null && !requesting) *@
+                    @*     { *@
+                    @*         <InputFile OnChange="UploadImage" class="btn btn-primary">Select a picture, Max size 2MB</InputFile> *@
+                    @*     } *@
+                    @*     @if (requesting) *@
+                    @*     { *@
+                    @*         <LoadingSpinner /> *@
+                    @*     } *@
+                    @* </div> *@
+                    @* @if (Event.ImageUrl != null && !requesting) *@
+                    @* { *@
+                    @*     <div class="card-footer text-center"> *@
+                    @*         <button class="btn btn-danger" @onclick="() => PromptDelete(Event.Id)">Delete image</button> *@
+                    @*     </div> *@
+                    @* } *@
                 </div>
                 @if(!string.IsNullOrEmpty(ErrorMessage))
                 {
@@ -47,6 +48,7 @@
             </div>
             <div class="col-md-8">
                 <ul class="list-group list-group-flush">
+                    <li class="list-group-item"><strong>Id:</strong> @Event.Id</li>
                     <li class="list-group-item"><strong>Description:</strong> @Event.Description</li>
                     <li class="list-group-item"><strong>Location:</strong> @Event.Location</li>
                     <li class="list-group-item"><strong>Max Registrations:</strong> @Event.MaxRegistrations</li>
@@ -68,11 +70,11 @@
 @code {
     [Parameter]
     public MyEventDto Event { get; set; }
-    
+
     private string? ErrorMessage = null;
-    
+
     private int imageUpdateCount = 0;
-    
+
     private bool showConfirmDeleteModal = false;
     private bool requesting = false;
     private Guid selectedEventId;
@@ -80,43 +82,60 @@
     [Parameter]
     public EventCallback ToggleEditMode { get; set; }
     
+    private string[] AllowedImageFormats  = { "image/jpeg", "image/png", "image/gif", "image/jpg" };
+
     private async Task UploadImage(InputFileChangeEventArgs e)
     {
-        requesting = true;
-        var imageFile = e.File;
-            
-    // Validate file format
-        string[] permittedTypes = { "image/jpeg", "image/png", "image/gif" };
-        if (!permittedTypes.Contains(imageFile.ContentType))
+        if (!AllowedImageFormats.Contains(e.File.ContentType))
         {
             ErrorMessage = "Only JPEG, JPG, PNG and GIF images are allowed.";
             return;
         }
 
-    // Resize image if necessary - Blazor does not provide native resizing capability. You may use JavaScript interop to perform image resizing before upload if required.
+        try 
+        {
+            requesting = true;
 
-    // Upload image
-        var ms = new MemoryStream();
-        await imageFile.OpenReadStream().CopyToAsync(ms);
-        
-        var content = new MultipartFormDataContent();
-        content.Headers.ContentDisposition = new ContentDispositionHeaderValue("form-data");
-        var streamContent = new StreamContent(new MemoryStream(ms.ToArray()));
-        streamContent.Headers.ContentType = new MediaTypeHeaderValue(imageFile.ContentType);
-        content.Add(streamContent, "file", imageFile.Name);
-        
+    // Resize the image while maintaining the aspect ratio
+            var image = await e.File.RequestImageFileAsync(e.File.ContentType, 300, int.MaxValue);
+            
+            await UploadFileToServer(image);
+            await RefreshEventData();
+        }
+        catch (Exception ex) 
+        {
+            ErrorMessage = "Error occurred while processing the image: " + ex.Message;
+        }
+        finally 
+        {
+            requesting = false;
+        }
+    } 
+
+    private async Task UploadFileToServer(IBrowserFile file)
+    {
+        using var content = new MultipartFormDataContent();
+
+        var fileContent = new StreamContent(file.OpenReadStream(maxAllowedSize: 2097152));
+        fileContent.Headers.ContentType = new MediaTypeHeaderValue(file.ContentType);
+
+        content.Add(content: fileContent, name: "\"file\"", fileName: file.Name);
+
         await Http.PostAsync($"Event/{Event.Id}/image", content);
         imageUpdateCount++;
+    }
+
+    private async Task RefreshEventData()
+    {
         Event = await Http.GetFromJsonAsync<MyEventDto>($"Event/{Event.Id}-organizer");
-        requesting = false;
-    }   
-    
+    }
+
     private void PromptDelete(Guid id)
     {
         selectedEventId = id;
         showConfirmDeleteModal = true;
     }
-    
+
     private async Task ConfirmDelete(bool confirmed)
     {
         showConfirmDeleteModal = false;
@@ -126,13 +145,13 @@
             await DeleteImage(selectedEventId);
         }
     }
-    
-    private async Task DeleteImage(Guid id)    
+
+    private async Task DeleteImage(Guid id)
     {
         requesting = true;
         await Http.DeleteAsync($"Event/{id}/image");
         imageUpdateCount++;
-        Event = await Http.GetFromJsonAsync<MyEventDto>($"Event/{Event.Id}-organizer");
+        await RefreshEventData();
         requesting = false;
-    }   
+    }
 }

@@ -9,22 +9,21 @@
 
 @attribute [Authorize(Roles = "User")] 
 
-<h4>Picture</h4>
 <div class="user-image-container">
-    @if (UserImageUrl == null)
+    @if (ImageUrl == null)
     {
         if (RequestingUploadImage)
         {
             <FluentProgressRing></FluentProgressRing>
         }
-        <InputFile OnChange="@OnInputFileChange">Select a picture</InputFile>
+        <InputFile OnChange="@OnInputFileChange">Select a picture, Max size 2MB</InputFile>
         @ErrorMessage
     }
-    @if (UserImageUrl != null)
+    @if (ImageUrl != null)
     {
         <div class="user-image-manage">
             
-            <img class="user-image-picture" src="@($"{UserImageUrl}?v={imageUpdateCount}")" alt="User image" />
+            <img class="user-image-picture" src="@($"{ImageUrl}?v={imageUpdateCount}")" alt="User image" />
 
             @if (!RequestingDeleteImage)
             {
@@ -44,12 +43,18 @@
 
 @code {
     [Parameter]
-    public Uri? UserImageUrl { get; set; } 
+    public Uri? ImageUrl { get; set; } 
+    
+    [Parameter]
+    public ImageType? Type { get; set; }
+    
+    [Parameter]
+    public Guid? EventId { get; set; }
     
     private int imageUpdateCount = 0;
     
     [Parameter]
-    public EventCallback RefreshUserInformation { get; set; }
+    public EventCallback RefreshInformation { get; set; }
     
     private string? ErrorMessage = null;
     
@@ -77,10 +82,17 @@
         fileContent.Headers.ContentType = new MediaTypeHeaderValue(resizedFile.ContentType);
         
         content.Add(content: fileContent, name: "\"file\"", fileName: resizedFile.Name);
+
+        if (Type == ImageType.Event)
+        {
+            await Http.PostAsync($"Event/{EventId}/image", content);
+        }
+        if (Type == ImageType.User)
+        {
+            await Http.PostAsync("User/image", content);
+        }
         
-        var response = await Http.PostAsync("User/image", content);
-      
-        await RefreshUserInformation.InvokeAsync();
+        await RefreshInformation.InvokeAsync();
         imageUpdateCount++;
         RequestingUploadImage = false;
     }
@@ -88,9 +100,25 @@
     private async Task DeleteImage()    
     {
         RequestingDeleteImage = true;
-        await Http.DeleteAsync("User/image");
-        await RefreshUserInformation.InvokeAsync();
+        if (Type == ImageType.User)
+        {
+            await Http.DeleteAsync("User/image");
+        }
+        if (Type == ImageType.Event)
+        {
+            await Http.DeleteAsync($"Event/{EventId}/image");
+        }
+        
+        await RefreshInformation.InvokeAsync();
         imageUpdateCount++;
         RequestingDeleteImage = false;
     }   
+    
+    public enum ImageType
+    {
+        User,
+        Event
+    }
 }
+
+
