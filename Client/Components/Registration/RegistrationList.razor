@@ -14,47 +14,50 @@ else
 {
     <ConfirmationModal Title="Delete registration" Message="Are you sure you want to delete this registration?" Visible="@showConfirmModal" ConfirmationChanged="ConfirmDelete" />
 
-    <input type="search" placeholder="Search by user name" @oninput="HandleSearchInput" />
+    <div class="search-bar">
+        <input type="search" placeholder="Search by user name" @oninput="HandleSearchInput" />
+    </div>
 
-    <table class="table">
-        <thead>
-        <tr>
-            <th>Creation Date</th>
-            <th>Role</th>
-            <th>State</th>
-            <th>Bib</th>
-            <th>Checked In</th>
-            <th>User Name</th>
-            <th>User Email</th>
-            <th>Action</th>
-        </tr>
-        </thead>
-        <tbody>
-        @foreach (var registration in registrations)
-        {
-            <tr>
-                <td>@registration.CreationDate</td>
-                <td>@registration.Role</td>
-                <td>
-                    <select value="@registration.State" @onchange="((e) => UpdateRegistrationState(registration, e))">
-                        @foreach (RegistrationState state in Enum.GetValues(typeof(RegistrationState)))
-                        {
-                            <option value="@state" selected="@(state == registration.State)">@state</option>
-                        }
-                    </select>
-                </td>
-                <td>@registration.Bib</td>
-                <td>@registration.CheckedIn</td>
-                <td>@registration.RegisteredUser.UserName</td>
-                <td>@registration.RegisteredUser.Email</td>
-                <td>
-                    <button class="btn btn-danger" @onclick="(() => PromptDelete(registration.Id))">Delete</button>
-                </td>
-            </tr>
-        }
-
-        </tbody>
-    </table>
+    <div class="registrations-table">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Creation Date</th>
+                    <th>Role</th>
+                    <th>State</th>
+                    <th>Bib</th>
+                    <th>Checked In</th>
+                    <th>User Name</th>
+                    <th>User Email</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var registration in registrations)
+                {
+                    <tr>
+                        <td>@registration.CreationDate</td>
+                        <td>@registration.Role</td>
+                        <td>
+                            <select value="@registration.State" @onchange="((e) => UpdateRegistrationState(registration, e))">
+                                @foreach (RegistrationState state in Enum.GetValues(typeof(RegistrationState)))
+                                {
+                                    <option value="@state" selected="@(state == registration.State)">@state</option>
+                                }
+                            </select>
+                        </td>
+                        <td>@registration.Bib</td>
+                        <td>@registration.CheckedIn</td>
+                        <td>@registration.RegisteredUser.UserName</td>
+                        <td>@registration.RegisteredUser.Email</td>
+                        <td>
+                            <button class="btn btn-danger" @onclick="(() => PromptDelete(registration.Id))">Delete</button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
 }
 
 @code {
