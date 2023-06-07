@@ -156,7 +156,7 @@ public class EventController : ControllerBase
         {
             return Forbid();
         }
-        var blobClient = new BlobClient(_blobStorageOptions.ConnectionString, _blobStorageOptions.EventsImageContainerName, eventToUpload.Id + "-event-picture");
+        var blobClient = new BlobClient(_blobStorageOptions.ConnectionString, _blobStorageOptions.EventImageContainerName, eventToUpload.Id.ToString());
         await blobClient.UploadAsync(file.OpenReadStream(), new BlobHttpHeaders { ContentType = file.ContentType }, conditions: null, cancellationToken: cancellationToken);
         
         eventToUpload.ImageUrl = blobClient.Uri;
@@ -180,7 +180,7 @@ public class EventController : ControllerBase
             return Forbid();
         }
         
-        var blobClient = new BlobClient(_blobStorageOptions.ConnectionString, _blobStorageOptions.EventsImageContainerName, eventToDeleteImage.Id + "-event-picture");
+        var blobClient = new BlobClient(_blobStorageOptions.ConnectionString, _blobStorageOptions.EventImageContainerName, eventToDeleteImage.Id.ToString());
         
         await blobClient.DeleteAsync(cancellationToken: cancellationToken);
             

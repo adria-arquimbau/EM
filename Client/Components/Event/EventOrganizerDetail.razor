@@ -1,4 +1,5 @@
 ﻿@using EventsManager.Shared.Dtos
+@using EventsManager.Client.Components.ConfirmationModal
 @using System.Net.Http.Headers
 @using System.Net.Http.Json
 
@@ -18,11 +19,11 @@
     <div class="row">
         <div class="row">
             <div class="col-md-4">
-                <img  src="@($"{Event.ImageUrl}?v={imageUpdateCount}")" alt="Event Image" class="img-fluid my-2 mx-auto d-block" style="max-width: 200px;"/>
                 @if (Event.ImageUrl != null)
                 {
+                    <img  src="@($"{Event.ImageUrl}?v={imageUpdateCount}")" alt="Event Image" class="img-fluid my-2 mx-auto d-block" style="max-width: 200px;"/>
                     <div class="user-image-manage-button">
-                        <FluentButton Appearance="Appearance.Accent" @onclick="DeleteImage">Delete image</FluentButton>
+                        <FluentButton Appearance="Appearance.Accent" @onclick="() => PromptDelete(Event.Id)">Delete image</FluentButton>
                     </div>
                 }
                 @if (Event.ImageUrl == null)
@@ -49,6 +50,8 @@
     </div>
 </div>
 
+<ConfirmationModal Title="Delete event image" Message="Are you sure you want to delete the event image?" Visible="@showConfirmDeleteModal" ConfirmationChanged="ConfirmDelete" />
+
 @code {
     [Parameter]
     public MyEventDto Event { get; set; }
@@ -56,6 +59,9 @@
     private string? ErrorMessage = null;
     
     private int imageUpdateCount = 0;
+    
+    private bool showConfirmDeleteModal = false;
+    private Guid selectedEventId;
 
     [Parameter]
     public EventCallback ToggleEditMode { get; set; }
@@ -63,7 +69,7 @@
     private async Task UploadImage(InputFileChangeEventArgs e)
     {
         var imageFile = e.File;
-        
+            
     // Validate file format
         string[] permittedTypes = { "image/jpeg", "image/png", "image/gif" };
         if (!permittedTypes.Contains(imageFile.ContentType))
@@ -89,9 +95,25 @@
         Event = await Http.GetFromJsonAsync<MyEventDto>($"Event/{Event.Id}-organizer");
     }   
     
-    private async Task DeleteImage()    
+    private void PromptDelete(Guid id)
     {
-        await Http.DeleteAsync($"Event/{Event.Id}/image");
+        selectedEventId = id;
+        showConfirmDeleteModal = true;
+    }
+    
+    private async Task ConfirmDelete(bool confirmed)
+    {
+        showConfirmDeleteModal = false;
+
+        if (confirmed)
+        {
+            await DeleteImage(selectedEventId);
+        }
+    }
+    
+    private async Task DeleteImage(Guid id)    
+    {
+        await Http.DeleteAsync($"Event/{id}/image");
         imageUpdateCount++;
         Event = await Http.GetFromJsonAsync<MyEventDto>($"Event/{Event.Id}-organizer");
     }   
