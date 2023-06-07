@@ -17,27 +17,8 @@
         <div class="row">
             <div class="col-md-4">
                 <div class="card mb-3">
-                    <ImageUploader RefreshInformation="RefreshEventData" EventId="@Event.Id" Type="ImageUploader.ImageType.Event" ImageUrl="@Event.ImageUrl" />
-                    @* <div class="card-body d-flex justify-content-center align-items-center"> *@
-                    @*     @if (Event.ImageUrl != null) *@
-                    @*     { *@
-                    @*         <img src="@($"{Event.ImageUrl}?v={imageUpdateCount}")" alt="Event Image" class="img-fluid"/> *@
-                    @*     } *@
-                    @*     @if (Event.ImageUrl == null && !requesting) *@
-                    @*     { *@
-                    @*         <InputFile OnChange="UploadImage" class="btn btn-primary">Select a picture, Max size 2MB</InputFile> *@
-                    @*     } *@
-                    @*     @if (requesting) *@
-                    @*     { *@
-                    @*         <LoadingSpinner /> *@
-                    @*     } *@
-                    @* </div> *@
-                    @* @if (Event.ImageUrl != null && !requesting) *@
-                    @* { *@
-                    @*     <div class="card-footer text-center"> *@
-                    @*         <button class="btn btn-danger" @onclick="() => PromptDelete(Event.Id)">Delete image</button> *@
-                    @*     </div> *@
-                    @* } *@
+                    <img src="@($"{Event.ImageUrl}?v={imageUpdateCount}")" alt="Event Image" class="img-fluid"/>
+                    <ImageUploader RefreshInformation="RefreshEventData" EventId="@Event.Id" Type="ImageUploader.ImageType.Event" ImageUrl="@Event.ImageUrl"/>
                 </div>
                 @if(!string.IsNullOrEmpty(ErrorMessage))
                 {

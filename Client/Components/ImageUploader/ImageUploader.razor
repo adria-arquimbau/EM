@@ -22,9 +22,6 @@
     @if (ImageUrl != null)
     {
         <div class="user-image-manage">
-            
-            <img class="user-image-picture" src="@($"{ImageUrl}?v={imageUpdateCount}")" alt="User image" />
-
             @if (!RequestingDeleteImage)
             {
                 <div class="user-image-manage-button">
