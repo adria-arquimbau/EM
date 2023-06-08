@@ -1,4 +1,5 @@
-﻿using System.IdentityModel.Tokens.Jwt;
+﻿using System.Configuration;
+using System.IdentityModel.Tokens.Jwt;
 using EventsManager.Server.Data;
 using EventsManager.Server.Handlers.Queries.Users.GetMyUser;
 using EventsManager.Server.Models;
@@ -41,8 +42,11 @@ public class Startup {
         .AddRoles<IdentityRole>()
         .AddEntityFrameworkStores<ApplicationDbContext>();
 
-        services.AddIdentityServer()
-            .AddApiAuthorization<ApplicationUser, ApplicationDbContext>(opt =>
+        services.AddIdentityServer(options =>
+            {
+                options.IssuerUri = configuration.GetSection("IssuerUri").Value;
+            })
+            .AddApiAuthorization<ApplicationUser, ApplicationDbContext>(opt => 
             {
                 opt.IdentityResources["openid"].UserClaims.Add("role");
                 opt.ApiResources.Single().UserClaims.Add("role");
