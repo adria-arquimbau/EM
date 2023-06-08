@@ -43,6 +43,21 @@
                     <li class="list-group-item"><strong>Finish Date:</strong> @Event.FinishDate</li>
                     <li class="list-group-item"><strong>Creation Date:</strong> @Event.CreationDate</li>
                     <li class="list-group-item"><strong>Pre-registrations:</strong> @Event.PreRegistrationsCount</li>
+                    @foreach (var role in new (string, string)[] 
+                    {
+                        ("Rider registration password", Event.RiderRegistrationPassword),
+                        ("Staff registration password", Event.StaffRegistrationPassword),
+                        ("Marshall registration password", Event.MarshallRegistrationPassword),
+                        ("Rider-Marshall registration password", Event.RiderMarshallRegistrationPassword)
+                    })
+                    {
+                        <li class="list-group-item">
+                            <strong>@role.Item1:</strong> 
+                            <span class="@(string.IsNullOrWhiteSpace(role.Item2) ? "text-danger" : "")">
+                                @DisplayPassword(role.Item2)
+                            </span>
+                        </li>
+                    }
                 </ul>
             </div>
         </div>
@@ -68,6 +83,11 @@
     
     private string[] AllowedImageFormats  = { "image/jpeg", "image/png", "image/gif", "image/jpg" };
 
+    private string DisplayPassword(string password)
+    {
+        return string.IsNullOrWhiteSpace(password) ? "NO PASSWORD SET" : password;
+    }   
+    
     private async Task UploadImage(InputFileChangeEventArgs e)
     {
         if (!AllowedImageFormats.Contains(e.File.ContentType))
