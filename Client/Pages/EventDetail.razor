@@ -1,111 +1,20 @@
 ﻿@page "/event-detail/{EventId:guid}"
 
 @using EventsManager.Shared.Dtos
+@using EventsManager.Client.Components.Event
 @inject IHttpClientFactory HttpClientFactory
-@inject HttpClient Http
-@inject AuthenticationStateProvider AuthenticationStateProvider
-@using System.Security.Claims
 
-<PageTitle>@eventDetail?.Name</PageTitle>
+<PageTitle>@eventName</PageTitle>
 
-@if (eventDetail == null)
-{
-    <p><em>Loading...</em></p>
-}
-else
-{
-    <div class="card">
-        <div class="card-header">
-            <h5>@eventDetail.Name</h5>
-        </div>
-        <div class="card-body">
-            <div class="row">
-                <div class="col-md-4">
-                    <div class="image-container">
-                        @if (eventDetail.ImageUrl != null)
-                        {
-                            <img src="@eventDetail.ImageUrl" alt="@eventDetail.Name" class="img-fluid">
-                        }
-                        else
-                        {
-                            <div style="width: 100%; height: 100%;"></div>
-                        }
-                    </div>
 
-                </div>
-                <div class="col-md-8">
-                    <p>@eventDetail.Description</p>
-                    <p><strong>Start Date:</strong> @eventDetail.StartDate.ToString("g")</p>
-                    <p><strong>Location:</strong> @eventDetail.Location</p>
-                    <p><strong>Registrations:</strong> @eventDetail.PreRegistrationsCount</p>
-                    <AuthorizeView>
-                            <Authorized>
-                                @if(iAmPreRegistered)
-                                {
-                                    <p><strong>You are already Pre-Registered in this event!</strong></p>
-                                }
-                            </Authorized>
-                        </AuthorizeView>
-                </div>
-            </div>
-        </div>
-    </div>
+<PublicEventDetail EventId="EventId" />
 
-    <AuthorizeView>
-        <Authorized>
-            @if(!iAmPreRegistered)
-            {
-                <button class="btn btn-primary" @onclick="() => isModalOpen = true">Pre-Register</button>
-            }
-        </Authorized>
-    </AuthorizeView>
-
-    @if (isModalOpen)
-    {
-        <div class="modal" tabindex="-1" role="dialog" style="display: block;">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title">Confirmation</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close" @onclick="() => isModalOpen = false">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        <p>Are you sure you want to pre-register for this event?</p>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal" @onclick="() => isModalOpen = false">Cancel</button>
-                        <button type="button" class="btn btn-primary" @onclick="PreRegister">Confirm</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    }
-}
-
-<style>
-    .image-container {
-        height: 200px;
-        overflow: hidden;
-    }
-
-    .image-container img {
-        width: 100%;
-        height: auto;
-        object-fit: cover;
-    }
-</style>
 
 @code {
     [Parameter]
     public Guid? EventId { get; set; }
-
-    private EventDto eventDetail;
-    private bool isModalOpen;
-    private bool iAmPreRegistered;
-    private ClaimsPrincipal user;
-
+    private string eventName;
+    
     protected override async Task OnInitializedAsync()
     {
         await GetBasicInfoAboutEventDetails();
@@ -114,22 +23,7 @@ else
     private async Task GetBasicInfoAboutEventDetails()
     {
         var http = HttpClientFactory.CreateClient("EventsManager.ServerAPI.Anonymous");
-        eventDetail = await http.GetFromJsonAsync<EventDto>($"Event/{EventId}");
-
-        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-        user = authState.User;
-        var isAuthenticated = user.Identity?.IsAuthenticated ?? false;
-        if (isAuthenticated)
-        {
-            var response = await Http.GetAsync($"Registration/event/{EventId}/iam-registered");
-            iAmPreRegistered = response.IsSuccessStatusCode;
-        }
-    }
-
-    private async Task PreRegister()
-    {
-        await Http.PostAsync($"Registration/event/{EventId}", null);
-        await GetBasicInfoAboutEventDetails();
-        isModalOpen = false;
+        var response = await http.GetFromJsonAsync<EventDto>($"Event/{EventId}");
+        eventName = response.Name;
     }
 }

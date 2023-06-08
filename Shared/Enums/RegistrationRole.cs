@@ -2,8 +2,9 @@
 
 public enum RegistrationRole
 {   
-    Staff,
+    None,
     Rider,
+    Staff,
     Marshal,    
     RiderMarshal
 }

@@ -20,9 +20,9 @@ public class RegistrationController : ControllerBase
         _context = context;
     }
     
-    [HttpPost("event/{eventId:guid}")]
+    [HttpPost("event/{eventId:guid}/{registrationRole}")]
     [Authorize(Roles = "User")] 
-    public async Task<IActionResult> Register([FromRoute] Guid eventId, CancellationToken cancellationToken)
+    public async Task<IActionResult> Register([FromRoute] Guid eventId, [FromRoute] RegistrationRole registrationRole, CancellationToken cancellationToken)
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         var user = await _context.Users.SingleAsync(x => x.Id == userId, cancellationToken: cancellationToken);
@@ -36,7 +36,7 @@ public class RegistrationController : ControllerBase
             return BadRequest("User already registered for this event");
         }
 
-        var registration = new Registration(user, RegistrationRole.Rider, RegistrationState.PreRegistered, eventToRegister);
+        var registration = new Registration(user, registrationRole, RegistrationState.PreRegistered, eventToRegister);
         
         _context.Registrations.Add(registration);
         await _context.SaveChangesAsync(cancellationToken);

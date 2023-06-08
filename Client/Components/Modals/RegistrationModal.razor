@@ -1,0 +1,57 @@
+﻿@using EventsManager.Shared.Enums
+<div class="modal" tabindex="-1" style="display: @(Visible ? "block" : "none")">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">@Title</h5>
+                <button type="button" class="btn-close" @onclick="ComeBack"></button>
+            </div>
+            <div class="modal-body">
+                <p>@Message</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" @onclick="Rider">Register as a Rider</button>
+                <button type="button" class="btn btn-primary" @onclick="Staff">Register as a Staff</button>
+                <button type="button" class="btn btn-primary" @onclick="Marshall">Register as a Marshall</button>
+                <button type="button" class="btn btn-primary" @onclick="RiderMarshall">Register as a Rider-Marshall</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public string Title { get; set; }
+    [Parameter] public string Message { get; set; }
+    [Parameter] public bool Visible { get; set; }
+    [Parameter] public EventCallback<RegistrationRole> ConfirmationChanged { get; set; }
+
+    private async Task Rider()
+    {   
+        Visible = false;
+        await ConfirmationChanged.InvokeAsync(RegistrationRole.Rider);
+    }
+    
+    private async Task Staff()
+    {   
+        Visible = false;
+        await ConfirmationChanged.InvokeAsync(RegistrationRole.Staff);
+    }
+    
+    private async Task Marshall()
+    {   
+        Visible = false;
+        await ConfirmationChanged.InvokeAsync(RegistrationRole.Marshal);
+    }
+    
+    private async Task RiderMarshall()
+    {   
+        Visible = false;
+        await ConfirmationChanged.InvokeAsync(RegistrationRole.RiderMarshal);
+    }
+    
+    private async Task ComeBack()
+    {       
+        Visible = false;
+        await ConfirmationChanged.InvokeAsync(RegistrationRole.None);
+    }
+}

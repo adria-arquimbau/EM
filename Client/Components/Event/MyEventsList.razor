@@ -15,8 +15,8 @@ else
         @foreach (var sportEvent in myEvents)
         {
             <div class="col-sm-12 col-md-6 col-lg-4 mb-4">
-                <div class="card h-100 clickable"  @onclick="() => NavigateToEventDetail(sportEvent.Id)">
-                    <div style="height: 15rem; overflow: hidden;">
+                <div class="card h-100">
+                    <div class="clickable"  @onclick="() => NavigateToEventDetail(sportEvent.Id)" style="height: 15rem; overflow: hidden;">
                         @if (sportEvent.ImageUrl != null)
                         {
                             <img src="@sportEvent.ImageUrl" class="card-img-top img-fluid clickable" @onclick="() => NavigateToEventDetail(sportEvent.Id)" alt="@sportEvent.Name"/>
@@ -26,7 +26,7 @@ else
                             <div style="height: 15rem;"></div>
                         }
                     </div>
-                    <div class="card-body">
+                    <div class="card-body clickable"  @onclick="() => NavigateToEventDetail(sportEvent.Id)">
                         <h5 class="card-title">@sportEvent.Name</h5>
                           <p class="card-text">@sportEvent.Description</p>
                           <p class="card-text"><small class="text-muted">Location: @sportEvent.Location</small></p>

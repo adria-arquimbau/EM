@@ -1,0 +1,111 @@
+﻿@using EventsManager.Shared.Dtos
+@using EventsManager.Client.Components.Modals
+@using EventsManager.Client.Components.Loaders
+@using EventsManager.Client.Pages
+@using System.Security.Claims
+@using System.Net
+@using EventsManager.Shared.Enums
+
+@inject HttpClient Http
+@inject IHttpClientFactory HttpClientFactory
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+
+@if (_eventDetail == null)
+{
+    <LoadingSpinner />
+}
+else
+{
+    <div class="card">
+        <div class="card-header">
+            <h5>@_eventDetail.Name</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="image-container">
+                        @if (_eventDetail.ImageUrl != null)
+                        {
+                            <img src="@_eventDetail.ImageUrl" alt="@_eventDetail.Name" class="img-fluid" />
+                        }
+                        else
+                        {
+                            <div style="width: 100%; height: 100%;"></div>
+                        }
+                    </div>
+                </div>
+                <div class="col-md-8">
+                    <p>@_eventDetail.Description</p>
+                    <p><strong>Start Date:</strong> @_eventDetail.StartDate.ToString("g")</p>
+                    <p><strong>Location:</strong> @_eventDetail.Location</p>
+                    <p><strong>Registrations:</strong> @_eventDetail.PreRegistrationsCount</p>
+                    <AuthorizeView>
+                        <Authorized>
+                            @if(_iAmPreRegistered)
+                            {
+                                <p><strong>You are already Pre-Registered in this event!</strong></p>
+                            }
+                        </Authorized>
+                    </AuthorizeView>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <AuthorizeView>
+        <Authorized>
+            @if(!_iAmPreRegistered)
+            {
+                <button class="btn btn-primary" @onclick="() => _isModalOpen = true">Pre-Register</button>
+            }
+        </Authorized>
+    </AuthorizeView>
+
+    @if (_isModalOpen)
+    {
+        <RegistrationModal Title="Registration type" Message="Select what type of registration you want to proceed." Visible="@_isModalOpen" ConfirmationChanged="PreRegister" />
+    }
+}
+
+
+@code {
+    [Parameter]
+    public Guid? EventId { get; set; }
+    
+    private EventDto? _eventDetail;
+    private bool _isModalOpen;
+    private bool _iAmPreRegistered;
+    private ClaimsPrincipal user;
+    
+    protected override async Task OnInitializedAsync()
+    {
+        await GetBasicInfoAboutEventDetails();
+    }
+
+    private async Task GetBasicInfoAboutEventDetails()
+    {
+        var http = HttpClientFactory.CreateClient("EventsManager.ServerAPI.Anonymous");
+        _eventDetail = await http.GetFromJsonAsync<EventDto>($"Event/{EventId}");
+
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        user = authState.User;
+        var isAuthenticated = user.Identity?.IsAuthenticated ?? false;
+        if (isAuthenticated)
+        {
+            var response = await Http.GetAsync($"Registration/event/{EventId}/iam-registered");
+            _iAmPreRegistered = response.IsSuccessStatusCode;
+        }
+    }
+
+    private async Task PreRegister(RegistrationRole registrationRole)   
+    {
+        _isModalOpen = false;
+
+        if (registrationRole != RegistrationRole.None)
+        {
+            await Http.PostAsync($"Registration/event/{EventId}/{registrationRole}", null);
+            await GetBasicInfoAboutEventDetails();
+        }
+    }
+}
