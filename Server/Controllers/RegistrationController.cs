@@ -20,9 +20,9 @@ public class RegistrationController : ControllerBase
         _context = context;
     }
     
-    [HttpPost("event/{eventId:guid}/{registrationRole}")]
+    [HttpPost("event/{eventId:guid}/{registrationRole}/password/{password?}")]
     [Authorize(Roles = "User")] 
-    public async Task<IActionResult> Register([FromRoute] Guid eventId, [FromRoute] RegistrationRole registrationRole, CancellationToken cancellationToken)
+    public async Task<IActionResult> Register([FromRoute] Guid eventId, [FromRoute] RegistrationRole registrationRole, [FromRoute] string? password, CancellationToken cancellationToken)
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         var user = await _context.Users.SingleAsync(x => x.Id == userId, cancellationToken: cancellationToken);
@@ -36,6 +36,15 @@ public class RegistrationController : ControllerBase
             return BadRequest("User already registered for this event");
         }
 
+        var registrationRolePassword = await _context.RegistrationRolePasswords
+            .Where(x => x.Event.Id == eventId && x.Role == registrationRole)
+            .SingleOrDefaultAsync(cancellationToken: cancellationToken);
+
+        if (registrationRolePassword != null && registrationRolePassword.Password != password)
+        {
+            return BadRequest("Invalid role registration password");
+        }
+        
         var registration = new Registration(user, registrationRole, RegistrationState.PreRegistered, eventToRegister);
         
         _context.Registrations.Add(registration);

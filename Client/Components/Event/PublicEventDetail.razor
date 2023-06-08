@@ -64,7 +64,9 @@ else
 
     @if (_isModalOpen)
     {
-        <RegistrationModal EventDto="@_eventDetail" EventId="EventId" Title="Registration type" Message="Select what type of registration you want to proceed." Visible="@_isModalOpen" ConfirmationChanged="PreRegister" />
+        <RegistrationModal EventDto="@_eventDetail" EventId="EventId" Title="Registration type" Message="Select what type of registration you want to proceed." 
+                           Visible="@_isModalOpen" 
+                           ConfirmationChanged="PreRegister" />
     }
 }
 
@@ -98,13 +100,13 @@ else
         }
     }
 
-    private async Task PreRegister(RegistrationRole registrationRole)   
+    private async Task PreRegister(RegistrationModal.RoleConfirmation? roleConfirmation)   
     {
         _isModalOpen = false;
 
-        if (registrationRole != RegistrationRole.None)
+        if (roleConfirmation != null)   
         {
-            await Http.PostAsync($"Registration/event/{EventId}/{registrationRole}", null);
+            await Http.PostAsync($"Registration/event/{EventId}/{roleConfirmation.Role}/password/{roleConfirmation.Password}", null);
             await GetBasicInfoAboutEventDetails();
         }
     }

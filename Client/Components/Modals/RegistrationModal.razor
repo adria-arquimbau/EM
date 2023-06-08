@@ -50,16 +50,16 @@
     [Parameter] public EventDto EventDto { get; set; }
     [Parameter] public bool Visible { get; set; }
     [Parameter] public Guid? EventId { get; set; }
-    [Parameter] public EventCallback<RegistrationRole> ConfirmationChanged { get; set; }
+    [Parameter] public EventCallback<RoleConfirmation?> ConfirmationChanged { get; set; }
 
     private RegistrationRole selectedRole;
     private bool requiresPassword = false;
-    private bool isPasswordCorrect = true;
+    private bool isPasswordCorrect = true;  
     private string passwordInput = string.Empty;
 
     private async Task ProcessRole(RegistrationRole role, bool requiredPassword)
     {   
-        if (requiredPassword)
+        if (requiredPassword)   
         {
             PreparePasswordVerification(role);
         }
@@ -79,7 +79,11 @@
     private async Task ChooseRole(RegistrationRole role)
     {   
         Visible = false;
-        await ConfirmationChanged.InvokeAsync(role);
+        await ConfirmationChanged.InvokeAsync(new RoleConfirmation
+        {
+            Role = role,
+            Password = passwordInput
+        });
     }
     
     private void PreparePasswordVerification(RegistrationRole role)
@@ -108,6 +112,14 @@
         requiresPassword = false;
         isPasswordCorrect = true;
         passwordInput = string.Empty;
-        ConfirmationChanged.InvokeAsync(RegistrationRole.None);
+        ConfirmationChanged.InvokeAsync(null);
+    }
+    
+    public class RoleConfirmation
+    {
+        public RegistrationRole Role { get; set; }
+        public string Password { get; set; }
     }
 }
+    
+
