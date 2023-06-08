@@ -23,14 +23,22 @@
                         }
                     </div>
                     <button type="button" class="btn btn-primary" @onclick="VerifyPassword">Verify</button>
+                    <button type="button" class="btn btn-secondary" @onclick="BackToRoles">Back</button>
                 }
             </div>
             <div class="modal-footer" style="display: @(requiresPassword ? "none" : "block")">
-                <button type="button" class="btn btn-primary" @onclick="(() => ProcessRole(RegistrationRole.Rider, EventDto.RiderHaveRegistrationRolePassword))">Register as a Rider</button>
-                <button type="button" class="btn btn-primary" @onclick="(() => ProcessRole(RegistrationRole.Staff, EventDto.StaffHaveRegistrationRolePassword))">Register as a Staff</button>
-                <button type="button" class="btn btn-primary" @onclick="(() => ProcessRole(RegistrationRole.Marshal, EventDto.MarshallHaveRegistrationRolePassword))">Register as a Marshall</button>
-                <button type="button" class="btn btn-primary" @onclick="(() => ProcessRole(RegistrationRole.RiderMarshal, EventDto.RiderMarshallHaveRegistrationRolePassword))">Register as a Rider-Marshall</button>
-
+                <button type="button" class="btn btn-primary" @onclick="(() => ProcessRole(RegistrationRole.Rider, EventDto.RiderHaveRegistrationRolePassword))">
+                    Register as a Rider @if(EventDto.RiderHaveRegistrationRolePassword){<small class="text-danger">(Password Required)</small>}
+                </button>
+                <button type="button" class="btn btn-primary" @onclick="(() => ProcessRole(RegistrationRole.Staff, EventDto.StaffHaveRegistrationRolePassword))">
+                    Register as a Staff @if(EventDto.StaffHaveRegistrationRolePassword){<small class="text-danger">(Password Required)</small>}
+                </button>
+                <button type="button" class="btn btn-primary" @onclick="(() => ProcessRole(RegistrationRole.Marshal, EventDto.MarshallHaveRegistrationRolePassword))">
+                    Register as a Marshall @if(EventDto.MarshallHaveRegistrationRolePassword){<small class="text-danger">(Password Required)</small>}
+                </button>
+                <button type="button" class="btn btn-primary" @onclick="(() => ProcessRole(RegistrationRole.RiderMarshal, EventDto.RiderMarshallHaveRegistrationRolePassword))">
+                    Register as a Rider-Marshall @if(EventDto.RiderMarshallHaveRegistrationRolePassword){<small class="text-danger">(Password Required)</small>}
+                </button>
             </div>
         </div>
     </div>
@@ -59,6 +67,13 @@
         {
             await ChooseRole(role);
         }
+    }
+    
+    private void BackToRoles()
+    {       
+        requiresPassword = false;
+        isPasswordCorrect = true;
+        passwordInput = string.Empty;
     }
     
     private async Task ChooseRole(RegistrationRole role)
