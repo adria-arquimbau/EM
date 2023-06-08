@@ -17,7 +17,10 @@
         <div class="row">
             <div class="col-md-4">
                 <div class="card mb-3">
-                    <img src="@($"{Event.ImageUrl}?v={imageUpdateCount}")" alt="Event Image" class="img-fluid"/>
+                    @if (Event.ImageUrl != null)
+                    {
+                        <img src="@($"{Event.ImageUrl}?v={imageUpdateCount}")" alt="Event Image" class="img-fluid"/>
+                    }
                     <ImageUploader RefreshInformation="RefreshEventData" EventId="@Event.Id" Type="ImageUploader.ImageType.Event" ImageUrl="@Event.ImageUrl"/>
                 </div>
                 @if(!string.IsNullOrEmpty(ErrorMessage))
@@ -109,6 +112,7 @@
     private async Task RefreshEventData()
     {
         Event = await Http.GetFromJsonAsync<MyEventDto>($"Event/{Event.Id}-organizer");
+        imageUpdateCount++;
     }
 
     private void PromptDelete(Guid id)

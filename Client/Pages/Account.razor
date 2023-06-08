@@ -15,8 +15,6 @@
 @if(user != null)
 {
     <FluentDivider></FluentDivider>
-    <ImageUploader Type="ImageUploader.ImageType.User" ImageUrl="@user?.ImageUrl" RefreshInformation="GetUserInformation"></ImageUploader>
-    <FluentDivider></FluentDivider>
     <UserInformation User="@user"></UserInformation>
     <FluentDivider></FluentDivider>
 }

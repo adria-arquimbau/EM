@@ -9,38 +9,38 @@
 
 @attribute [Authorize(Roles = "User")] 
 
-<div class="user-image-container">
+<div class="user-image-container text-center">
     @if (ImageUrl == null)
     {
         if (RequestingUploadImage)
         {
-            <FluentProgressRing></FluentProgressRing>
+            <div class="d-flex justify-content-center">
+                <FluentProgressRing></FluentProgressRing>
+            </div>
         }
-        <InputFile OnChange="@OnInputFileChange">Select a picture, Max size 2MB</InputFile>
-        @ErrorMessage
+        <div class="input-file-container">
+            <InputFile OnChange="@OnInputFileChange" class="form-control">Select a picture, Max size 2MB</InputFile>
+            <span class="text-danger">@ErrorMessage</span>
+        </div>
     }
     @if (ImageUrl != null)
     {
-        <div class="user-image-manage">
+       
             @if (!RequestingDeleteImage)
             {
-                <div class="user-image-manage-button">
-                    <FluentButton Appearance="Appearance.Accent" @onclick="DeleteImage">Delete image</FluentButton>
-                </div>
+                <FluentButton Appearance="Appearance.Accent" @onclick="DeleteImage" class="btn btn-danger mt-2">Delete image</FluentButton>
             }
             else
             {
-                <div class="user-image-manage-button">
-                    <FluentButton Disabled="true" Appearance="Appearance.Accent" @onclick="DeleteImage">Deleteting</FluentButton>
-                </div>
+                <FluentButton Disabled="true" Appearance="Appearance.Accent" @onclick="DeleteImage" class="btn btn-danger mt-2">Deleting...</FluentButton>
             }
-        </div>
+       
     }
 </div>
 
 @code {
     [Parameter]
-    public Uri? ImageUrl { get; set; } 
+        public Uri? ImageUrl { get; set; } 
     
     [Parameter]
     public ImageType? Type { get; set; }

@@ -1,63 +1,81 @@
 ﻿@using System.Text
 @using System.Text.Json
 @using EventsManager.Shared.Dtos
+@using EventsManager.Client.Components.ImageUploader
 @using Microsoft.AspNetCore.Authorization
 
 @inject HttpClient Http
 
 @attribute [Authorize(Roles = "User")]
 
-<h4>Basic information</h4>
 
-@RenderButtons
-
-<img class="user-image-picture" src="@($"{User.ImageUrl}")" alt="User image" />
-<form>
-    <div class="mb-3">
-        <label class="form-label">Email</label>
-        <input type="email" class="form-control" value="@User.Email" readonly />
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-lg p-3 mb-5 bg-white rounded">
+                <div class="card-body">
+                    <ImageUploader Type="ImageUploader.ImageType.User" ImageUrl="@User?.ImageUrl" RefreshInformation="GetUserInformation" />
+                    <div class="d-flex justify-content-center">
+                        @if (User?.ImageUrl != null)
+                        {
+                            <img class="user-image-picture rounded-circle mb-4" src="@($"{User.ImageUrl}?v={_imageUpdateCount}")" alt="User image"/>
+                        }
+                    </div>
+                    <h4 class="card-title text-center mb-4">Basic information</h4>
+                    <form>
+                        <div class="mb-3">
+                                <label class="form-label">Email</label>
+                                <input type="email" class="form-control" value="@User.Email" readonly />
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">User name</label>
+                                <input type="text" class="form-control" value="@User.UserName" readonly />
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Phone number</label>
+                                <input type="text" class="form-control" @bind="@User.PhoneNumber" readonly="@ReadOnly" />
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Name</label>
+                                <input type="text" class="form-control" @bind="@User.Name" readonly="@ReadOnly" />
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Family name</label>
+                                <input type="text" class="form-control" @bind="@User.FamilyName" readonly="@ReadOnly" />
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Address</label>
+                                <input type="text" class="form-control" @bind="@User.Address" readonly="@ReadOnly" />
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">City</label>
+                                <input type="text" class="form-control" @bind="@User.City" readonly="@ReadOnly" />
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Country</label>
+                                <input type="text" class="form-control" @bind="@User.Country" readonly="@ReadOnly" />
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Postal code</label>
+                                <input type="text" class="form-control" @bind="@User.PostalCode" readonly="@ReadOnly" />
+                            </div>
+                    </form>
+                    <div class="d-flex justify-content-center mt-4">
+                        @RenderButtons
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-    <div class="mb-3">
-        <label class="form-label">User name</label>
-        <input type="text" class="form-control" value="@User.UserName" readonly />
-    </div>
-    <div class="mb-3">
-        <label class="form-label">Phone number</label>
-        <input type="text" class="form-control" @bind="@User.PhoneNumber" readonly="@ReadOnly" />
-    </div>
-    <div class="mb-3">
-        <label class="form-label">Name</label>
-        <input type="text" class="form-control" @bind="@User.Name" readonly="@ReadOnly" />
-    </div>
-    <div class="mb-3">
-        <label class="form-label">Family name</label>
-        <input type="text" class="form-control" @bind="@User.FamilyName" readonly="@ReadOnly" />
-    </div>
-    <div class="mb-3">
-        <label class="form-label">Address</label>
-        <input type="text" class="form-control" @bind="@User.Address" readonly="@ReadOnly" />
-    </div>
-    <div class="mb-3">
-        <label class="form-label">City</label>
-        <input type="text" class="form-control" @bind="@User.City" readonly="@ReadOnly" />
-    </div>
-    <div class="mb-3">
-        <label class="form-label">Country</label>
-        <input type="text" class="form-control" @bind="@User.Country" readonly="@ReadOnly" />
-    </div>
-    <div class="mb-3">
-        <label class="form-label">Postal code</label>
-        <input type="text" class="form-control" @bind="@User.PostalCode" readonly="@ReadOnly" />
-    </div>
-</form>
-
-@RenderButtons
+</div>
 
 @code { 
     [Parameter]
     public UserDto? User { get; set; }
 
     private bool ReadOnly { get; set; } = true;
+    
+    private int _imageUpdateCount = 0;
 
     private void SwitchToEditMode()
     {
@@ -66,8 +84,14 @@
 
     private async Task CancelEdit()
     {
-        User = await Http.GetFromJsonAsync<UserDto>("User");
+        await GetUserInformation();
         ReadOnly = true;
+    }
+    
+    private async Task GetUserInformation()
+    {
+        User = await Http.GetFromJsonAsync<UserDto>("User");
+        _imageUpdateCount++;
     }
 
     private async Task SaveAccountInformation()
