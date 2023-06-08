@@ -1,4 +1,6 @@
-﻿namespace EventsManager.Shared.Dtos;
+﻿using EventsManager.Shared.Enums;
+
+namespace EventsManager.Shared.Dtos;
 
 public class MyEventDto
 {
@@ -15,4 +17,8 @@ public class MyEventDto
     public int PreRegistrationsCount { get; set; }
     public DateTime OpenRegistrationsDate { get; set; }  
     public DateTime CloseRegistrationsDate { get; set; }
+    public string? StaffRegistrationPassword { get; set; }
+    public string? RiderRegistrationPassword { get; set; }
+    public string? MarshallRegistrationPassword { get; set; }
+    public string? RiderMarshallRegistrationPassword { get; set; }
 }

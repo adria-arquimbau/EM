@@ -10,8 +10,9 @@ namespace EventsManager.Server.Data;
 public class ApplicationDbContext : ApiAuthorizationDbContext<ApplicationUser>
 {
     public DbSet<Event> Events { get; set; }
+    public DbSet<RegistrationRolePassword> RegistrationRolePasswords { get; set; }
     public DbSet<Registration> Registrations { get; set; }
-    public override DbSet<ApplicationUser> Users { get; set; }
+    public override DbSet<ApplicationUser> Users { get; set; }  
     
     public ApplicationDbContext(DbContextOptions options, IOptions<OperationalStoreOptions> operationalStoreOptions) : base(options, operationalStoreOptions)
     {
@@ -22,5 +23,6 @@ public class ApplicationDbContext : ApiAuthorizationDbContext<ApplicationUser>
         base.OnModelCreating(modelBuilder);
         modelBuilder.ApplyConfiguration(new EventTypeConfiguration());
         modelBuilder.ApplyConfiguration(new RegistrationTypeConfiguration());
+        modelBuilder.ApplyConfiguration(new RegistrationRolePasswordTypeConfiguration());
     }
 }

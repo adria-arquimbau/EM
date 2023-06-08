@@ -347,6 +347,29 @@ namespace EventsManager.Server.Data.Migrations
                     b.ToTable("Registrations");
                 });
 
+            modelBuilder.Entity("EventsManager.Server.Models.RegistrationRolePassword", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("EventId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Password")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EventId");
+
+                    b.ToTable("RegistrationRolePasswords");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {
                     b.Property<string>("Id")
@@ -514,6 +537,17 @@ namespace EventsManager.Server.Data.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("EventsManager.Server.Models.RegistrationRolePassword", b =>
+                {
+                    b.HasOne("EventsManager.Server.Models.Event", "Event")
+                        .WithMany("RegistrationRolePasswords")
+                        .HasForeignKey("EventId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Event");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -574,6 +608,8 @@ namespace EventsManager.Server.Data.Migrations
 
             modelBuilder.Entity("EventsManager.Server.Models.Event", b =>
                 {
+                    b.Navigation("RegistrationRolePasswords");
+
                     b.Navigation("Registrations");
                 });
 #pragma warning restore 612, 618

@@ -64,7 +64,7 @@ else
 
     @if (_isModalOpen)
     {
-        <RegistrationModal Title="Registration type" Message="Select what type of registration you want to proceed." Visible="@_isModalOpen" ConfirmationChanged="PreRegister" />
+        <RegistrationModal EventDto="@_eventDetail" EventId="EventId" Title="Registration type" Message="Select what type of registration you want to proceed." Visible="@_isModalOpen" ConfirmationChanged="PreRegister" />
     }
 }
 

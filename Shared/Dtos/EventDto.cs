@@ -8,6 +8,9 @@ public class EventDto
     public string Description { get; set; }
     public string Location { get; set; }
     public Uri? ImageUrl { get; set; }
-    
     public int PreRegistrationsCount { get; set; }
+    public bool RiderHaveRegistrationRolePassword { get; set; }
+    public bool StaffHaveRegistrationRolePassword { get; set; }
+    public bool MarshallHaveRegistrationRolePassword { get; set; }
+    public bool RiderMarshallHaveRegistrationRolePassword { get; set; }
 }

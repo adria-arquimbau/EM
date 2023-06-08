@@ -1,4 +1,5 @@
 ﻿@using EventsManager.Shared.Dtos
+@using EventsManager.Shared.Enums
 @using Microsoft.AspNetCore.Components.Forms
 
 <div class="modal show d-block" tabindex="-1">
@@ -37,8 +38,19 @@
                         <label for="finishDate" class="form-label">Finish Date/Time:</label>
                         <input type="datetime-local" id="finishDate" @bind="@EventDetail.FinishDate" />
 
+                        <label for="riderPassword">Rider registration password:</label>
+                        <InputText id="riderPassword" @bind-Value="EventDetail.RiderRegistrationPassword" class="form-control my-2" />
                         
-                        <label for="isPublic">Public Event:</label>
+                        <label for="staffPassword">Staff registration password:</label>
+                        <InputText id="staffPassword" @bind-Value="EventDetail.StaffRegistrationPassword" class="form-control my-2" />
+                        
+                        <label for="marshallPassword">Marshall registration password:</label>
+                        <InputText id="marshallPassword" @bind-Value="EventDetail.MarshallRegistrationPassword" class="form-control my-2" />
+                        
+                        <label for="riderMarshallPassword">Rider-Marshall registration password:</label>
+                        <InputText id="riderMarshallPassword" @bind-Value="EventDetail.RiderMarshallRegistrationPassword" class="form-control my-2" />
+                    
+                    <label for="isPublic">Public Event:</label>
                         <InputCheckbox id="isPublic" @bind-Value="EventDetail.IsPublic" class="form-check-input my-2" />
 
                 </EditForm>

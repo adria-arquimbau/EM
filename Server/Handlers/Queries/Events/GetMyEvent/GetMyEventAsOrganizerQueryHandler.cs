@@ -20,6 +20,7 @@ public class GetMyEventAsOrganizerQueryHandler : IRequestHandler<GetMyEventAsOrg
         var eventEntity = await _context.Events
             .Include(e => e.Owner)
             .Include(e => e.Registrations)
+            .Include(e => e.RegistrationRolePasswords)
             .SingleAsync(e => e.Id == request.EventId, cancellationToken: cancellationToken);
 
         if (eventEntity.Owner.Id != request.UserId)
@@ -41,7 +42,11 @@ public class GetMyEventAsOrganizerQueryHandler : IRequestHandler<GetMyEventAsOrg
             CloseRegistrationsDate = eventEntity.CloseRegistrationsDate,
             StartDate = eventEntity.StartDate,
             FinishDate = eventEntity.FinishDate,
-            PreRegistrationsCount = eventEntity.Registrations.Count(r => r.State == RegistrationState.PreRegistered)
+            PreRegistrationsCount = eventEntity.Registrations.Count(r => r.State == RegistrationState.PreRegistered),
+            StaffRegistrationPassword = eventEntity.RegistrationRolePasswords.SingleOrDefault(r => r.Role == RegistrationRole.Staff)?.Password,
+            RiderRegistrationPassword = eventEntity.RegistrationRolePasswords.SingleOrDefault(r => r.Role == RegistrationRole.Rider)?.Password,
+            MarshallRegistrationPassword = eventEntity.RegistrationRolePasswords.SingleOrDefault(r => r.Role == RegistrationRole.Marshal)?.Password,
+            RiderMarshallRegistrationPassword = eventEntity.RegistrationRolePasswords.SingleOrDefault(r => r.Role == RegistrationRole.RiderMarshal)?.Password
         };
     }
 }

@@ -17,6 +17,8 @@ public class Event
     public DateTime OpenRegistrationsDate { get; private set; }  
     public DateTime CloseRegistrationsDate { get; private set; }
     public virtual ICollection<Registration> Registrations { get; set; }
+    
+    public ICollection<RegistrationRolePassword> RegistrationRolePasswords { get; set; }
 
     private Event() { }
     
@@ -48,4 +50,4 @@ public class Event
         OpenRegistrationsDate = openRegistrationsDate;
         CloseRegistrationsDate = closeRegistrationsDate;
     }
-}       
+}

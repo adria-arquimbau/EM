@@ -11,6 +11,7 @@ using EventsManager.Server.Handlers.Queries.Events.GetMyEvent;
 using EventsManager.Server.Handlers.Queries.Events.GetMyEvents;
 using EventsManager.Server.Settings;
 using EventsManager.Shared.Dtos;
+using EventsManager.Shared.Enums;
 using EventsManager.Shared.Requests;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -141,6 +142,22 @@ public class EventController : ControllerBase
             .ToListAsync(cancellationToken: cancellationToken);
 
         return Ok(registrations);
+    }
+    
+    [HttpPost("{eventId:guid}/registration/{registrationRole}/verify-password")]
+    [Authorize(Roles = "User")]
+    public async Task<IActionResult> VerifyRegistrationRolePassword([FromRoute] Guid eventId, [FromRoute] RegistrationRole registrationRole, [FromBody] VerifyRegistrationRolePasswordRequest request, CancellationToken cancellationToken)
+    {
+        var registrationRolePassword = await _context.RegistrationRolePasswords
+            .Where(x => x.Event.Id == eventId && x.Role == registrationRole)
+            .SingleOrDefaultAsync(cancellationToken: cancellationToken);
+
+        if (registrationRolePassword?.Password != request.Password)
+        {
+            return BadRequest();
+        }
+        
+        return Ok();
     }
     
     [HttpPost("{eventId:guid}/image")]
