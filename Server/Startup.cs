@@ -42,15 +42,17 @@ public class Startup {
         .AddRoles<IdentityRole>()
         .AddEntityFrameworkStores<ApplicationDbContext>();
 
+        var issuer = configuration.GetSection("IdentityServer")["IssuerUri"];
         services.AddIdentityServer(options =>
-            {
-                options.IssuerUri = configuration.GetSection("IssuerUri").Value;
+            {   
+                options.IssuerUri = issuer;
             })
             .AddApiAuthorization<ApplicationUser, ApplicationDbContext>(opt => 
             {
                 opt.IdentityResources["openid"].UserClaims.Add("role");
                 opt.ApiResources.Single().UserClaims.Add("role");
             });
+
         JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Remove("role");
         
         var googleAuthSection = configuration.GetSection("GoogleAuth");
