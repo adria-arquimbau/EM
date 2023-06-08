@@ -41,7 +41,10 @@ public class Startup {
         .AddRoles<IdentityRole>()
         .AddEntityFrameworkStores<ApplicationDbContext>();
 
-        services.AddIdentityServer()
+        services.AddIdentityServer(options =>
+            {
+                options.IssuerUri = "https://lbm-events-manager.azurewebsites.net/";
+            })
             .AddApiAuthorization<ApplicationUser, ApplicationDbContext>(opt => 
             {
                 opt.IdentityResources["openid"].UserClaims.Add("role");
