@@ -53,7 +53,7 @@ public class EventController : ControllerBase
     }
     
     [HttpGet("{eventId:guid}-organizer")]
-    [Authorize(Roles = "Organizer")] 
+    [Authorize(Roles = "User")] 
     public async Task<IActionResult> GetMyEventAsOrganizer([FromRoute] Guid eventId)
     {   
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;

@@ -25,9 +25,14 @@ public class GetMyEventAsOrganizerQueryHandler : IRequestHandler<GetMyEventAsOrg
 
         if (eventEntity.Owner.Id != request.UserId)
         {
-            throw new UnauthorizedAccessException();
+            var userRegistration = eventEntity.Registrations.FirstOrDefault(x => x.UserId == request.UserId && x.Role == RegistrationRole.Staff);
+
+            if (userRegistration == null)
+            {
+                throw new UnauthorizedAccessException();
+            }
         }
-        
+
         return new MyEventDto
         {
             Id = eventEntity.Id,

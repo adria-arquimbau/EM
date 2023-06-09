@@ -7,7 +7,7 @@
 @using Microsoft.AspNetCore.Authorization
 @inject HttpClient Http
 
-@attribute [Authorize(Roles = "Organizer")]
+@attribute [Authorize(Roles = "User")]
 
 <h3 class="mb-4">Event @eventDetail?.Name</h3>
 
@@ -23,8 +23,7 @@
 }
 else
 {
-    
-        @switch (currentComponent)
+    @switch (currentComponent)
         {
             case PageComponent.EventDetail:
                 <MyEventDetail Event="eventDetail" ToggleEditMode="ToggleEditMode" />
