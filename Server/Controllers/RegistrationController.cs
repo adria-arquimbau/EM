@@ -94,7 +94,7 @@ public class RegistrationController : ControllerBase
             })
             .SingleOrDefaultAsync(cancellationToken: cancellationToken);
 
-        return registrationDto != null ? Ok(registrationDto) : NotFound();
+        return Ok(registrationDto);
     }
     
     [HttpDelete("{registrationId:guid}")]
