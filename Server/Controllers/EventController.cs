@@ -99,27 +99,28 @@ public class EventController : ControllerBase
     
     [HttpGet("{eventId:guid}/registrations")]
     [Authorize(Roles = "Organizer")]
-    public async Task<IActionResult> GetAllRegistrationsByEventId([FromRoute] Guid eventId, [FromQuery] string? search, CancellationToken cancellationToken)
+    public async Task<IActionResult> GetAllRegistrationsByEventId([FromRoute] Guid eventId, [FromQuery] string? search, [FromQuery] RegistrationRole? role, CancellationToken cancellationToken)
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         
         var eventRegistrations = await _context.Events
             .Where(x => x.Id == eventId)
             .Include(x => x.Owner)
-            .SingleAsync(cancellationToken: cancellationToken);
+            .SingleAsync(cancellationToken: cancellationToken); 
 
         if (eventRegistrations.Owner.Id != userId)
         {
             throw new UnauthorizedAccessException("You are not the owner of this event");
         }
+        
         var valueToSearch = search ?? "";
-        var registrations = await _context.Registrations 
+        var registrationsQuery = _context.Registrations 
             .Where(x => x.Event.Id == eventId && x.User.UserName.Contains(valueToSearch))
             .Select(x => new RegistrationDto
             {
                 Id = x.Id,
                 CreationDate = x.CreationDate,
-                Role = x.Role,
+                Role = x.Role,  
                 State = x.State,
                 Bib = x.Bib,
                 CheckedIn = x.CheckedIn,
@@ -139,9 +140,15 @@ public class EventController : ControllerBase
                     EmailConfirmed = x.User.EmailConfirmed
                 }
             })
-            .ToListAsync(cancellationToken: cancellationToken);
+            .AsQueryable();
 
-        return Ok(registrations);
+        if (role.HasValue)
+        {
+            registrationsQuery = registrationsQuery.Where(x => x.Role == role);
+        }
+    
+        var response = await registrationsQuery.ToListAsync(cancellationToken: cancellationToken);
+        return Ok(response);
     }
     
     [HttpPost("{eventId:guid}/registration/{registrationRole}/verify-password")]

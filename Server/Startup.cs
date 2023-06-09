@@ -44,7 +44,7 @@ public class Startup {
 
         var issuer = configuration.GetSection("IdentityServer")["IssuerUri"];
         services.AddIdentityServer(options =>
-            {   
+            { 
                 options.IssuerUri = issuer;
             })
             .AddApiAuthorization<ApplicationUser, ApplicationDbContext>(opt => 

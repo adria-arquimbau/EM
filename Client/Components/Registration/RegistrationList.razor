@@ -15,11 +15,26 @@ else
     <ConfirmationModal Title="Delete registration" Message="Are you sure you want to delete this registration?" Visible="@showConfirmModal" ConfirmationChanged="ConfirmDelete" />
 
     <div class="search-bar">
-        <input type="search" placeholder="Search by user name" @oninput="HandleSearchInput" />
+        <div class="input-group">
+            <input type="search" class="form-control" placeholder="Search by user name" @oninput="HandleSearchInput" />
+            <select class="form-control" @onchange="HandleRoleChange">
+                @foreach (RegistrationRole role in Enum.GetValues(typeof(RegistrationRole)))
+                {
+                    @if(role == RegistrationRole.None)
+                    {
+                        <option value="@role">All roles</option>
+                    }
+                    else
+                    {
+                        <option value="@role">@role</option>
+                    }
+                }
+            </select>
+        </div>
     </div>
 
     <div class="registrations-table">
-        <table class="table">
+        <table class="table table-striped table-responsive">
             <thead>
                 <tr>
                     <th>Creation Date</th>
@@ -55,6 +70,9 @@ else
                         </td>
                     </tr>
                 }
+            <tr>
+                <td colspan="8">Total Registrations: @registrations.Count</td>
+            </tr>
             </tbody>
         </table>
     </div>
@@ -66,7 +84,8 @@ else
     
     private bool showConfirmModal = false;
     private Guid selectedRegistrationId;
-
+    private RegistrationRole selectedRegistrationRole;
+    
     private List<RegistrationDto> registrations;
 
     protected override async Task OnInitializedAsync()
@@ -74,10 +93,21 @@ else
         await LoadRegistrations();
     }
 
+    private async Task HandleRoleChange(ChangeEventArgs e)
+    {
+        selectedRegistrationRole = Enum.TryParse<RegistrationRole>(e.Value.ToString(), out var newRole) 
+            ? newRole : RegistrationRole.None;
+    
+        await LoadRegistrations();
+    }
+
+    
     private async Task LoadRegistrations(string? search = null)
     {
-        registrations = await Http.GetFromJsonAsync<List<RegistrationDto>>($"Event/{EventId}/registrations?search={search}");
+        var roleQuery = selectedRegistrationRole != RegistrationRole.None ? $"&role={selectedRegistrationRole}" : "";
+        registrations = await Http.GetFromJsonAsync<List<RegistrationDto>>($"Event/{EventId}/registrations?search={search}{roleQuery}");
     }
+
 
     private async Task HandleSearchInput(ChangeEventArgs e)
     {
