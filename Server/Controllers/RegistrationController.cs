@@ -63,6 +63,7 @@ public class RegistrationController : ControllerBase
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         var registration = await _context.Registrations
+            .Include(x => x.User)
             .Include(x => x.Event)
             .ThenInclude(x => x.Owner)
             .SingleAsync(x => x.Id == registrationUpdateRequest.Id, cancellationToken: cancellationToken);
@@ -79,7 +80,7 @@ public class RegistrationController : ControllerBase
 
         if (registration.Role == RegistrationRole.Staff && registrationUpdateRequest.State == RegistrationState.Accepted)
         {
-            var user = await _userManager.FindByIdAsync(userId);
+            var user = await _userManager.FindByIdAsync(registration.User.Id);
             var roles = await _userManager.GetRolesAsync(user);
             if (!roles.Contains("Staff"))
             {
@@ -91,13 +92,13 @@ public class RegistrationController : ControllerBase
             if (oldRegistrationRole == RegistrationRole.Staff.ToString() && oldRegistrationState == RegistrationState.Accepted.ToString())
             {
                 var anotherStaffAcceptedRegistrationsCount = await _context.Registrations
-                    .Where(x => (x.State == RegistrationState.Accepted && x.Role == RegistrationRole.Staff && x.User.Id == userId) &&
+                    .Where(x => (x.State == RegistrationState.Accepted && x.Role == RegistrationRole.Staff && x.User.Id == registration.User.Id) &&
                                 x.Id != registrationUpdateRequest.Id)
                     .CountAsync(cancellationToken: cancellationToken);
 
                 if (anotherStaffAcceptedRegistrationsCount == 0)
                 {
-                    var user = await _userManager.FindByIdAsync(userId);
+                    var user = await _userManager.FindByIdAsync(registration.User.Id);
                     await _userManager.RemoveFromRoleAsync(user, "Staff");
                 }   
             }   
@@ -136,6 +137,7 @@ public class RegistrationController : ControllerBase
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         var registration = await _context.Registrations
+            .Include(x => x.User)
             .Include(x => x.Event)
             .ThenInclude(x => x.Owner)
             .SingleAsync(x => x.Id == registrationId, cancellationToken: cancellationToken);
@@ -148,13 +150,13 @@ public class RegistrationController : ControllerBase
         if (registration is { State: RegistrationState.Accepted, Role: RegistrationRole.Staff })
         {
             var anotherStaffAcceptedRegistrationsCount = await _context.Registrations
-                .Where(x => (x.State == RegistrationState.Accepted && x.Role == RegistrationRole.Staff && x.User.Id == userId) &&
+                .Where(x => (x.State == RegistrationState.Accepted && x.Role == RegistrationRole.Staff && x.User.Id == registration.User.Id) &&
                             x.Id != registrationId)
                 .CountAsync(cancellationToken: cancellationToken);
 
             if (anotherStaffAcceptedRegistrationsCount == 0)
             {
-                var user = await _userManager.FindByIdAsync(userId);
+                var user = await _userManager.FindByIdAsync(registration.User.Id);
                 await _userManager.RemoveFromRoleAsync(user, "Staff");
             }   
         }   
