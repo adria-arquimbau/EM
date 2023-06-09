@@ -25,7 +25,7 @@ public class GetMyEventAsOrganizerQueryHandler : IRequestHandler<GetMyEventAsOrg
 
         if (eventEntity.Owner.Id != request.UserId)
         {
-            var userRegistration = eventEntity.Registrations.FirstOrDefault(x => x.UserId == request.UserId && x.Role == RegistrationRole.Staff);
+            var userRegistration = eventEntity.Registrations.FirstOrDefault(x => x.UserId == request.UserId && x is { Role: RegistrationRole.Staff, State: RegistrationState.Accepted });
 
             if (userRegistration == null)
             {
@@ -47,7 +47,10 @@ public class GetMyEventAsOrganizerQueryHandler : IRequestHandler<GetMyEventAsOrg
             CloseRegistrationsDate = eventEntity.CloseRegistrationsDate,
             StartDate = eventEntity.StartDate,
             FinishDate = eventEntity.FinishDate,
-            PreRegistrationsCount = eventEntity.Registrations.Count(r => r.State == RegistrationState.PreRegistered),
+            RidersPreRegistrationsCount = eventEntity.Registrations.Count(r => r is { State: RegistrationState.PreRegistered, Role: RegistrationRole.Rider }),
+            RidersAcceptedRegistrationsCount = eventEntity.Registrations.Count(r => r is { State: RegistrationState.Accepted, Role: RegistrationRole.Rider }),
+            MarshallAcceptedRegistrationsCount = eventEntity.Registrations.Count(r => r is { State: RegistrationState.Accepted, Role: RegistrationRole.Marshal }),
+            RiderMarshallAcceptedRegistrationsCount = eventEntity.Registrations.Count(r => r is { State: RegistrationState.Accepted, Role: RegistrationRole.RiderMarshal }),
             StaffRegistrationPassword = eventEntity.RegistrationRolePasswords.SingleOrDefault(r => r.Role == RegistrationRole.Staff)?.Password,
             RiderRegistrationPassword = eventEntity.RegistrationRolePasswords.SingleOrDefault(r => r.Role == RegistrationRole.Rider)?.Password,
             MarshallRegistrationPassword = eventEntity.RegistrationRolePasswords.SingleOrDefault(r => r.Role == RegistrationRole.Marshal)?.Password,

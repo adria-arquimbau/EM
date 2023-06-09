@@ -1,6 +1,7 @@
 ﻿@using EventsManager.Shared.Dtos
 @using EventsManager.Client.Components.ImageUploader
 @using EventsManager.Client.Components.Loaders
+@using EventsManager.Client.Components.Modals
 @using System.Net.Http.Headers
 @using System.Net.Http.Json
 
@@ -42,7 +43,10 @@
                     <li class="list-group-item"><strong>Start Date:</strong> @Event.StartDate</li>
                     <li class="list-group-item"><strong>Finish Date:</strong> @Event.FinishDate</li>
                     <li class="list-group-item"><strong>Creation Date:</strong> @Event.CreationDate</li>
-                    <li class="list-group-item"><strong>Pre-registrations:</strong> @Event.PreRegistrationsCount</li>
+                    <li class="list-group-item"><strong>Riders Pre-registrations:</strong> @Event.RidersPreRegistrationsCount</li>
+                    <li class="list-group-item"><strong>Riders Accepted registrations:</strong> @Event.RidersAcceptedRegistrationsCount</li>
+                    <li class="list-group-item"><strong>Marshall Accepted registrations:</strong> @Event.MarshallAcceptedRegistrationsCount</li>
+                    <li class="list-group-item"><strong>Rider-Marshall Accepted registrations:</strong> @Event.RiderMarshallAcceptedRegistrationsCount</li>
                     @foreach (var role in new (string, string)[] 
                     {
                         ("Rider registration password", Event.RiderRegistrationPassword),
@@ -63,8 +67,6 @@
         </div>
     </div>
 </div>
-
-<ConfirmationModal Title="Delete event image" Message="Are you sure you want to delete the event image?" Visible="@showConfirmDeleteModal" ConfirmationChanged="ConfirmDelete" />
 
 @code {
     [Parameter]

@@ -14,7 +14,10 @@ public class MyEventDto
     public Uri? ImageUrl { get; set; }   
     public int MaxRegistrations { get; set; }       
     public bool IsPublic { get; set; }  
-    public int PreRegistrationsCount { get; set; }
+    public int RidersPreRegistrationsCount { get; set; }
+    public int RidersAcceptedRegistrationsCount { get; set; }   
+    public int MarshallAcceptedRegistrationsCount { get; set; }   
+    public int RiderMarshallAcceptedRegistrationsCount { get; set; }   
     public DateTime OpenRegistrationsDate { get; set; }  
     public DateTime CloseRegistrationsDate { get; set; }
     public string? StaffRegistrationPassword { get; set; }

@@ -39,7 +39,7 @@ else
                     <p>@_eventDetail.Description</p>
                     <p><strong>Start Date:</strong> @_eventDetail.StartDate.ToString("g")</p>
                     <p><strong>Location:</strong> @_eventDetail.Location</p>
-                    <p><strong>Registrations:</strong> @_eventDetail.PreRegistrationsCount</p>
+                    <p><strong>Accepted registrations:</strong> @_eventDetail.PreRegistrationsCount</p>
                     <AuthorizeView>
                         <Authorized>
                             @if(_myRegistration != null)
@@ -49,15 +49,46 @@ else
                                         <h5>Your Registration Details</h5>
                                     </div>
                                     <div class="card-body">
-                                        <p><strong>Creation Date:</strong> @_myRegistration.CreationDate.ToString("g")</p>
+                                        <p><strong>Registration date:</strong> @_myRegistration.CreationDate.ToString("g")</p>
                                         <p><strong>Role:</strong> @_myRegistration.Role</p>
                                         <p><strong>State:</strong> @_myRegistration.State</p>
-                                        <p><strong>Bib:</strong> @_myRegistration.Bib</p>
-                                        <p><strong>Checked In:</strong> @_myRegistration.CheckedIn</p>
-
-                                        @if(_myRegistration.Role == RegistrationRole.Staff)
+                                        @if (_myRegistration.Bib == null)
+                                        {
+                                            <p style="color:red;"><strong>Bib:</strong> No Bib</p>
+                                        }
+                                        else
+                                        {
+                                            <p><strong>Bib:</strong> @_myRegistration.Bib</p>
+                                        }
+                                        <p><strong>Checked In:</strong> @(_myRegistration.CheckedIn ? "Yes" : "No")</p>
+                                        
+                                        @if(_myRegistration.Role == RegistrationRole.Staff && _myRegistration.State == RegistrationState.Accepted)
                                         {
                                             <button class="btn btn-success" @onclick="NavigateToOrganizerPanel">Go to Organizer Panel</button>
+                                        }
+                                        
+                                        @if(_myRegistration.State == RegistrationState.PreRegistered)
+                                        {
+                                            @if(_myRegistration.Role == RegistrationRole.Rider)
+                                            {
+                                                <div class="alert alert-danger" role="alert">
+                                                    You need to pay for the registration.
+                                                    <button class="btn btn-primary">Pay Now</button>
+                                                </div>
+                                            }
+                                            else
+                                            {
+                                                <div class="alert alert-warning" role="alert">
+                                                    Your registration is awaiting approval from the event owner.
+                                                </div>
+                                            }
+                                        }
+                    
+                                        @if(_myRegistration.State == RegistrationState.Cancelled)
+                                        {
+                                            <div class="alert alert-danger" role="alert">
+                                                Your registration is cancelled. If you don't know why, please contact the organization.
+                                            </div>
                                         }
                                     </div>
                                 </div>

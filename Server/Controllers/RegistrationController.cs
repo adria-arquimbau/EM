@@ -5,6 +5,7 @@ using EventsManager.Shared.Dtos;
 using EventsManager.Shared.Enums;
 using EventsManager.Shared.Requests;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -15,10 +16,12 @@ namespace EventsManager.Server.Controllers;
 public class RegistrationController : ControllerBase
 {
     private readonly ApplicationDbContext _context;
+    private readonly UserManager<ApplicationUser> _userManager;
 
-    public RegistrationController(ApplicationDbContext context)
+    public RegistrationController(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
     {
         _context = context;
+        _userManager = userManager;
     }
     
     [HttpPost("event/{eventId:guid}/{registrationRole}/password/{password?}")]
@@ -68,8 +71,38 @@ public class RegistrationController : ControllerBase
         {
             return Forbid();
         }
-
+        
+        var oldRegistrationRole = registration.Role.ToString();
+        var oldRegistrationState = registration.State.ToString();
+        
         registration.Update(registrationUpdateRequest.Bib, registrationUpdateRequest.CheckedIn, registrationUpdateRequest.State);
+
+        if (registration.Role == RegistrationRole.Staff && registrationUpdateRequest.State == RegistrationState.Accepted)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            var roles = await _userManager.GetRolesAsync(user);
+            if (!roles.Contains("Staff"))
+            {
+                await _userManager.AddToRoleAsync(user, "Staff");
+            }
+        }   
+        else
+        {
+            if (oldRegistrationRole == RegistrationRole.Staff.ToString() && oldRegistrationState == RegistrationState.Accepted.ToString())
+            {
+                var anotherStaffAcceptedRegistrationsCount = await _context.Registrations
+                    .Where(x => (x.State == RegistrationState.Accepted && x.Role == RegistrationRole.Staff && x.User.Id == userId) &&
+                                x.Id != registrationUpdateRequest.Id)
+                    .CountAsync(cancellationToken: cancellationToken);
+
+                if (anotherStaffAcceptedRegistrationsCount == 0)
+                {
+                    var user = await _userManager.FindByIdAsync(userId);
+                    await _userManager.RemoveFromRoleAsync(user, "Staff");
+                }   
+            }   
+        }
+        
         await _context.SaveChangesAsync(cancellationToken);
         
         return Ok(); 
@@ -101,15 +134,30 @@ public class RegistrationController : ControllerBase
     [Authorize(Roles = "Organizer")]
     public async Task<IActionResult> Delete([FromRoute] Guid registrationId, CancellationToken cancellationToken)
     {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         var registration = await _context.Registrations
             .Include(x => x.Event)
             .ThenInclude(x => x.Owner)
             .SingleAsync(x => x.Id == registrationId, cancellationToken: cancellationToken);
 
-        if (registration.Event.Owner.Id != User.FindFirst(ClaimTypes.NameIdentifier)?.Value)
+        if (registration.Event.Owner.Id != userId)
         {
             return Forbid();
         }
+        
+        if (registration is { State: RegistrationState.Accepted, Role: RegistrationRole.Staff })
+        {
+            var anotherStaffAcceptedRegistrationsCount = await _context.Registrations
+                .Where(x => (x.State == RegistrationState.Accepted && x.Role == RegistrationRole.Staff && x.User.Id == userId) &&
+                            x.Id != registrationId)
+                .CountAsync(cancellationToken: cancellationToken);
+
+            if (anotherStaffAcceptedRegistrationsCount == 0)
+            {
+                var user = await _userManager.FindByIdAsync(userId);
+                await _userManager.RemoveFromRoleAsync(user, "Staff");
+            }   
+        }   
         
         _context.Registrations.Remove(registration);
         await _context.SaveChangesAsync(cancellationToken);

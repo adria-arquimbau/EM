@@ -53,7 +53,7 @@ public class EventController : ControllerBase
     }
     
     [HttpGet("{eventId:guid}-organizer")]
-    [Authorize(Roles = "User")] 
+    [Authorize(Roles = "Organizer, Staff")] 
     public async Task<IActionResult> GetMyEventAsOrganizer([FromRoute] Guid eventId)
     {   
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -95,11 +95,11 @@ public class EventController : ControllerBase
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;  
         await _mediator.Send(new UpdateEventCommandRequest(eventDto, userId));
         return Ok(); 
-    }   
+    }
     
     [HttpGet("{eventId:guid}/registrations")]
-    [Authorize(Roles = "User")]
-    public async Task<IActionResult> GetAllRegistrationsByEventId([FromRoute] Guid eventId, [FromQuery] string? search, [FromQuery] RegistrationRole? role, CancellationToken cancellationToken)
+    [Authorize(Roles = "Organizer, Staff")]
+    public async Task<IActionResult> GetAllRiderRegistrationsByEventId([FromRoute] Guid eventId, [FromQuery] string? search, [FromQuery] RegistrationRole? role, CancellationToken cancellationToken)
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         
@@ -111,7 +111,7 @@ public class EventController : ControllerBase
 
         if (eventRequest.Owner.Id != userId)   
         {
-            var userRegistration = eventRequest.Registrations.FirstOrDefault(x => x.UserId == userId && x.Role == RegistrationRole.Staff);
+            var userRegistration = eventRequest.Registrations.FirstOrDefault(x => x.UserId == userId && x is { Role: RegistrationRole.Staff, State: RegistrationState.Accepted });
 
             if (userRegistration == null)
             {
@@ -197,7 +197,7 @@ public class EventController : ControllerBase
     }   
     
     [HttpDelete("{eventId:guid}/image")]   
-    [Authorize(Roles = "User")] 
+    [Authorize(Roles = "Organizer")] 
     public async Task<IActionResult> DeleteEventImage([FromRoute] Guid eventId, CancellationToken cancellationToken)
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;

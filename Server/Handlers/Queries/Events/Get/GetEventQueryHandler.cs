@@ -29,7 +29,7 @@ public class GetEventQueryHandler : IRequestHandler<GetEventQueryRequest, EventD
                 Description = x.Description,
                 Location = x.Location,
                 ImageUrl = x.ImageUrl,
-                PreRegistrationsCount = x.Registrations.Count,
+                PreRegistrationsCount = x.Registrations.Count(r => r.Role == RegistrationRole.Rider),
                 RiderMarshallHaveRegistrationRolePassword = x.RegistrationRolePasswords.Any(y => y.Role == RegistrationRole.RiderMarshal),
                 RiderHaveRegistrationRolePassword = x.RegistrationRolePasswords.Any(y => y.Role == RegistrationRole.Rider),
                 StaffHaveRegistrationRolePassword = x.RegistrationRolePasswords.Any(y => y.Role == RegistrationRole.Staff),

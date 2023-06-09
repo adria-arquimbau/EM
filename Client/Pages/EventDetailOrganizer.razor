@@ -7,7 +7,7 @@
 @using Microsoft.AspNetCore.Authorization
 @inject HttpClient Http
 
-@attribute [Authorize(Roles = "User")]
+@attribute [Authorize(Roles = "Organizer, Staff")]
 
 <h3 class="mb-4">Event @eventDetail?.Name</h3>
 

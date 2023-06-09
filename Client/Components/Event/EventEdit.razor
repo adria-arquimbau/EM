@@ -25,19 +25,7 @@
 
                         <label for="maxRegistrations">Max Registrations:</label>
                         <InputNumber id="maxRegistrations" @bind-Value="EventDetail.MaxRegistrations" class="form-control my-2" />
-
-                        <label for="openRegistrationsDate" class="form-label">Open Registrations Date/Time:</label>
-                        <input type="datetime-local" id="openRegistrationsDate" @bind="@EventDetail.OpenRegistrationsDate" />
-                        
-                        <label for="closeRegistrationsDate" class="form-label">Close Registrations Date/Time:</label>
-                        <input type="datetime-local" id="closeRegistrationsDate" @bind="@EventDetail.CloseRegistrationsDate" />
-                        
-                        <label for="startDate" class="form-label">Start Date/Time:</label>
-                        <input type="datetime-local" id="startDate" @bind="@EventDetail.StartDate" />
-                        
-                        <label for="finishDate" class="form-label">Finish Date/Time:</label>
-                        <input type="datetime-local" id="finishDate" @bind="@EventDetail.FinishDate" />
-
+                    
                         <label for="riderPassword">Rider registration password:</label>
                         <InputText id="riderPassword" @bind-Value="EventDetail.RiderRegistrationPassword" class="form-control my-2" />
                         
@@ -50,9 +38,21 @@
                         <label for="riderMarshallPassword">Rider-Marshall registration password:</label>
                         <InputText id="riderMarshallPassword" @bind-Value="EventDetail.RiderMarshallRegistrationPassword" class="form-control my-2" />
                     
-                    <label for="isPublic">Public Event:</label>
+                        <label for="isPublic">Public Event:</label>
                         <InputCheckbox id="isPublic" @bind-Value="EventDetail.IsPublic" class="form-check-input my-2" />
-
+                        
+                        <label for="openRegistrationsDate" class="form-label">Open Registrations Date/Time:</label>
+                        <input type="datetime-local" id="openRegistrationsDate" @bind="@EventDetail.OpenRegistrationsDate" />
+                        
+                        <label for="closeRegistrationsDate" class="form-label">Close Registrations Date/Time:</label>
+                        <input type="datetime-local" id="closeRegistrationsDate" @bind="@EventDetail.CloseRegistrationsDate" />
+                        
+                        <label for="startDate" class="form-label">Start Date/Time:</label>
+                        <input type="datetime-local" id="startDate" @bind="@EventDetail.StartDate" />
+                        
+                        <label for="finishDate" class="form-label">Finish Date/Time:</label>
+                        <input type="datetime-local" id="finishDate" @bind="@EventDetail.FinishDate" />
+                    
                 </EditForm>
             </div>
             <div class="modal-footer">
