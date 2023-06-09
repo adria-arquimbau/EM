@@ -62,6 +62,8 @@ else
                                         }
                                         <p><strong>Checked In:</strong> @(_myRegistration.CheckedIn ? "Yes" : "No")</p>
                                         
+                                        <button class="btn btn-success" @onclick="NavigateToTicket">Open a ticket</button>
+                                        
                                         @if(_myRegistration.Role == RegistrationRole.Staff && _myRegistration.State == RegistrationState.Accepted)
                                         {
                                             <button class="btn btn-success" @onclick="NavigateToOrganizerPanel">Go to Organizer Panel</button>
@@ -170,5 +172,10 @@ else
     private void NavigateToOrganizerPanel()
     {
         NavigationManager.NavigateTo($"event-detail-organizer/{EventId}");
+    }
+    
+    private void NavigateToTicket()
+    {
+        NavigationManager.NavigateTo($"ticket-chat/{EventId}");
     }
 }
