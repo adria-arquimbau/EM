@@ -33,7 +33,7 @@ else
                 <RegistrationList EventId="@EventId" />
                 break;
             case PageComponent.RegistrationRolePasswords:
-                <RegistrationRolePasswordsEdit MyEventDto="@eventDetail" />
+                <RegistrationRolePasswordsEdit MyEventDto="@eventDetail" RefreshEvent="LoadEventDetail" />
                 break;
             // Add more cases as necessary
         }
