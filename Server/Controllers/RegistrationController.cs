@@ -1,6 +1,7 @@
 ﻿using System.Security.Claims;
 using EventsManager.Server.Data;
 using EventsManager.Server.Models;
+using EventsManager.Shared.Dtos;
 using EventsManager.Shared.Enums;
 using EventsManager.Shared.Requests;
 using Microsoft.AspNetCore.Authorization;
@@ -74,17 +75,26 @@ public class RegistrationController : ControllerBase
         return Ok(); 
     }
     
-    [HttpGet("event/{eventId:guid}/iam-registered")]
+    [HttpGet("event/{eventId:guid}")]
     [Authorize(Roles = "User")]
-    public async Task<IActionResult> IAmRegistered([FromRoute] Guid eventId, CancellationToken cancellationToken)
+    public async Task<IActionResult> GetMyRegistration([FromRoute] Guid eventId, CancellationToken cancellationToken)
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         
-        var registration = await _context.Registrations
+        var registrationDto = await _context.Registrations
             .Where(x => x.Event.Id == eventId && x.User.Id == userId)
+            .Select(x => new RegistrationDto
+            {
+                Id = x.Id,
+                CreationDate = x.CreationDate,
+                Role = x.Role,
+                State = x.State,
+                Bib = x.Bib,    
+                CheckedIn = x.CheckedIn
+            })
             .SingleOrDefaultAsync(cancellationToken: cancellationToken);
 
-        return registration != null ? Ok() : NotFound();
+        return registrationDto != null ? Ok(registrationDto) : NotFound();
     }
     
     [HttpDelete("{registrationId:guid}")]

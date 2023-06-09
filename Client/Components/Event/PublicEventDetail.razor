@@ -42,7 +42,7 @@ else
                     <p><strong>Registrations:</strong> @_eventDetail.PreRegistrationsCount</p>
                     <AuthorizeView>
                         <Authorized>
-                            @if(_iAmPreRegistered)
+                            @if(_myRegistration != null)
                             {
                                 <p><strong>You are already Pre-Registered in this event!</strong></p>
                             }
@@ -55,7 +55,7 @@ else
 
     <AuthorizeView>
         <Authorized>
-            @if(!_iAmPreRegistered)
+            @if(_myRegistration == null)
             {
                 <button class="btn btn-primary" @onclick="() => _isModalOpen = true">Pre-Register</button>
             }
@@ -76,8 +76,8 @@ else
     public Guid? EventId { get; set; }
     
     private EventDto? _eventDetail;
+    private RegistrationDto? _myRegistration;
     private bool _isModalOpen;
-    private bool _iAmPreRegistered;
     private ClaimsPrincipal user;
     
     protected override async Task OnInitializedAsync()
@@ -95,8 +95,7 @@ else
         var isAuthenticated = user.Identity?.IsAuthenticated ?? false;
         if (isAuthenticated)
         {
-            var response = await Http.GetAsync($"Registration/event/{EventId}/iam-registered");
-            _iAmPreRegistered = response.IsSuccessStatusCode;
+            _myRegistration = await Http.GetFromJsonAsync<RegistrationDto>($"Registration/event/{EventId}");
         }
     }
 
