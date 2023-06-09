@@ -98,19 +98,25 @@ public class EventController : ControllerBase
     }   
     
     [HttpGet("{eventId:guid}/registrations")]
-    [Authorize(Roles = "Organizer")]
+    [Authorize(Roles = "User")]
     public async Task<IActionResult> GetAllRegistrationsByEventId([FromRoute] Guid eventId, [FromQuery] string? search, [FromQuery] RegistrationRole? role, CancellationToken cancellationToken)
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         
-        var eventRegistrations = await _context.Events
+        var eventRequest = await _context.Events
             .Where(x => x.Id == eventId)
             .Include(x => x.Owner)
+            .Include(x => x.Registrations.Where(r => r.Role == RegistrationRole.Staff))
             .SingleAsync(cancellationToken: cancellationToken); 
 
-        if (eventRegistrations.Owner.Id != userId)
+        if (eventRequest.Owner.Id != userId)   
         {
-            throw new UnauthorizedAccessException("You are not the owner of this event");
+            var userRegistration = eventRequest.Registrations.FirstOrDefault(x => x.UserId == userId && x.Role == RegistrationRole.Staff);
+
+            if (userRegistration == null)
+            {
+                throw new UnauthorizedAccessException();
+            }
         }
         
         var valueToSearch = search ?? "";
