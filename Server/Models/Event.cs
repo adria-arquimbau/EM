@@ -13,13 +13,12 @@ public class Event
     public string Location { get; private set; }
     public Uri? ImageUrl { get; set; }   
     public int MaxRegistrations { get; private set; }       
-    public bool IsPublic { get; private set; }  
-    public DateTime OpenRegistrationsDate { get; private set; }  
+    public bool IsPublic { get; private set; } 
+    public DateTime OpenRegistrationsDate { get; private set; }
     public DateTime CloseRegistrationsDate { get; private set; }
     public virtual ICollection<Registration> Registrations { get; set; }
-    
-    public ICollection<RegistrationRolePassword> RegistrationRolePasswords { get; set; }
-
+    public ICollection<RegistrationRolePassword> RegistrationRolePasswords { get; set; } = new List<RegistrationRolePassword>();
+    public ICollection<EventPrice> Prices { get; set; } = new List<EventPrice>();
     private Event() { }
     
     public Event(string name, string description, string location, int maxRegistrations, ApplicationUser owner, DateTime startDate, DateTime finishDate, DateTime openRegistrationsDate, DateTime closeRegistrationsDate)

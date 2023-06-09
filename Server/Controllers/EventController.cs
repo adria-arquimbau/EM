@@ -9,6 +9,7 @@ using EventsManager.Server.Handlers.Queries.Events.Get;
 using EventsManager.Server.Handlers.Queries.Events.GetAll;
 using EventsManager.Server.Handlers.Queries.Events.GetMyEvent;
 using EventsManager.Server.Handlers.Queries.Events.GetMyEvents;
+using EventsManager.Server.Models;
 using EventsManager.Server.Settings;
 using EventsManager.Shared.Dtos;
 using EventsManager.Shared.Enums;
@@ -94,6 +95,50 @@ public class EventController : ControllerBase
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;  
         await _mediator.Send(new UpdateEventCommandRequest(eventDto, userId));
+        return Ok(); 
+    }
+    
+    [HttpPut("update-registration-passwords")]
+    [Authorize(Roles = "Organizer")] 
+    public async Task<IActionResult> UpdateRegistrationPasswords([FromBody] MyEventDto eventDto, CancellationToken cancellationToken)
+    {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;  
+        
+        var eventToUpdate = await _context.Events
+            .Where(x => x.Id == eventDto.Id)
+            .Include(x => x.Owner)
+            .Include(x => x.RegistrationRolePasswords)
+            .SingleAsync(cancellationToken: cancellationToken);
+        
+        if (eventToUpdate.Owner.Id != userId)
+        {
+            return Forbid();
+        }
+        
+        var registrationRolePasswords = new List<RegistrationRolePassword>();
+
+        if (!string.IsNullOrWhiteSpace(eventDto.MarshallRegistrationPassword))
+        {
+            registrationRolePasswords.Add(new RegistrationRolePassword { Role = RegistrationRole.Marshal, Password = eventDto.MarshallRegistrationPassword });
+        }
+        if (!string.IsNullOrWhiteSpace(eventDto.RiderRegistrationPassword))
+        {
+            registrationRolePasswords.Add(new RegistrationRolePassword { Role = RegistrationRole.Rider, Password = eventDto.RiderRegistrationPassword });
+        }
+        if (!string.IsNullOrWhiteSpace(eventDto.StaffRegistrationPassword))
+        {
+            registrationRolePasswords.Add(new RegistrationRolePassword { Role = RegistrationRole.Staff, Password = eventDto.StaffRegistrationPassword });
+        }
+        if (!string.IsNullOrWhiteSpace(eventDto.RiderMarshallRegistrationPassword))
+        {
+            registrationRolePasswords.Add(new RegistrationRolePassword { Role = RegistrationRole.RiderMarshal, Password = eventDto.RiderMarshallRegistrationPassword });
+        }
+
+        eventToUpdate.RegistrationRolePasswords.Clear();
+        eventToUpdate.RegistrationRolePasswords = registrationRolePasswords;
+        
+        await _context.SaveChangesAsync(cancellationToken);
+        
         return Ok(); 
     }
     

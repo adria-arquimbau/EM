@@ -29,28 +29,6 @@ public class UpdateEventCommandHandler : IRequestHandler<UpdateEventCommandReque
 
         eventToUpdate.Update(request.EventDto.Name, request.EventDto.Description, request.EventDto.Location, request.EventDto.MaxRegistrations, request.EventDto.StartDate, request.EventDto.FinishDate, request.EventDto.OpenRegistrationsDate, request.EventDto.CloseRegistrationsDate, request.EventDto.IsPublic);
 
-        var registrationRolePasswords = new List<RegistrationRolePassword>();
-
-        if (!string.IsNullOrWhiteSpace(request.EventDto.MarshallRegistrationPassword))
-        {
-            registrationRolePasswords.Add(new RegistrationRolePassword { Role = RegistrationRole.Marshal, Password = request.EventDto.MarshallRegistrationPassword });
-        }
-        if (!string.IsNullOrWhiteSpace(request.EventDto.RiderRegistrationPassword))
-        {
-            registrationRolePasswords.Add(new RegistrationRolePassword { Role = RegistrationRole.Rider, Password = request.EventDto.RiderRegistrationPassword });
-        }
-        if (!string.IsNullOrWhiteSpace(request.EventDto.StaffRegistrationPassword))
-        {
-            registrationRolePasswords.Add(new RegistrationRolePassword { Role = RegistrationRole.Staff, Password = request.EventDto.StaffRegistrationPassword });
-        }
-        if (!string.IsNullOrWhiteSpace(request.EventDto.RiderMarshallRegistrationPassword))
-        {
-            registrationRolePasswords.Add(new RegistrationRolePassword { Role = RegistrationRole.RiderMarshal, Password = request.EventDto.RiderMarshallRegistrationPassword });
-        }
-
-        eventToUpdate.RegistrationRolePasswords.Clear();
-        eventToUpdate.RegistrationRolePasswords = registrationRolePasswords;
-        
         await _context.SaveChangesAsync(cancellationToken);
 
     }

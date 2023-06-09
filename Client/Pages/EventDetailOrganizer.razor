@@ -14,6 +14,7 @@
 <div class="btn-group mb-4" role="group" aria-label="View options">
     <button type="button" class="btn @(currentComponent == PageComponent.EventDetail ? "btn-primary" : "btn-outline-primary")" @onclick="(() => SetCurrentComponent(PageComponent.EventDetail))">Event Detail</button>
     <button type="button" class="btn @(currentComponent == PageComponent.RegistrationList ? "btn-primary" : "btn-outline-primary")" @onclick="(() => SetCurrentComponent(PageComponent.RegistrationList))">Registrations</button>
+    <button type="button" class="btn @(currentComponent == PageComponent.RegistrationRolePasswords ? "btn-primary" : "btn-outline-primary")" @onclick="(() => SetCurrentComponent(PageComponent.RegistrationRolePasswords))">Registrations role passwords</button>
     <!-- Add more buttons as necessary -->
 </div>
 
@@ -29,24 +30,26 @@ else
                 <MyEventDetail Event="eventDetail" ToggleEditMode="ToggleEditMode" />
                 break;
             case PageComponent.RegistrationList:
-                <FluentDivider></FluentDivider>
                 <RegistrationList EventId="@EventId" />
+                break;
+            case PageComponent.RegistrationRolePasswords:
+                <RegistrationRolePasswordsEdit MyEventDto="@eventDetail" />
                 break;
             // Add more cases as necessary
         }
 
         @if (isEditMode)
         {
-            <EventEdit EventDetail="eventDetail" ToggleEditMode="ToggleEditMode" HandleValidSubmit="HandleValidSubmit" />
+            <MyEventEdit EventDetail="eventDetail" ToggleEditMode="ToggleEditMode" HandleValidSubmit="HandleValidSubmit" />
         }
-    
 }
 
 @code {
     public enum PageComponent
     {
         EventDetail,
-        RegistrationList
+        RegistrationList,
+        RegistrationRolePasswords,
         // Add more components as necessary
     }
 
