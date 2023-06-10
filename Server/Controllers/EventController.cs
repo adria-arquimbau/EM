@@ -106,11 +106,11 @@ public class EventController : ControllerBase
         
         var eventToUpdate = await _context.Events
             .Where(x => x.Id == eventDto.Id)
-            .Include(x => x.Owner)
+            .Include(x => x.Owners)
             .Include(x => x.RegistrationRolePasswords)
             .SingleAsync(cancellationToken: cancellationToken);
         
-        if (eventToUpdate.Owner.Id != userId)
+        if (eventToUpdate.Owners.All(o => o.Id != userId))
         {
             return Forbid();
         }
@@ -150,11 +150,11 @@ public class EventController : ControllerBase
         
         var eventRequest = await _context.Events
             .Where(x => x.Id == eventId)
-            .Include(x => x.Owner)
+            .Include(x => x.Owners)
             .Include(x => x.Registrations.Where(r => r.Role == RegistrationRole.Staff))
             .SingleAsync(cancellationToken: cancellationToken); 
 
-        if (eventRequest.Owner.Id != userId)   
+        if (eventRequest.Owners.All(o => o.Id != userId))   
         {
             var userRegistration = eventRequest.Registrations.FirstOrDefault(x => x.UserId == userId && x is { Role: RegistrationRole.Staff, State: RegistrationState.Accepted });
 
@@ -224,10 +224,10 @@ public class EventController : ControllerBase
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         var eventToUpload = await _context.Events
-            .Include(x => x.Owner)
+            .Include(x => x.Owners)
             .SingleAsync(x => x.Id == eventId, cancellationToken);
         
-        if (eventToUpload.Owner.Id != userId)
+        if (eventToUpload.Owners.All(o => o.Id != userId))
         {
             return Forbid();
         }
@@ -247,10 +247,10 @@ public class EventController : ControllerBase
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         var eventToDeleteImage = await _context.Events
-            .Include(x => x.Owner)
+            .Include(x => x.Owners)
             .SingleAsync(x => x.Id == eventId, cancellationToken);
 
-        if (eventToDeleteImage.Owner.Id != userId)
+        if (eventToDeleteImage.Owners.All(o => o.Id != userId))
         {
             return Forbid();
         }

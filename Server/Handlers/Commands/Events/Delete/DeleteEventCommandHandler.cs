@@ -21,12 +21,12 @@ public class DeleteEventCommandHandler : IRequestHandler<DeleteEventCommandReque
     public async Task Handle(DeleteEventCommandRequest request, CancellationToken cancellationToken)
     {
         var eventToDelete = await _context.Events
-            .Include(x => x.Owner)
+            .Include(x => x.Owners)
             .Include(x => x.Registrations.Where(r => r.State == RegistrationState.Accepted && r.Role == RegistrationRole.Staff))
             .ThenInclude(x => x.User)
             .SingleAsync(e => e.Id == request.EventId, cancellationToken: cancellationToken);
 
-        if (eventToDelete.Owner.Id != request.UserId)
+        if (eventToDelete.Owners.All(o => o.Id != request.UserId))
         {
             throw new Exception("You are not the owner of this event");
         }

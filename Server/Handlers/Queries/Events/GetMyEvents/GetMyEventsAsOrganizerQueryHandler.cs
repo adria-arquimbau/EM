@@ -17,7 +17,7 @@ public class GetMyEventsAsOrganizerQueryHandler : IRequestHandler<GetMyEventsAsO
     public async Task<List<MyEventDto>> Handle(GetMyEventsAsOrganizerQueryRequest request, CancellationToken cancellationToken)
     {
         return await _context.Events
-            .Where(x => x.Owner.Id == request.UserId)
+            .Where(x => x.Owners.All(o => o.Id == request.UserId))
             .Select(x => new MyEventDto
             {
                 Id = x.Id,

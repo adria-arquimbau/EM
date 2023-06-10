@@ -18,11 +18,11 @@ public class UpdateEventCommandHandler : IRequestHandler<UpdateEventCommandReque
     public async Task Handle(UpdateEventCommandRequest request, CancellationToken cancellationToken)
     {
         var eventToUpdate = await _context.Events
-            .Include(x => x.Owner)
+            .Include(x => x.Owners)
             .Include(x => x.RegistrationRolePasswords)
             .SingleAsync(e => e.Id == request.EventDto.Id, cancellationToken: cancellationToken);
 
-        if (eventToUpdate.Owner.Id != request.UserId)
+        if (eventToUpdate.Owners.All(o => o.Id != request.UserId))
         {
             throw new Exception("You are not the owner of this event");
         }

@@ -65,10 +65,10 @@ public class RegistrationController : ControllerBase
         var registration = await _context.Registrations
             .Include(x => x.User)
             .Include(x => x.Event)
-            .ThenInclude(x => x.Owner)
+            .ThenInclude(x => x.Owners)
             .SingleAsync(x => x.Id == registrationUpdateRequest.Id, cancellationToken: cancellationToken);
 
-        if (registration.Event.Owner.Id != userId)
+        if (registration.Event.Owners.All(o => o.Id != userId))
         {
             return Forbid();
         }
@@ -139,10 +139,10 @@ public class RegistrationController : ControllerBase
         var registration = await _context.Registrations
             .Include(x => x.User)
             .Include(x => x.Event)
-            .ThenInclude(x => x.Owner)
+            .ThenInclude(x => x.Owners)
             .SingleAsync(x => x.Id == registrationId, cancellationToken: cancellationToken);
 
-        if (registration.Event.Owner.Id != userId)
+        if (registration.Event.Owners.All(o => o.Id != userId))
         {
             return Forbid();
         }

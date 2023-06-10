@@ -18,13 +18,13 @@ public class GetMyEventAsOrganizerQueryHandler : IRequestHandler<GetMyEventAsOrg
     public async Task<MyEventDto> Handle(GetMyEventAsOrganizerQueryRequest request, CancellationToken cancellationToken)
     {
         var eventEntity = await _context.Events
-            .Include(e => e.Owner)
+            .Include(e => e.Owners)
             .Include(e => e.Registrations)
             .Include(e => e.RegistrationRolePasswords)
             .Include(e => e.Prices)
             .SingleAsync(e => e.Id == request.EventId, cancellationToken: cancellationToken);
 
-        if (eventEntity.Owner.Id != request.UserId)
+        if (eventEntity.Owners.All(o => o.Id != request.UserId))
         {
             var userRegistration = eventEntity.Registrations.FirstOrDefault(x => x.UserId == request.UserId && x is { Role: RegistrationRole.Staff, State: RegistrationState.Accepted });
 

@@ -9,10 +9,7 @@ public class EventTypeConfiguration : IEntityTypeConfiguration<Event>
     public void Configure(EntityTypeBuilder<Event> builder)
     {
         builder.HasKey(x => x.Id);
-        builder.HasOne(x => x.Owner)
-            .WithMany(o => o.OwnedEvents)
-            .HasForeignKey(x => x.OwnerId)
-            .IsRequired()
-            .OnDelete(DeleteBehavior.Restrict);
+        builder.HasMany(e => e.Owners)
+            .WithMany(u => u.OwnedEvents);
     }
 }

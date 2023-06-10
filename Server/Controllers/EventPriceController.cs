@@ -28,10 +28,10 @@ public class EventPriceController : ControllerBase
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
      
         var sportEvent = await _context.Events
-            .Include(x => x.Owner)
+            .Include(x => x.Owners)
             .SingleAsync(x => x.Id == priceRequest.EventId, cancellationToken);
 
-        if(sportEvent.Owner.Id != userId)   
+        if(sportEvent.Owners.All(o => o.Id != userId))   
         {
             return Unauthorized();
         }
@@ -50,10 +50,10 @@ public class EventPriceController : ControllerBase
      
         var price = await _context.EventPrices
             .Include(x => x.Event)
-            .ThenInclude(x => x.Owner)
+            .ThenInclude(x => x.Owners)
             .SingleAsync(x => x.Id == priceId, cancellationToken);
 
-        if(price.Event.Owner.Id != userId)   
+        if(price.Event.Owners.All(o => o.Id != userId))   
         {
             return Unauthorized();
         }

@@ -6,12 +6,11 @@ public class Event
     public DateTime CreationDate { get; private set; }
     public DateTime StartDate { get; private set; }
     public DateTime FinishDate { get; private set; }
-    public string OwnerId { get; private set;  }
-    public ApplicationUser Owner { get; private set;  }
+    public ICollection<ApplicationUser> Owners { get; private set;  } = new List<ApplicationUser>();
     public string Name { get; private set; }
-    public string Description { get; private set; }
+    public string Description { get; private set; } 
     public string Location { get; private set; }
-    public Uri? ImageUrl { get; set; }   
+    public Uri? ImageUrl { get; set; }      
     public int MaxRegistrations { get; private set; }       
     public bool IsPublic { get; private set; } 
     public bool IsDeleted { get; set; }     
@@ -24,7 +23,7 @@ public class Event
     
     public Event(string name, string description, string location, int maxRegistrations, ApplicationUser owner, DateTime startDate, DateTime finishDate, DateTime openRegistrationsDate, DateTime closeRegistrationsDate)
     {
-        Owner = owner;
+        Owners.Add(owner);
         Name = name;    
         Description = description;    
         CreationDate = DateTime.UtcNow;
