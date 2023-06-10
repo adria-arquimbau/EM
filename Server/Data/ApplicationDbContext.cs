@@ -26,5 +26,8 @@ public class ApplicationDbContext : ApiAuthorizationDbContext<ApplicationUser>
         modelBuilder.ApplyConfiguration(new RegistrationTypeConfiguration());
         modelBuilder.ApplyConfiguration(new RegistrationRolePasswordTypeConfiguration());
         modelBuilder.ApplyConfiguration(new EventPricesTypeConfiguration());
+        
+        modelBuilder.Entity<Event>()
+            .HasQueryFilter(entity => !entity.IsDeleted);
     }
 }

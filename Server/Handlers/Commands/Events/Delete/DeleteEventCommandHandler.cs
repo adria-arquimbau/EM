@@ -47,7 +47,7 @@ public class DeleteEventCommandHandler : IRequestHandler<DeleteEventCommandReque
             }
         }
 
-        _context.Remove(eventToDelete);
+        eventToDelete.IsDeleted = true;
         await _context.SaveChangesAsync(cancellationToken);
     }
 }
