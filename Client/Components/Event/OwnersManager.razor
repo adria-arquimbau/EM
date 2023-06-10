@@ -1,10 +1,41 @@
 ﻿@using EventsManager.Shared.Dtos
+@inject HttpClient Http
 
 <h3>OwnersManager</h3>
+
+
+@if (users == null)
+{
+    <p><em>Loading...</em></p>
+}
+else if (!users.Any())
+{
+    <p><em>No users found.</em></p>
+}
+else
+{
+    foreach (var user in users)
+    {
+        <p>@user.Name</p>  <!-- Replace with the structure you want -->
+    }
+}
 
 @code {
     [Parameter]
     public MyEventDto? MyEventDto { get; set; }
     [Parameter]
     public EventCallback RefreshEvent { get; set; }
+
+    private List<UserDto>? users = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetAllUsers();
+    }
+    
+    private async Task GetAllUsers()
+    {
+        var response = await Http.GetFromJsonAsync<List<UserDto>>("User/all-users");
+        users = response;
+    }
 }
