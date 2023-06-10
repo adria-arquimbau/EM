@@ -16,6 +16,11 @@
     <button type="button" class="btn @(currentComponent == PageComponent.RegistrationList ? "btn-primary" : "btn-outline-primary")" @onclick="(() => SetCurrentComponent(PageComponent.RegistrationList))">Registrations</button>
     <button type="button" class="btn @(currentComponent == PageComponent.RegistrationRolePasswords ? "btn-primary" : "btn-outline-primary")" @onclick="(() => SetCurrentComponent(PageComponent.RegistrationRolePasswords))">Registrations role passwords</button>
     <button type="button" class="btn @(currentComponent == PageComponent.Price ? "btn-primary" : "btn-outline-primary")" @onclick="(() => SetCurrentComponent(PageComponent.Price))">Price</button>
+    @if (iAmTheCreator)
+    {
+        <button type="button" class="btn @(currentComponent == PageComponent.OwnersManagement ? "btn-primary" : "btn-outline-primary")" @onclick="(() => SetCurrentComponent(PageComponent.OwnersManagement))">Owners Management</button>
+
+    }
     <!-- Add more buttons as necessary -->
 </div>
 
@@ -39,6 +44,9 @@ else
             case PageComponent.Price:
                 <PriceEdit MyEventDto="@eventDetail" RefreshEvent="LoadEventDetail" />
                 break;
+            case PageComponent.OwnersManagement:
+                <OwnersManager MyEventDto="@eventDetail" RefreshEvent="LoadEventDetail" />
+                break;
             // Add more cases as necessary
         }
 
@@ -54,7 +62,8 @@ else
         EventDetail,
         RegistrationList,
         RegistrationRolePasswords,
-        Price
+        Price,
+        OwnersManagement,
         // Add more components as necessary
     }
 
@@ -63,11 +72,17 @@ else
 
     private MyEventDto eventDetail;
     private bool isEditMode;
+    private bool iAmTheCreator;
     private PageComponent currentComponent = PageComponent.EventDetail;
 
     protected override async Task OnInitializedAsync()
     {
         await LoadEventDetail();
+        var response = await Http.GetAsync($"Event/{EventId}/am-i-the-creator");
+        if (!response.IsSuccessStatusCode)
+        {
+            iAmTheCreator = true;
+        }
     }
 
     private async Task LoadEventDetail()

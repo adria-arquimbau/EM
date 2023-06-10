@@ -71,6 +71,27 @@ public class EventController : ControllerBase
         return Ok(response); 
     }
     
+    [HttpGet("{eventId:guid}/am-i-the-creator")]
+    [Authorize(Roles = "Organizer")] 
+    public async Task<IActionResult> AmITheOwner([FromRoute] Guid eventId, CancellationToken cancellationToken)
+    {   
+        // var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        //
+        // var eventToUpdate = await _context.Events
+        //     .Where(x => x.Id == eventId)
+        //     .Include(x => x.Creator)
+        //     .SingleAsync(cancellationToken: cancellationToken);
+        //
+        // var amITheCreator = eventToUpdate.Creator.Id == userId;
+        //
+        // if (amITheCreator)
+        // {   
+        //     return Ok();
+        // }
+        //
+        return Forbid();
+    }
+    
     [HttpPost]
     [Authorize(Roles = "Organizer")] 
     public async Task<IActionResult> CreateAnEvent([FromBody] CreateEventRequest request)
@@ -141,7 +162,7 @@ public class EventController : ControllerBase
         
         return Ok(); 
     }
-    
+
     [HttpGet("{eventId:guid}/registrations")]
     [Authorize(Roles = "Organizer, Staff")]
     public async Task<IActionResult> GetAllRiderRegistrationsByEventId([FromRoute] Guid eventId, [FromQuery] string? search, [FromQuery] RegistrationRole? role, CancellationToken cancellationToken)

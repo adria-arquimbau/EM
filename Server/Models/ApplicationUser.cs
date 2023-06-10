@@ -16,6 +16,7 @@ public class ApplicationUser : IdentityUser
     public virtual DateTime? RegistrationDate { get; set; }
     public virtual ICollection<Registration> Registrations { get; set; }
     public virtual List<Event> OwnedEvents { get; set; } = new();
+    public virtual List<Event> CreatorEvents { get; set; } = new();
         
     public void UpdateLastLoginTime()   
     {

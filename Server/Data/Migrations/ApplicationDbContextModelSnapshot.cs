@@ -22,6 +22,21 @@ namespace EventsManager.Server.Data.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("ApplicationUserEvent", b =>
+                {
+                    b.Property<Guid>("OwnedEventsId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("OwnersId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("OwnedEventsId", "OwnersId");
+
+                    b.HasIndex("OwnersId");
+
+                    b.ToTable("UserEventOwner", (string)null);
+                });
+
             modelBuilder.Entity("Duende.IdentityServer.EntityFramework.Entities.DeviceFlowCodes", b =>
                 {
                     b.Property<string>("UserCode")
@@ -267,6 +282,10 @@ namespace EventsManager.Server.Data.Migrations
                     b.Property<DateTime>("CreationDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("CreatorId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -302,9 +321,9 @@ namespace EventsManager.Server.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("OwnerId");
+                    b.HasIndex("CreatorId");
 
-                    b.ToTable("Events", (string)null);
+                    b.ToTable("Events");
                 });
 
             modelBuilder.Entity("EventsManager.Server.Models.EventPrice", b =>
@@ -329,7 +348,7 @@ namespace EventsManager.Server.Data.Migrations
 
                     b.HasIndex("EventId");
 
-                    b.ToTable("EventPrices", (string)null);
+                    b.ToTable("EventPrices");
                 });
 
             modelBuilder.Entity("EventsManager.Server.Models.Registration", b =>
@@ -368,7 +387,7 @@ namespace EventsManager.Server.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Registrations", (string)null);
+                    b.ToTable("Registrations");
                 });
 
             modelBuilder.Entity("EventsManager.Server.Models.RegistrationRolePassword", b =>
@@ -391,7 +410,7 @@ namespace EventsManager.Server.Data.Migrations
 
                     b.HasIndex("EventId");
 
-                    b.ToTable("RegistrationRolePasswords", (string)null);
+                    b.ToTable("RegistrationRolePasswords");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -531,15 +550,30 @@ namespace EventsManager.Server.Data.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("ApplicationUserEvent", b =>
+                {
+                    b.HasOne("EventsManager.Server.Models.Event", null)
+                        .WithMany()
+                        .HasForeignKey("OwnedEventsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("EventsManager.Server.Models.ApplicationUser", null)
+                        .WithMany()
+                        .HasForeignKey("OwnersId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("EventsManager.Server.Models.Event", b =>
                 {
-                    b.HasOne("EventsManager.Server.Models.ApplicationUser", "Owner")
-                        .WithMany("OwnedEvents")
-                        .HasForeignKey("OwnerId")
+                    b.HasOne("EventsManager.Server.Models.ApplicationUser", "Creator")
+                        .WithMany("CreatorEvents")
+                        .HasForeignKey("CreatorId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.Navigation("Owner");
+                    b.Navigation("Creator");
                 });
 
             modelBuilder.Entity("EventsManager.Server.Models.EventPrice", b =>
@@ -636,7 +670,7 @@ namespace EventsManager.Server.Data.Migrations
 
             modelBuilder.Entity("EventsManager.Server.Models.ApplicationUser", b =>
                 {
-                    b.Navigation("OwnedEvents");
+                    b.Navigation("CreatorEvents");
 
                     b.Navigation("Registrations");
                 });

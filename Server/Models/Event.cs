@@ -6,6 +6,8 @@ public class Event
     public DateTime CreationDate { get; private set; }
     public DateTime StartDate { get; private set; }
     public DateTime FinishDate { get; private set; }
+    public string CreatorId { get; private set; }
+    public ApplicationUser Creator { get; private set; }
     public ICollection<ApplicationUser> Owners { get; private set;  } = new List<ApplicationUser>();
     public string Name { get; private set; }
     public string Description { get; private set; } 
@@ -21,9 +23,10 @@ public class Event
     public ICollection<EventPrice> Prices { get; set; } = new List<EventPrice>();
     private Event() { }
     
-    public Event(string name, string description, string location, int maxRegistrations, ApplicationUser owner, DateTime startDate, DateTime finishDate, DateTime openRegistrationsDate, DateTime closeRegistrationsDate)
+    public Event(string name, string description, string location, int maxRegistrations, ApplicationUser creator, DateTime startDate, DateTime finishDate, DateTime openRegistrationsDate, DateTime closeRegistrationsDate)
     {
-        Owners.Add(owner);
+        Creator = creator;
+        Owners.Add(creator);
         Name = name;    
         Description = description;    
         CreationDate = DateTime.UtcNow;

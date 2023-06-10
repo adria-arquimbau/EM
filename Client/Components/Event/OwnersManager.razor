@@ -1,0 +1,10 @@
+﻿@using EventsManager.Shared.Dtos
+
+<h3>OwnersManager</h3>
+
+@code {
+    [Parameter]
+    public MyEventDto? MyEventDto { get; set; }
+    [Parameter]
+    public EventCallback RefreshEvent { get; set; }
+}
