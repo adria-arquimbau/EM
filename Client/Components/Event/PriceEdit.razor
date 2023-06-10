@@ -1,8 +1,12 @@
 ﻿@using EventsManager.Shared.Dtos
+@using EventsManager.Client.Components.Modals
 @using Microsoft.AspNetCore.Components.Forms
 @inject HttpClient Http
 
 <h3>PriceEdit</h3>
+
+<ConfirmationModal Title="Confirmation" Message="Are you sure you want to remove this price?" 
+                   Visible="@confirmModalVisible" ConfirmationChanged="OnConfirmationChanged" />
 
 <EditForm Model="MyEventDto" class="mt-4">
     <DataAnnotationsValidator />
@@ -27,7 +31,7 @@
                                     }
                                 </h5>
                                 <p class="card-text text-muted">Start: @price.StartDate.ToString("MM/dd/yyyy") - End: @price.EndDate.ToString("MM/dd/yyyy")</p>
-                                <button class="btn btn-danger" @onclick="(() => RemovePrice(price))">Remove</button>
+                                <button class="btn btn-danger" @onclick="(() => ConfirmRemovePrice(price))">Remove</button>
                             </div>
                         </div>
                     </div>
@@ -76,7 +80,10 @@
     public EventCallback RefreshEvent { get; set; }
     
     private EventPriceDto newPrice = new();
+    private EventPriceDto priceToRemove; // Store the price to remove after confirmation
+
     private bool isModalOpen = false;
+    private bool confirmModalVisible = false; // Confirmation modal state
     private string modalClass => isModalOpen ? "modal d-block" : "modal";
 
     private void OpenModal()
@@ -108,9 +115,24 @@
         isModalOpen = false;
     }
 
-    private void RemovePrice(EventPriceDto price)
+    // Open the confirmation modal instead of removing directly
+    private void ConfirmRemovePrice(EventPriceDto price)
     {
-        MyEventDto?.Prices.Remove(price);
-        RefreshEvent.InvokeAsync(MyEventDto);
+        priceToRemove = price;
+        confirmModalVisible = true;
+    }
+
+    // Confirmation handler
+    private async Task OnConfirmationChanged(bool confirmed)
+    {
+        if (confirmed)
+        {
+            await Http.DeleteAsync($"EventPrice/{priceToRemove.Id}");
+            await RefreshEvent.InvokeAsync(MyEventDto);
+        }
+
+    // Reset state
+        priceToRemove = null;
+        confirmModalVisible = false;
     }
 }

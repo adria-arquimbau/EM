@@ -58,6 +58,7 @@ public class GetMyEventAsOrganizerQueryHandler : IRequestHandler<GetMyEventAsOrg
             RiderMarshallRegistrationPassword = eventEntity.RegistrationRolePasswords.SingleOrDefault(r => r.Role == RegistrationRole.RiderMarshal)?.Password,
             Prices = eventEntity.Prices.Select(x => new EventPriceDto
             {
+                Id = x.Id,
                 Price = x.Price,
                 StartDate = x.StartDate,
                 EndDate = x.EndDate

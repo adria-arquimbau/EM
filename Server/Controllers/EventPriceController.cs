@@ -40,5 +40,27 @@ public class EventPriceController : ControllerBase
         await _context.SaveChangesAsync(cancellationToken);
         
         return Ok();
-    }       
+    }    
+    
+    [HttpDelete("{priceId:guid}")]
+    [Authorize(Roles = "Organizer")]
+    public async Task<ActionResult> Remove([FromRoute] Guid priceId, CancellationToken cancellationToken)
+    {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+     
+        var price = await _context.EventPrices
+            .Include(x => x.Event)
+            .ThenInclude(x => x.Owner)
+            .SingleAsync(x => x.Id == priceId, cancellationToken);
+
+        if(price.Event.Owner.Id != userId)   
+        {
+            return Unauthorized();
+        }
+        
+        _context.EventPrices.Remove(price);
+        await _context.SaveChangesAsync(cancellationToken);
+        
+        return Ok();
+    }   
 }
