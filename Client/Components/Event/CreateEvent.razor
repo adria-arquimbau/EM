@@ -50,7 +50,13 @@
 </EditForm>
 
 @code {
-    private CreateEventRequest createEventRequest = new();
+    private CreateEventRequest createEventRequest = new CreateEventRequest
+    {
+        StartDate = DateTime.Now,
+        FinishDate = DateTime.Now.AddDays(7),
+        OpenRegistrationsDate = DateTime.Now,
+        CloseRegistrationsDate = DateTime.Now.AddDays(7)
+    };
 
     private async Task CreateEventCall()
     {

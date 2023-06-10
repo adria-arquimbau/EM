@@ -90,10 +90,13 @@
     {
         newPrice = new EventPriceDto
         {
-            EventId = MyEventDto.Id
+            EventId = MyEventDto.Id,
+            StartDate = DateTime.Today,  // Set start date to today
+            EndDate = DateTime.Today.AddDays(7)  // Set end date to one week later
         };
         isModalOpen = true;
     }
+
 
     private async void AddPrice()
     {
