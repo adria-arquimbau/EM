@@ -13,6 +13,7 @@ public class ApplicationDbContext : ApiAuthorizationDbContext<ApplicationUser>
     public DbSet<RegistrationRolePassword> RegistrationRolePasswords { get; set; }
     public DbSet<Registration> Registrations { get; set; }
     public override DbSet<ApplicationUser> Users { get; set; }  
+    public DbSet<EventPrice> EventPrices { get; set; }  
     
     public ApplicationDbContext(DbContextOptions options, IOptions<OperationalStoreOptions> operationalStoreOptions) : base(options, operationalStoreOptions)
     {
@@ -24,5 +25,6 @@ public class ApplicationDbContext : ApiAuthorizationDbContext<ApplicationUser>
         modelBuilder.ApplyConfiguration(new EventTypeConfiguration());
         modelBuilder.ApplyConfiguration(new RegistrationTypeConfiguration());
         modelBuilder.ApplyConfiguration(new RegistrationRolePasswordTypeConfiguration());
+        modelBuilder.ApplyConfiguration(new EventPricesTypeConfiguration());
     }
 }
