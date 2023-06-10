@@ -4,26 +4,45 @@
 
 <h3>PriceEdit</h3>
 
-<EditForm Model="MyEventDto">
+<EditForm Model="MyEventDto" class="mt-4">
     <DataAnnotationsValidator />
     <div class="container">
         <div class="row">
-            @if (MyEventDto?.Prices != null)
+            @if (MyEventDto?.Prices != null && MyEventDto.Prices.Count > 0)
             {
                 foreach (var price in MyEventDto.Prices)
                 {
-                    <div class="col-md-4">
-                        <div class="card mb-4 shadow-sm">
+                    <div class="col-md-4 mb-4">
+                        <div class="card">
                             <div class="card-body">
-                                <h5 class="card-title">Price: @price.Price €</h5>
-                                <h6 class="card-subtitle mb-2 text-muted">Start: @price.StartDate - End: @price.EndDate</h6>
+                                <h5 class="card-title">
+                                    Price: 
+                                    @if (price.Price is 0 or null)
+                                    {
+                                        <span>FREE</span>
+                                    }
+                                    else
+                                    {
+                                        <span>@price.Price €</span>
+                                    }
+                                </h5>
+                                <p class="card-text text-muted">Start: @price.StartDate.ToString("MM/dd/yyyy") - End: @price.EndDate.ToString("MM/dd/yyyy")</p>
                                 <button class="btn btn-danger" @onclick="(() => RemovePrice(price))">Remove</button>
                             </div>
                         </div>
                     </div>
                 }
             }
-            <button class="btn btn-primary" @onclick="OpenModal">Add Price</button>
+            else
+            {
+                <div class="col-12">
+                    <p>No prices yet. Add one below.</p>
+                </div>
+            }
+
+            <div class="col-12 mt-4">
+                <button class="btn btn-primary" @onclick="OpenModal">Add Price</button>
+            </div>
         </div>
     </div>
 </EditForm>
@@ -38,7 +57,7 @@
                 </button>
             </div>
             <div class="modal-body">
-                <InputNumber @bind-Value="newPrice.Price" class="form-control mb-2" placeholder="Price" /> Set empty for free
+                <InputNumber @bind-Value="newPrice.Price" class="form-control mb-2" placeholder="Price (leave empty for free)" />
                 <InputDate @bind-Value="newPrice.StartDate" class="form-control mb-2" placeholder="Start Date" />
                 <InputDate @bind-Value="newPrice.EndDate" class="form-control mb-2" placeholder="End Date" />
             </div>
@@ -82,8 +101,6 @@
         {
             // Handle the error here
         }
-
-        
     }
 
     private void CloseModal()
