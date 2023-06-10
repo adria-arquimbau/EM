@@ -21,6 +21,7 @@ public class GetMyEventAsOrganizerQueryHandler : IRequestHandler<GetMyEventAsOrg
             .Include(e => e.Owner)
             .Include(e => e.Registrations)
             .Include(e => e.RegistrationRolePasswords)
+            .Include(e => e.Prices)
             .SingleAsync(e => e.Id == request.EventId, cancellationToken: cancellationToken);
 
         if (eventEntity.Owner.Id != request.UserId)
@@ -54,7 +55,13 @@ public class GetMyEventAsOrganizerQueryHandler : IRequestHandler<GetMyEventAsOrg
             StaffRegistrationPassword = eventEntity.RegistrationRolePasswords.SingleOrDefault(r => r.Role == RegistrationRole.Staff)?.Password,
             RiderRegistrationPassword = eventEntity.RegistrationRolePasswords.SingleOrDefault(r => r.Role == RegistrationRole.Rider)?.Password,
             MarshallRegistrationPassword = eventEntity.RegistrationRolePasswords.SingleOrDefault(r => r.Role == RegistrationRole.Marshal)?.Password,
-            RiderMarshallRegistrationPassword = eventEntity.RegistrationRolePasswords.SingleOrDefault(r => r.Role == RegistrationRole.RiderMarshal)?.Password
+            RiderMarshallRegistrationPassword = eventEntity.RegistrationRolePasswords.SingleOrDefault(r => r.Role == RegistrationRole.RiderMarshal)?.Password,
+            Prices = eventEntity.Prices.Select(x => new EventPriceDto
+            {
+                Price = x.Price,
+                StartDate = x.StartDate,
+                EndDate = x.EndDate
+            }).ToList()
         };
     }
 }

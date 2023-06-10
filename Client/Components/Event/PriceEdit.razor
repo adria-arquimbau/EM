@@ -1,0 +1,47 @@
+﻿@using EventsManager.Shared.Dtos
+@using Microsoft.AspNetCore.Components.Forms
+
+<h3>PriceEdit</h3>
+
+<EditForm Model="MyEventDto">
+    <DataAnnotationsValidator />
+    <div class="container">
+        <div class="row">
+            @if (MyEventDto?.Prices != null)
+            {
+                foreach (var price in MyEventDto.Prices)
+                {
+                    <div class="col-md-4">
+                        <div class="card mb-4 shadow-sm">
+                            <div class="card-body">
+                                <h5 class="card-title">Price: @price.Price</h5>
+                                <h6 class="card-subtitle mb-2 text-muted">Start: @price.StartDate - End: @price.EndDate</h6>
+                                <button class="btn btn-danger" @onclick="(() => RemovePrice(price))">Remove</button>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+            <button class="btn btn-primary" @onclick="AddPrice">Add Price</button>
+        </div>
+    </div>
+</EditForm>
+
+@code {
+    [Parameter]
+    public MyEventDto? MyEventDto { get; set; }
+    [Parameter]
+    public EventCallback RefreshEvent { get; set; }
+
+    private void RemovePrice(EventPriceDto price)
+    {
+        MyEventDto?.Prices.Remove(price);
+        RefreshEvent.InvokeAsync(MyEventDto);
+    }
+
+    private void AddPrice()
+    {
+        MyEventDto?.Prices.Add(new EventPriceDto() { Price = 0, StartDate = DateTime.Now, EndDate = DateTime.Now });
+        RefreshEvent.InvokeAsync(MyEventDto);
+    }
+}

@@ -24,4 +24,5 @@ public class MyEventDto
     public string? RiderRegistrationPassword { get; set; }
     public string? MarshallRegistrationPassword { get; set; }
     public string? RiderMarshallRegistrationPassword { get; set; }
+    public List<EventPriceDto> Prices { get; set; }
 }
