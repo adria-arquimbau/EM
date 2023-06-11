@@ -1,5 +1,6 @@
 ﻿using EventsManager.Server.Data;
 using EventsManager.Server.Models;
+using EventsManager.Shared.Enums;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -20,6 +21,7 @@ public class CreateEventCommandHandler : IRequestHandler<CreateEventCommandReque
 
         var newEvent = new Event(request.Request.Name, request.Request.Description, request.Request.Location, request.Request.MaxRegistrations, owner, request.Request.StartDate, request.Request.FinishDate, request.Request.OpenRegistrationsDate, request.Request.CloseRegistrationsDate);
         
+        newEvent.Registrations.Add(new Registration(owner, RegistrationRole.Staff, RegistrationState.Accepted, newEvent));
         _context.Events.Add(newEvent);
         await _context.SaveChangesAsync(cancellationToken);
     }
