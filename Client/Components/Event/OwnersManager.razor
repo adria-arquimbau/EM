@@ -16,7 +16,7 @@
 {
     <p><em>Start typing to search for a user...</em></p>
 }
-else if (filteredUsers == null || !filteredUsers.Any())
+else if (_filteredUsers == null || !_filteredUsers.Any())
 {
     <p><em>No results found...</em></p>
 }
@@ -30,7 +30,7 @@ else
             </tr>
         </thead>
         <tbody>
-            @foreach (var user in filteredUsers)
+            @foreach (var user in _filteredUsers)
             {
                 <tr>
                     <td>@user.UserName</td>
@@ -51,6 +51,14 @@ else
     </table>
 }
 
+<h2>Owners List</h2>
+<ul>
+    @foreach (var user in currentOwners)
+    {
+        <li>@user.UserName</li>
+    }
+</ul>
+
 <ConfirmationModal Title="Confirmation" Message="@confirmationMessage"
                    Visible="showConfirmation" ConfirmationChanged="HandleConfirmation">
 </ConfirmationModal>
@@ -62,7 +70,8 @@ else
     public EventCallback RefreshEvent { get; set; }
 
     private List<UserDtoToSetASOwner>? _users;
-    private List<UserDtoToSetASOwner>? filteredUsers;
+    private List<UserDtoToSetASOwner>? _filteredUsers = new List<UserDtoToSetASOwner>();
+    private List<UserDtoToSetASOwner> currentOwners = new List<UserDtoToSetASOwner>();
     private bool showConfirmation;
     private UserDtoToSetASOwner selectedUser;
     private string confirmationMessage;
@@ -127,6 +136,7 @@ else
 
     private void OnSearchUsers()
     {
-        filteredUsers = !string.IsNullOrWhiteSpace(searchTerm) ? _users.Where(user => user.UserName.ToLower().Contains(searchTerm)).ToList() : null;
+        _filteredUsers = !string.IsNullOrWhiteSpace(searchTerm) ? _users.Where(user => user.UserName.ToLower().Contains(searchTerm)).ToList() : new List<UserDtoToSetASOwner>();
+        currentOwners = _users.Where(user => user.IsOwner).ToList();
     }
 }
