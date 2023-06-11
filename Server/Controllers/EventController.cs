@@ -93,7 +93,13 @@ public class EventController : ControllerBase
         
         eventToUpdate.Owners.Add(owner);
 
-        eventToUpdate.Registrations.Add(new Registration(owner, RegistrationRole.Staff, RegistrationState.Accepted, eventToUpdate));
+        var registrationAlreadyExist = await _context.Registrations
+            .AnyAsync(x => x.Event.Id == eventToUpdate.Id && x.User.Id == owner.Id && x.Role == RegistrationRole.Staff, cancellationToken: cancellationToken);
+
+        if (!registrationAlreadyExist)
+        {
+            eventToUpdate.Registrations.Add(new Registration(owner, RegistrationRole.Staff, RegistrationState.Accepted, eventToUpdate));
+        }
         
         await _context.SaveChangesAsync(cancellationToken);
         return Ok();
