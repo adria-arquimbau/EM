@@ -185,7 +185,7 @@ else
     private string GetRegistrationStateText()
     {
         if (_eventDetail.PreAndAcceptedRidersRegistrationsCount >= _eventDetail.MaxRegistrations
-            || DateTime.Now > _eventDetail.OpenRegistrationsDate
+            || DateTime.Now < _eventDetail.OpenRegistrationsDate
             || DateTime.Now > _eventDetail.CloseRegistrationsDate)
         {
             return "CLOSED";
@@ -197,8 +197,8 @@ else
     private string GetRegistrationStateColor()
     {
         if (_eventDetail.PreAndAcceptedRidersRegistrationsCount >= _eventDetail.MaxRegistrations
-            || DateTime.Now > _eventDetail.OpenRegistrationsDate
-            || DateTime.Now > _eventDetail.CloseRegistrationsDate)
+            || DateTime.UtcNow < _eventDetail.OpenRegistrationsDate
+            || DateTime.UtcNow > _eventDetail.CloseRegistrationsDate)
         {
             return "red"; // Apply red color for CLOSED state
         }

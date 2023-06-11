@@ -39,7 +39,14 @@ public class RegistrationController : ControllerBase
         {
             return BadRequest("User already registered for this event");
         }
-
+        
+        var currentDate = DateTime.UtcNow;
+        if (currentDate < eventToRegister.OpenRegistrationsDate || 
+            currentDate > eventToRegister.CloseRegistrationsDate)
+        {
+            return BadRequest("Registrations are currently closed for this event");
+        }
+        
         var registrationRolePassword = await _context.RegistrationRolePasswords
             .Where(x => x.Event.Id == eventId && x.Role == registrationRole)
             .SingleOrDefaultAsync(cancellationToken: cancellationToken);
