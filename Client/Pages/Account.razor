@@ -1,34 +1,33 @@
 ﻿@page "/Account"
 
 @using EventsManager.Client.Components.User
-@using EventsManager.Client.Components.ImageUploader
 @using EventsManager.Shared.Dtos
 @using Microsoft.AspNetCore.Authorization
 
 @inject HttpClient Http
-@inject AuthenticationStateProvider authenticationStateProvider
+@inject AuthenticationStateProvider AuthenticationStateProvider
 
 @attribute [Authorize(Roles = "User")] 
 
 <h3>My account</h3>
 
-@if(user != null)
+@if(User != null)
 {
     <FluentDivider></FluentDivider>
-    <UserInformation User="@user"></UserInformation>
+    <UserInformation User="@User"></UserInformation>
     <FluentDivider></FluentDivider>
 }
-@if(user == null)
+@if(User == null)
 {
     <FluentProgressRing></FluentProgressRing>
 }
 
 @code {
-    private UserDto? user { get; set; }
+    private UserDto? User { get; set; }
     
     protected override async Task OnInitializedAsync()
     {
-        var authState = await authenticationStateProvider.GetAuthenticationStateAsync();
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         if (authState.User.Identity?.IsAuthenticated == true)
         {
             await GetUserInformation();
@@ -37,6 +36,6 @@
 
     private async Task GetUserInformation()
     {
-        user = await Http.GetFromJsonAsync<UserDto>("User");
+        User = await Http.GetFromJsonAsync<UserDto>("User");
     }
 }

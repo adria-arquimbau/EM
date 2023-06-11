@@ -1,6 +1,7 @@
 ﻿@using EventsManager.Shared.Dtos
 @using EventsManager.Shared.Enums
 @using Microsoft.AspNetCore.Components.Forms
+@using System.ComponentModel.DataAnnotations
 
 <div class="modal show d-block" tabindex="-1">
     <div class="modal-dialog">
@@ -50,10 +51,11 @@
         </div>
     </div>
 </div>
-
+    
 @code {
     [Parameter]
-    public MyEventDto EventDetail { get; set; }
+    [Required]
+    public MyEventDto EventDetail { get; set; } = null!;
 
     [Parameter]
     public EventCallback ToggleEditMode { get; set; }

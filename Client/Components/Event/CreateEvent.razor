@@ -1,56 +1,57 @@
 ﻿@using EventsManager.Shared.Requests
 @inject HttpClient Http
+@inject IToastService ToastService
 
 <h3>Create Event</h3>
 
-<EditForm Model="createEventRequest" OnValidSubmit="CreateEventCall">
+<EditForm Model="_createEventRequest" OnValidSubmit="CreateEventCall">
     <DataAnnotationsValidator />
 
     <div class="form-group">
         <label>Event Name:</label>
-        <InputText class="form-control" @bind-Value="createEventRequest.Name" />
+        <InputText class="form-control" @bind-Value="_createEventRequest.Name" />
     </div>
 
     <div class="form-group">
         <label>Description:</label>
-        <InputTextArea class="form-control" @bind-Value="createEventRequest.Description" />
+        <InputTextArea class="form-control" @bind-Value="_createEventRequest.Description" />
     </div>
 
     <div class="form-group">
         <label>Location:</label>
-        <InputText class="form-control" @bind-Value="createEventRequest.Location" />
+        <InputText class="form-control" @bind-Value="_createEventRequest.Location" />
     </div>
 
     <div class="form-group">
         <label>Max Registrations:</label>
-        <InputNumber class="form-control" @bind-Value="createEventRequest.MaxRegistrations" />
+        <InputNumber class="form-control" @bind-Value="_createEventRequest.MaxRegistrations" />
     </div>
 
     <div class="form-group">
         <label>Start Date:</label>
-        <InputDate class="form-control" @bind-Value="createEventRequest.StartDate" />
+        <InputDate class="form-control" @bind-Value="_createEventRequest.StartDate" />
     </div>
 
     <div class="form-group">
         <label>Finish Date:</label>
-        <InputDate class="form-control" @bind-Value="createEventRequest.FinishDate" />
+        <InputDate class="form-control" @bind-Value="_createEventRequest.FinishDate" />
     </div>
 
     <div class="form-group">
         <label>Open Registrations Date:</label>
-        <InputDate class="form-control" @bind-Value="createEventRequest.OpenRegistrationsDate" />
+        <InputDate class="form-control" @bind-Value="_createEventRequest.OpenRegistrationsDate" />
     </div>
 
     <div class="form-group">
         <label>Close Registrations Date:</label>
-        <InputDate class="form-control" @bind-Value="createEventRequest.CloseRegistrationsDate" />
+        <InputDate class="form-control" @bind-Value="_createEventRequest.CloseRegistrationsDate" />
     </div>
 
     <button type="submit" class="btn btn-primary">Create Event</button>
 </EditForm>
 
 @code {
-    private CreateEventRequest createEventRequest = new CreateEventRequest
+    private CreateEventRequest _createEventRequest = new()
     {
         StartDate = DateTime.Now,
         FinishDate = DateTime.Now.AddDays(7),
@@ -60,16 +61,17 @@
 
     private async Task CreateEventCall()
     {
-        var response = await Http.PostAsJsonAsync("Event", createEventRequest);
-
+        var response = await Http.PostAsJsonAsync("Event", _createEventRequest);
+        
+        if (!response.IsSuccessStatusCode)
+        {
+            ToastService.ShowError("Something went wrong while updating your information");
+        }
         if (response.IsSuccessStatusCode)
         {
             await OnEventCreated.InvokeAsync(true);
         }
-        else
-        {
-            // handle errors
-        }
+        
     }
 
     [Parameter]

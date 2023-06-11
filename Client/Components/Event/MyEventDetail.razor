@@ -7,10 +7,11 @@
 
 @inject HttpClient Http
 
+
 <div class="card">
     <div class="card-header bg-primary text-white">
         <div class="d-flex justify-content-between align-items-center">
-            <h3>@Event.Name</h3>
+            <h3>@Event?.Name</h3>
             <button class="btn btn-light" @onclick="() => ToggleEditMode.InvokeAsync()">Edit</button>
         </div>
     </div>
@@ -18,41 +19,41 @@
         <div class="row">
             <div class="col-md-4">
                 <div class="card mb-3">
-                    @if (Event.ImageUrl != null)
+                    @if (Event?.ImageUrl != null)
                     {
-                        <img src="@($"{Event.ImageUrl}?v={imageUpdateCount}")" alt="Event Image" class="img-fluid"/>
+                        <img src="@($"{Event.ImageUrl}?v={_imageUpdateCount}")" alt="Event Image" class="img-fluid"/>
                     }
-                    <ImageUploader RefreshInformation="RefreshEventData" EventId="@Event.Id" Type="ImageUploader.ImageType.Event" ImageUrl="@Event.ImageUrl"/>
+                    <ImageUploader RefreshInformation="RefreshEventData" EventId="@Event?.Id" Type="ImageUploader.ImageType.Event" ImageUrl="@Event?.ImageUrl"/>
                 </div>
-                @if(!string.IsNullOrEmpty(ErrorMessage))
+                @if(!string.IsNullOrEmpty(_errorMessage))
                 {
                     <div class="alert alert-danger" role="alert">
-                        @ErrorMessage
+                        @_errorMessage
                     </div>
                 }
             </div>
             <div class="col-md-8">
                 <ul class="list-group list-group-flush">
-                    <li class="list-group-item"><strong>Id:</strong> @Event.Id</li>
-                    <li class="list-group-item"><strong>Description:</strong> @Event.Description</li>
-                    <li class="list-group-item"><strong>Location:</strong> @Event.Location</li>
-                    <li class="list-group-item"><strong>Max Registrations:</strong> @Event.MaxRegistrations</li>
-                    <li class="list-group-item"><strong>Is Public:</strong> @Event.IsPublic</li>
-                    <li class="list-group-item"><strong>Open Registrations Date:</strong> @Event.OpenRegistrationsDate</li>
-                    <li class="list-group-item"><strong>Close Registrations Date:</strong> @Event.CloseRegistrationsDate</li>
-                    <li class="list-group-item"><strong>Start Date:</strong> @Event.StartDate</li>
-                    <li class="list-group-item"><strong>Finish Date:</strong> @Event.FinishDate</li>
-                    <li class="list-group-item"><strong>Creation Date:</strong> @Event.CreationDate</li>
-                    <li class="list-group-item"><strong>Riders Pre-registrations:</strong> @Event.RidersPreRegistrationsCount</li>
-                    <li class="list-group-item"><strong>Riders Accepted registrations:</strong> @Event.RidersAcceptedRegistrationsCount</li>
-                    <li class="list-group-item"><strong>Marshall Accepted registrations:</strong> @Event.MarshallAcceptedRegistrationsCount</li>
-                    <li class="list-group-item"><strong>Rider-Marshall Accepted registrations:</strong> @Event.RiderMarshallAcceptedRegistrationsCount</li>
-                    @foreach (var role in new (string, string)[] 
+                    <li class="list-group-item"><strong>Id:</strong> @Event?.Id</li>
+                    <li class="list-group-item"><strong>Description:</strong> @Event?.Description</li>
+                    <li class="list-group-item"><strong>Location:</strong> @Event?.Location</li>
+                    <li class="list-group-item"><strong>Max Registrations:</strong> @Event?.MaxRegistrations</li>
+                    <li class="list-group-item"><strong>Is Public:</strong> @Event?.IsPublic</li>
+                    <li class="list-group-item"><strong>Open Registrations Date:</strong> @Event?.OpenRegistrationsDate</li>
+                    <li class="list-group-item"><strong>Close Registrations Date:</strong> @Event?.CloseRegistrationsDate</li>
+                    <li class="list-group-item"><strong>Start Date:</strong> @Event?.StartDate</li>
+                    <li class="list-group-item"><strong>Finish Date:</strong> @Event?.FinishDate</li>
+                    <li class="list-group-item"><strong>Creation Date:</strong> @Event?.CreationDate</li>
+                    <li class="list-group-item"><strong>Riders Pre-registrations:</strong> @Event?.RidersPreRegistrationsCount</li>
+                    <li class="list-group-item"><strong>Riders Accepted registrations:</strong> @Event?.RidersAcceptedRegistrationsCount</li>
+                    <li class="list-group-item"><strong>Marshall Accepted registrations:</strong> @Event?.MarshallAcceptedRegistrationsCount</li>
+                    <li class="list-group-item"><strong>Rider-Marshall Accepted registrations:</strong> @Event?.RiderMarshallAcceptedRegistrationsCount</li>
+                    @foreach (var role in new[] 
                     {
-                        ("Rider registration password", Event.RiderRegistrationPassword),
-                        ("Staff registration password", Event.StaffRegistrationPassword),
-                        ("Marshall registration password", Event.MarshallRegistrationPassword),
-                        ("Rider-Marshall registration password", Event.RiderMarshallRegistrationPassword)
+                        ("Rider registration password", Event?.RiderRegistrationPassword),
+                        ("Staff registration password", Event?.StaffRegistrationPassword),
+                        ("Marshall registration password", Event?.MarshallRegistrationPassword),
+                        ("Rider-Marshall registration password", Event?.RiderMarshallRegistrationPassword)
                     })
                     {
                         <li class="list-group-item">
@@ -70,20 +71,20 @@
 
 @code {
     [Parameter]
-    public MyEventDto Event { get; set; }
+    public MyEventDto? Event { get; set; }
 
-    private string? ErrorMessage = null;
+    private string? _errorMessage = null;
 
-    private int imageUpdateCount = 0;
+    private int _imageUpdateCount = 0;
 
-    private bool showConfirmDeleteModal = false;
-    private bool requesting = false;
-    private Guid selectedEventId;
+    private bool _showConfirmDeleteModal = false;
+    private bool _requesting = false;
+    private Guid _selectedEventId;
     
     [Parameter]
     public EventCallback ToggleEditMode { get; set; }
     
-    private string[] AllowedImageFormats  = { "image/jpeg", "image/png", "image/gif", "image/jpg" };
+    private string[] _allowedImageFormats  = { "image/jpeg", "image/png", "image/gif", "image/jpg" };
 
     private string DisplayPassword(string password)
     {
@@ -92,15 +93,15 @@
     
     private async Task UploadImage(InputFileChangeEventArgs e)
     {
-        if (!AllowedImageFormats.Contains(e.File.ContentType))
+        if (!_allowedImageFormats.Contains(e.File.ContentType))
         {
-            ErrorMessage = "Only JPEG, JPG, PNG and GIF images are allowed.";
+            _errorMessage = "Only JPEG, JPG, PNG and GIF images are allowed.";
             return;
         }
 
         try 
         {
-            requesting = true;
+            _requesting = true;
 
     // Resize the image while maintaining the aspect ratio
             var image = await e.File.RequestImageFileAsync(e.File.ContentType, 300, int.MaxValue);
@@ -110,11 +111,11 @@
         }
         catch (Exception ex) 
         {
-            ErrorMessage = "Error occurred while processing the image: " + ex.Message;
+            _errorMessage = "Error occurred while processing the image: " + ex.Message;
         }
         finally 
         {
-            requesting = false;
+            _requesting = false;
         }
     } 
 
@@ -127,38 +128,50 @@
 
         content.Add(content: fileContent, name: "\"file\"", fileName: file.Name);
 
-        await Http.PostAsync($"Event/{Event.Id}/image", content);
-        imageUpdateCount++;
+        var response = await Http.PostAsync($"Event/{Event?.Id}/image", content);
+        if (!response.IsSuccessStatusCode)
+        {
+            //ToastService.ShowError("Something went wrong while updating your image");
+        }
+        _imageUpdateCount++;
     }
 
     private async Task RefreshEventData()
     {
-        Event = await Http.GetFromJsonAsync<MyEventDto>($"Event/{Event.Id}-organizer");
-        imageUpdateCount++;
+        try
+        {
+            Event = await Http.GetFromJsonAsync<MyEventDto>($"Event/{Event?.Id}-organizer");
+        }
+        catch (Exception)
+        {
+            //ToastService.ShowError("Something went wrong when retrieving your event information");
+        }
+        
+        _imageUpdateCount++;
     }
 
     private void PromptDelete(Guid id)
     {
-        selectedEventId = id;
-        showConfirmDeleteModal = true;
+        _selectedEventId = id;
+        _showConfirmDeleteModal = true;
     }
 
     private async Task ConfirmDelete(bool confirmed)
     {
-        showConfirmDeleteModal = false;
+        _showConfirmDeleteModal = false;
 
         if (confirmed)
         {
-            await DeleteImage(selectedEventId);
+            await DeleteImage(_selectedEventId);
         }
     }
 
     private async Task DeleteImage(Guid id)
     {
-        requesting = true;
+        _requesting = true;
         await Http.DeleteAsync($"Event/{id}/image");
-        imageUpdateCount++;
+        _imageUpdateCount++;
         await RefreshEventData();
-        requesting = false;
+        _requesting = false;
     }
 }

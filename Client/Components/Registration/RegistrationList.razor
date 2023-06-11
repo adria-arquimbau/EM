@@ -5,14 +5,15 @@
 @using EventsManager.Client.Components.Loaders
 
 @inject HttpClient Http
+@inject IToastService ToastService
 
-@if (registrations == null)
+@if (_registrations == null)
 {
     <LoadingSpinner />
 }
 else
 {
-    <ConfirmationModal Title="Delete registration" Message="Are you sure you want to delete this registration?" Visible="@showConfirmModal" ConfirmationChanged="ConfirmDelete" />
+    <ConfirmationModal Title="Delete registration" Message="Are you sure you want to delete this registration?" Visible="@_showConfirmModal" ConfirmationChanged="ConfirmDelete" />
 
     <div class="search-bar">
         <div class="input-group">
@@ -48,7 +49,7 @@ else
                 </tr>
             </thead>
             <tbody>
-                @foreach (var registration in registrations)
+                @foreach (var registration in _registrations)
                 {
                     <tr>
                         <td>@registration.CreationDate</td>
@@ -71,7 +72,7 @@ else
                     </tr>
                 }
             <tr>
-                <td colspan="8">Total Registrations: @registrations.Count</td>
+                <td colspan="8">Total Registrations: @_registrations.Count</td>
             </tr>
             </tbody>
         </table>
@@ -82,11 +83,11 @@ else
     [Parameter]
     public Guid? EventId { get; set; }
     
-    private bool showConfirmModal = false;
-    private Guid selectedRegistrationId;
-    private RegistrationRole selectedRegistrationRole;
+    private bool _showConfirmModal = false;
+    private Guid _selectedRegistrationId;
+    private RegistrationRole _selectedRegistrationRole;
     
-    private List<RegistrationDto> registrations;
+    private List<RegistrationDto>? _registrations;
 
     protected override async Task OnInitializedAsync()
     {
@@ -95,7 +96,7 @@ else
 
     private async Task HandleRoleChange(ChangeEventArgs e)
     {
-        selectedRegistrationRole = Enum.TryParse<RegistrationRole>(e.Value.ToString(), out var newRole) 
+        _selectedRegistrationRole = Enum.TryParse<RegistrationRole>(e.Value?.ToString(), out var newRole) 
             ? newRole : RegistrationRole.None;
     
         await LoadRegistrations();
@@ -104,44 +105,45 @@ else
     
     private async Task LoadRegistrations(string? search = null)
     {
-        var roleQuery = selectedRegistrationRole != RegistrationRole.None ? $"&role={selectedRegistrationRole}" : "";
-        registrations = await Http.GetFromJsonAsync<List<RegistrationDto>>($"Event/{EventId}/registrations?search={search}{roleQuery}");
+        var roleQuery = _selectedRegistrationRole != RegistrationRole.None ? $"&role={_selectedRegistrationRole}" : "";
+        _registrations = await Http.GetFromJsonAsync<List<RegistrationDto>>($"Event/{EventId}/registrations?search={search}{roleQuery}");
     }
 
 
     private async Task HandleSearchInput(ChangeEventArgs e)
     {
-        await LoadRegistrations(e.Value.ToString());
+        await LoadRegistrations(e.Value?.ToString());
     }
     
     private void PromptDelete(Guid id)
     {
-        selectedRegistrationId = id;
-        showConfirmModal = true;
+        _selectedRegistrationId = id;
+        _showConfirmModal = true;
     }
     
     private async Task ConfirmDelete(bool confirmed)
     {
-        showConfirmModal = false;
+        _showConfirmModal = false;
 
         if (confirmed)
         {
-            await DeleteRegistration(selectedRegistrationId);
+            await DeleteRegistration(_selectedRegistrationId);
         }
     }
 
     private async Task DeleteRegistration(Guid id)
     {
-        await Http.DeleteAsync($"Registration/{id}");
-        
+        var response = await Http.DeleteAsync($"Registration/{id}");
+        if (!response.IsSuccessStatusCode)
+        {
+            ToastService.ShowError("Something went wrong while updating your information");
+        }
         await LoadRegistrations();
     }
     
     private async Task UpdateRegistrationState(RegistrationDto registration, ChangeEventArgs e)
     {
-        RegistrationState newState;
-    
-        if(Enum.TryParse(e.Value.ToString(), out newState))
+        if(Enum.TryParse(e.Value?.ToString(), out RegistrationState newState))
         {
             registration.State = newState;
         
@@ -153,7 +155,11 @@ else
                 CheckedIn = registration.CheckedIn
             };
 
-            await Http.PutAsJsonAsync($"Registration", updateRequest);
+            var response = await Http.PutAsJsonAsync($"Registration", updateRequest);
+            if (!response.IsSuccessStatusCode)
+            {
+                ToastService.ShowError("Something went wrong while updating the registration");
+            }   
         
             await LoadRegistrations();
         }

@@ -5,6 +5,7 @@
 @using Microsoft.AspNetCore.Authorization
 
 @inject HttpClient Http
+@inject IToastService ToastService
 
 @attribute [Authorize(Roles = "User")]
 
@@ -25,15 +26,15 @@
                     <form>
                         <div class="mb-3">
                                 <label class="form-label">Email</label>
-                                <input type="email" class="form-control" value="@User.Email" readonly />
+                                <input type="email" class="form-control" value="@User?.Email" readonly />
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">User name</label>
-                                <input type="text" class="form-control" value="@User.UserName" readonly />
+                                <input type="text" class="form-control" value="@User?.UserName" readonly />
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">Phone number</label>
-                                <input type="text" class="form-control" @bind="@User.PhoneNumber" readonly="@ReadOnly" />
+                                <input type="text" class="form-control" @bind="@User!.PhoneNumber" readonly="@ReadOnly" />
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">Name</label>
@@ -96,9 +97,13 @@
 
     private async Task SaveAccountInformation()
     {
-        User.RequestingUpdate = true;
+        User!.RequestingUpdate = true;
         var userToString = JsonSerializer.Serialize(User);
-        await Http.PutAsync("User", new StringContent(userToString, Encoding.UTF8, "application/json"));
+        var response = await Http.PutAsync("User", new StringContent(userToString, Encoding.UTF8, "application/json"));
+        if (!response.IsSuccessStatusCode)
+        {
+            ToastService.ShowError("Something went wrong while updating your information");
+        }
         User.RequestingUpdate = false;
         ReadOnly = true;
     }

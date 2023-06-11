@@ -12,8 +12,10 @@
 
 @using EventsManager.Shared.Dtos
 @using EventsManager.Client.Components.Loaders
+
 @inject IHttpClientFactory HttpClientFactory
 @inject NavigationManager NavigationManager
+@inject IToastService ToastService
 
 <h3>Next Events</h3>
 
@@ -23,7 +25,7 @@
     </div>
 </div>
 
-@if (Events == null)
+@if (_events == null)
 {
     <LoadingSpinner />
 }
@@ -58,29 +60,37 @@ else
     </div>
 }
 
-@inject IToastService toastService
-<button class="btn btn-info" @onclick="@(() => toastService.ShowInfo("I'm an INFO message"))">Info Toast</button>
-<button class="btn btn-success" @onclick="@(() => toastService.ShowSuccess("I'm a SUCCESS message with a custom title"))">Success Toast</button>
-<button class="btn btn-warning" @onclick="@(() => toastService.ShowWarning("I'm a WARNING message"))">Warning Toast</button>
-<button class="btn btn-danger" @onclick="@(() => toastService.ShowError("I'm an ERROR message"))">Error Toast</button>
+
 
 @code {
-    private List<EventDto> Events;
-    private string searchTerm = string.Empty;
+    private List<EventDto>? _events;
+    private string? _searchTerm = string.Empty;
 
     protected override async Task OnInitializedAsync()
     {
-        var http = HttpClientFactory.CreateClient("EventsManager.ServerAPI.Anonymous");
-        Events = await http.GetFromJsonAsync<List<EventDto>>("Event");
+        try
+        {
+            var http = HttpClientFactory.CreateClient("EventsManager.ServerAPI.Anonymous");
+            _events = await http.GetFromJsonAsync<List<EventDto>>("Event");
+        
+            if (_events == null)
+            {
+                ToastService.ShowError("Failed to retrieve events. Please try again later.");
+            }
+        }
+        catch (Exception ex)
+        {
+            ToastService.ShowError("An error occurred while retrieving events. Error: " + ex.Message);
+        }
     }
 
     private void UpdateSearchTerm(ChangeEventArgs e)
     {
-        searchTerm = e.Value.ToString();
+        _searchTerm = e.Value?.ToString();
     }
 
-    private IEnumerable<EventDto> FilteredEvents => Events
-        .Where(e => e.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase));
+    private IEnumerable<EventDto> FilteredEvents => _events?
+        .Where(e => e.Name.Contains(_searchTerm, StringComparison.OrdinalIgnoreCase));
     
     private void NavigateToEventDetail(Guid eventId)
     {
