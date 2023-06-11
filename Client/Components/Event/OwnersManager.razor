@@ -28,7 +28,8 @@ else
                     <td>
                         @if(user.IsOwner)
                         {
-                            <p>This user is already an Owner</p>
+                            <p>This user is an Owner</p>
+                            <button class="btn btn-danger" @onclick="() => StartDeleteOwner(user)">Delete Owner</button>
                         }
                         else
                         {
@@ -41,8 +42,8 @@ else
     </table>
 }
 
-<ConfirmationModal Title="Confirmation" Message="Are you sure you want to set this user as the owner?"
-                       Visible="showConfirmation" ConfirmationChanged="HandleConfirmation">
+<ConfirmationModal Title="Confirmation" Message="@confirmationMessage"
+                   Visible="showConfirmation" ConfirmationChanged="HandleConfirmation">
 </ConfirmationModal>
 
 @code {
@@ -55,6 +56,8 @@ else
     private List<UserDtoToSetASOwner>? filteredUsers;
     private bool showConfirmation;
     private UserDtoToSetASOwner selectedUser;
+    private string confirmationMessage;
+    private bool isDeleteAction;
 
     protected override async Task OnInitializedAsync()
     {
@@ -68,17 +71,35 @@ else
         filteredUsers = new List<UserDtoToSetASOwner>(_users);
     }
 
-    private async Task SetOwner(UserDtoToSetASOwner user)
+    private void SetOwner(UserDtoToSetASOwner user)
     {
         selectedUser = user;
+        confirmationMessage = "Are you sure you want to set this user as the owner?";
+        isDeleteAction = false;
         showConfirmation = true;    
     }
-    
+
+    private void StartDeleteOwner(UserDtoToSetASOwner user)
+    {
+        selectedUser = user;
+        confirmationMessage = "Are you sure you want to delete this owner?";
+        isDeleteAction = true;
+        showConfirmation = true;
+    }
+
     private async Task HandleConfirmation(bool confirmed)
     {   
         if (confirmed)
         {
-            await Http.PutAsync($"Event/{MyEventDto.Id}/set-owner/{selectedUser.Id}", null);
+            if (isDeleteAction)
+            {
+                await Http.DeleteAsync($"Event/{MyEventDto.Id}/owner/{selectedUser.Id}");
+                Console.WriteLine("Owner was deleted, but the staff role is still active.");
+            }
+            else
+            {
+                await Http.PutAsync($"Event/{MyEventDto.Id}/set-owner/{selectedUser.Id}", null);
+            }
             await RefreshEvent.InvokeAsync();
         }
         await GetAllUsers();

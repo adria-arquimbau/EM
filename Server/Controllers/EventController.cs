@@ -99,6 +99,39 @@ public class EventController : ControllerBase
         return Ok();
     }
     
+    [HttpDelete("{eventId:guid}/owner/{ownerId:guid}")]
+    [Authorize(Roles = "Organizer")] 
+    public async Task<IActionResult> DeleteOwner([FromRoute] Guid eventId, [FromRoute] Guid ownerId, CancellationToken cancellationToken)
+    {   
+        var requesterId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;  
+        
+        var eventToUpdate = await _context.Events
+            .Where(x => x.Id == eventId)
+            .Include(x => x.Creator)
+            .Include(x => x.Owners)
+            .SingleAsync(cancellationToken: cancellationToken);
+
+        if (eventToUpdate.Creator.Id != requesterId)
+        {
+            return Forbid();
+        }
+
+        if (eventToUpdate.Creator.Id == ownerId.ToString())
+        {
+            return BadRequest("You can't remove the creator of the event as an owner.");
+        }
+        
+        var owner = await _context.Users
+            .Where(x => x.Id == ownerId.ToString())
+            .SingleAsync(cancellationToken: cancellationToken);
+
+        eventToUpdate.Owners.Remove(owner);
+
+        await _context.SaveChangesAsync(cancellationToken);
+        
+        return Ok();
+    }
+    
     [HttpGet("{eventId:guid}/am-i-the-creator")]
     [Authorize(Roles = "Organizer")] 
     public async Task<IActionResult> AmITheCreator([FromRoute] Guid eventId, CancellationToken cancellationToken)
