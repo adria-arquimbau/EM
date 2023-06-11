@@ -1,3 +1,4 @@
+using Blazored.Toast;
 using EventsManager.Client;
 using EventsManager.Client.Authorization;
 using Microsoft.AspNetCore.Components.Web;
@@ -15,7 +16,7 @@ builder.Services.AddScoped(sp => sp.GetRequiredService<IHttpClientFactory>().Cre
 builder.Services.AddHttpClient("EventsManager.ServerAPI", client => client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress))
     .AddHttpMessageHandler<BaseAddressAuthorizationMessageHandler>();
 builder.Services.AddScoped(sp => sp.GetRequiredService<IHttpClientFactory>().CreateClient("EventsManager.ServerAPI"));
-
+builder.Services.AddBlazoredToast();
 builder.Services.AddApiAuthorization()
     .AddAccountClaimsPrincipalFactory<CustomUserFactory>();
 builder.Services.AddFluentUIComponents();

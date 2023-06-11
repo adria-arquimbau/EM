@@ -8,11 +8,12 @@ public class EventDto
     public string Description { get; set; }
     public string Location { get; set; }
     public Uri? ImageUrl { get; set; }
-    public int PreRegistrationsCount { get; set; }
+    public int PreAndAcceptedRidersRegistrationsCount { get; set; }
     public bool RiderHaveRegistrationRolePassword { get; set; }
     public bool StaffHaveRegistrationRolePassword { get; set; }
     public bool MarshallHaveRegistrationRolePassword { get; set; }
     public bool RiderMarshallHaveRegistrationRolePassword { get; set; } 
     public int MaxRegistrations { get; set; }
     public DateTime OpenRegistrationsDate { get; set; }
+    public DateTime CloseRegistrationsDate { get; set; }
 }

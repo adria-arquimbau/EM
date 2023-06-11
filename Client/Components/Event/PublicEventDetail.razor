@@ -40,7 +40,8 @@ else
                     <p><strong>Start Date:</strong> @_eventDetail.StartDate.ToString("g")</p>
                     <p><strong>Location:</strong> @_eventDetail.Location</p>
                     <p><strong>Open registrations date:</strong> @_eventDetail.OpenRegistrationsDate</p>
-                    <p><strong>Accepted registrations:</strong> @_eventDetail.PreRegistrationsCount/@_eventDetail.MaxRegistrations</p>
+                    <p><strong>Registrations state:</strong> <span style="color: @(GetRegistrationStateColor())">@GetRegistrationStateText()</span></p>
+                    <p><strong>Accepted registrations:</strong> @_eventDetail.PreAndAcceptedRidersRegistrationsCount/@_eventDetail.MaxRegistrations</p>
                     <AuthorizeView>
                         <Authorized>
                             @if(_myRegistration != null)
@@ -131,6 +132,7 @@ else
     
     protected override async Task OnInitializedAsync()
     {
+       
         await GetBasicInfoAboutEventDetails();
     }
 
@@ -179,4 +181,29 @@ else
     {
         NavigationManager.NavigateTo($"ticket-chat/{EventId}");
     }
+    
+    private string GetRegistrationStateText()
+    {
+        if (_eventDetail.PreAndAcceptedRidersRegistrationsCount >= _eventDetail.MaxRegistrations
+            || DateTime.Now > _eventDetail.OpenRegistrationsDate
+            || DateTime.Now > _eventDetail.CloseRegistrationsDate)
+        {
+            return "CLOSED";
+        }
+
+        return "OPEN";
+    }
+
+    private string GetRegistrationStateColor()
+    {
+        if (_eventDetail.PreAndAcceptedRidersRegistrationsCount >= _eventDetail.MaxRegistrations
+            || DateTime.Now > _eventDetail.OpenRegistrationsDate
+            || DateTime.Now > _eventDetail.CloseRegistrationsDate)
+        {
+            return "red"; // Apply red color for CLOSED state
+        }
+
+        return "green"; // Apply green color for OPEN state
+    }
+
 }

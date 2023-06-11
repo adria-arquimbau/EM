@@ -29,13 +29,15 @@ public class GetEventQueryHandler : IRequestHandler<GetEventQueryRequest, EventD
                 Description = x.Description,
                 Location = x.Location,
                 ImageUrl = x.ImageUrl,
-                PreRegistrationsCount = x.Registrations.Count(r => r.Role == RegistrationRole.Rider),
+                PreAndAcceptedRidersRegistrationsCount = x.Registrations.Count(r => r.Role == RegistrationRole.Rider &&
+                    (r.State == RegistrationState.PreRegistered || r.State == RegistrationState.Accepted)),
                 RiderMarshallHaveRegistrationRolePassword = x.RegistrationRolePasswords.Any(y => y.Role == RegistrationRole.RiderMarshal),
                 RiderHaveRegistrationRolePassword = x.RegistrationRolePasswords.Any(y => y.Role == RegistrationRole.Rider),
                 StaffHaveRegistrationRolePassword = x.RegistrationRolePasswords.Any(y => y.Role == RegistrationRole.Staff),
                 MarshallHaveRegistrationRolePassword = x.RegistrationRolePasswords.Any(y => y.Role == RegistrationRole.Marshal),
                 MaxRegistrations = x.MaxRegistrations,
-                OpenRegistrationsDate = x.OpenRegistrationsDate
+                OpenRegistrationsDate = x.OpenRegistrationsDate,
+                CloseRegistrationsDate = x.CloseRegistrationsDate
             })
             .SingleAsync(cancellationToken: cancellationToken);
     }
