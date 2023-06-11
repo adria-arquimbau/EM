@@ -34,6 +34,8 @@ public class GetEventQueryHandler : IRequestHandler<GetEventQueryRequest, EventD
                 RiderHaveRegistrationRolePassword = x.RegistrationRolePasswords.Any(y => y.Role == RegistrationRole.Rider),
                 StaffHaveRegistrationRolePassword = x.RegistrationRolePasswords.Any(y => y.Role == RegistrationRole.Staff),
                 MarshallHaveRegistrationRolePassword = x.RegistrationRolePasswords.Any(y => y.Role == RegistrationRole.Marshal),
+                MaxRegistrations = x.MaxRegistrations,
+                OpenRegistrationsDate = x.OpenRegistrationsDate
             })
             .SingleAsync(cancellationToken: cancellationToken);
     }

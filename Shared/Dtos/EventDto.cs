@@ -12,5 +12,7 @@ public class EventDto
     public bool RiderHaveRegistrationRolePassword { get; set; }
     public bool StaffHaveRegistrationRolePassword { get; set; }
     public bool MarshallHaveRegistrationRolePassword { get; set; }
-    public bool RiderMarshallHaveRegistrationRolePassword { get; set; }
+    public bool RiderMarshallHaveRegistrationRolePassword { get; set; } 
+    public int MaxRegistrations { get; set; }
+    public DateTime OpenRegistrationsDate { get; set; }
 }

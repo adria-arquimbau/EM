@@ -39,7 +39,8 @@ else
                     <p>@_eventDetail.Description</p>
                     <p><strong>Start Date:</strong> @_eventDetail.StartDate.ToString("g")</p>
                     <p><strong>Location:</strong> @_eventDetail.Location</p>
-                    <p><strong>Accepted registrations:</strong> @_eventDetail.PreRegistrationsCount</p>
+                    <p><strong>Open registrations date:</strong> @_eventDetail.OpenRegistrationsDate</p>
+                    <p><strong>Accepted registrations:</strong> @_eventDetail.PreRegistrationsCount/@_eventDetail.MaxRegistrations</p>
                     <AuthorizeView>
                         <Authorized>
                             @if(_myRegistration != null)
