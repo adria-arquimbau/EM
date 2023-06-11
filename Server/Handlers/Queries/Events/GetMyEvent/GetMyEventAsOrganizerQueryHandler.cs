@@ -24,7 +24,7 @@ public class GetMyEventAsOrganizerQueryHandler : IRequestHandler<GetMyEventAsOrg
             .Include(e => e.Prices)
             .SingleAsync(e => e.Id == request.EventId, cancellationToken: cancellationToken);
 
-        if (eventEntity.Owners.All(o => o.Id != request.UserId))
+        if (eventEntity.Owners.All(o => o.Id != request.UserId) && eventEntity.CreatorId != request.UserId)
         {
             var userRegistration = eventEntity.Registrations.FirstOrDefault(x => x.UserId == request.UserId && x is { Role: RegistrationRole.Staff, State: RegistrationState.Accepted });
 

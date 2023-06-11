@@ -17,4 +17,3 @@ public class UserDto
     public bool RequestingUpdate { get; set; }
     public bool? IsOrganizer { get; set; }
 }
-            

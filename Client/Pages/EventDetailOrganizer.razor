@@ -19,7 +19,6 @@
     @if (iAmTheCreator)
     {
         <button type="button" class="btn @(currentComponent == PageComponent.OwnersManagement ? "btn-primary" : "btn-outline-primary")" @onclick="(() => SetCurrentComponent(PageComponent.OwnersManagement))">Owners Management</button>
-
     }
     <!-- Add more buttons as necessary -->
 </div>
@@ -79,7 +78,7 @@ else
     {
         await LoadEventDetail();
         var response = await Http.GetAsync($"Event/{EventId}/am-i-the-creator");
-        if (!response.IsSuccessStatusCode)
+        if (response.IsSuccessStatusCode)
         {
             iAmTheCreator = true;
         }

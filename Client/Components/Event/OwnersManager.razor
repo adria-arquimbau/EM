@@ -1,24 +1,49 @@
 ﻿@using EventsManager.Shared.Dtos
+@using EventsManager.Client.Components.Modals
+
 @inject HttpClient Http
 
 <h3>OwnersManager</h3>
 
+<input type="text" class="form-control" placeholder="Search..." @oninput="OnSearch" />
 
-@if (users == null)
+@if (_users == null)
 {
     <p><em>Loading...</em></p>
 }
-else if (!users.Any())
-{
-    <p><em>No users found.</em></p>
-}
 else
 {
-    foreach (var user in users)
-    {
-        <p>@user.Name</p>  <!-- Replace with the structure you want -->
-    }
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">User Name</th>
+                <th scope="col">Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var user in filteredUsers)
+            {
+                <tr>
+                    <td>@user.UserName</td>
+                    <td>
+                        @if(user.IsOwner)
+                        {
+                            <p>This user is already an Owner</p>
+                        }
+                        else
+                        {
+                            <button class="btn btn-primary" @onclick="() => SetOwner(user)">Set as Owner</button>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
 }
+
+<ConfirmationModal Title="Confirmation" Message="Are you sure you want to set this user as the owner?"
+                       Visible="showConfirmation" ConfirmationChanged="HandleConfirmation">
+</ConfirmationModal>
 
 @code {
     [Parameter]
@@ -26,16 +51,43 @@ else
     [Parameter]
     public EventCallback RefreshEvent { get; set; }
 
-    private List<UserDto>? users = new();
+    private List<UserDtoToSetASOwner>? _users;
+    private List<UserDtoToSetASOwner>? filteredUsers;
+    private bool showConfirmation;
+    private UserDtoToSetASOwner selectedUser;
 
     protected override async Task OnInitializedAsync()
     {
         await GetAllUsers();
     }
-    
+
     private async Task GetAllUsers()
     {
-        var response = await Http.GetFromJsonAsync<List<UserDto>>("User/all-users");
-        users = response;
+        var response = await Http.GetFromJsonAsync<List<UserDtoToSetASOwner>>($"User/all-users-to-set-owner/event/{MyEventDto.Id}");
+        _users = response;
+        filteredUsers = new List<UserDtoToSetASOwner>(_users);
+    }
+
+    private async Task SetOwner(UserDtoToSetASOwner user)
+    {
+        selectedUser = user;
+        showConfirmation = true;    
+    }
+    
+    private async Task HandleConfirmation(bool confirmed)
+    {   
+        if (confirmed)
+        {
+            await Http.PutAsync($"Event/{MyEventDto.Id}/set-owner/{selectedUser.Id}", null);
+            await RefreshEvent.InvokeAsync();
+        }
+        await GetAllUsers();
+        showConfirmation = false;
+    }
+
+    private void OnSearch(ChangeEventArgs e)
+    {
+        var value = e.Value.ToString().ToLower();
+        filteredUsers = _users.Where(user => user.UserName.ToLower().Contains(value)).ToList();
     }
 }

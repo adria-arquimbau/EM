@@ -71,24 +71,52 @@ public class EventController : ControllerBase
         return Ok(response); 
     }
     
+    [HttpPut("{eventId:guid}/set-owner/{ownerId:guid}")]
+    [Authorize(Roles = "Organizer")] 
+    public async Task<IActionResult> SetOwner([FromRoute] Guid eventId, [FromRoute] Guid ownerId, CancellationToken cancellationToken)
+    {   
+        var requesterId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;  
+        
+        var eventToUpdate = await _context.Events
+            .Where(x => x.Id == eventId)
+            .Include(x => x.Creator)
+            .SingleAsync(cancellationToken: cancellationToken);
+
+        if (eventToUpdate.Creator.Id != requesterId)
+        {
+            return Forbid();
+        }
+        
+        var owner = await _context.Users
+            .Where(x => x.Id == ownerId.ToString())
+            .SingleAsync(cancellationToken: cancellationToken);
+        
+        eventToUpdate.Owners.Add(owner);
+
+        eventToUpdate.Registrations.Add(new Registration(owner, RegistrationRole.Staff, RegistrationState.Accepted, eventToUpdate));
+        
+        await _context.SaveChangesAsync(cancellationToken);
+        return Ok();
+    }
+    
     [HttpGet("{eventId:guid}/am-i-the-creator")]
     [Authorize(Roles = "Organizer")] 
-    public async Task<IActionResult> AmITheOwner([FromRoute] Guid eventId, CancellationToken cancellationToken)
+    public async Task<IActionResult> AmITheCreator([FromRoute] Guid eventId, CancellationToken cancellationToken)
     {   
-        // var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        //
-        // var eventToUpdate = await _context.Events
-        //     .Where(x => x.Id == eventId)
-        //     .Include(x => x.Creator)
-        //     .SingleAsync(cancellationToken: cancellationToken);
-        //
-        // var amITheCreator = eventToUpdate.Creator.Id == userId;
-        //
-        // if (amITheCreator)
-        // {   
-        //     return Ok();
-        // }
-        //
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        
+        var eventToUpdate = await _context.Events
+            .Where(x => x.Id == eventId)
+            .Include(x => x.Creator)
+            .SingleAsync(cancellationToken: cancellationToken);
+        
+        var amITheCreator = eventToUpdate.Creator.Id == userId;
+        
+        if (amITheCreator)
+        {   
+            return Ok();
+        }
+        
         return Forbid();
     }
     
@@ -131,7 +159,7 @@ public class EventController : ControllerBase
             .Include(x => x.RegistrationRolePasswords)
             .SingleAsync(cancellationToken: cancellationToken);
         
-        if (eventToUpdate.Owners.All(o => o.Id != userId))
+        if (eventToUpdate.Owners.All(o => o.Id != userId) && eventToUpdate.Creator.Id != userId)
         {
             return Forbid();
         }
@@ -175,7 +203,7 @@ public class EventController : ControllerBase
             .Include(x => x.Registrations.Where(r => r.Role == RegistrationRole.Staff))
             .SingleAsync(cancellationToken: cancellationToken); 
 
-        if (eventRequest.Owners.All(o => o.Id != userId))   
+        if (eventRequest.Owners.All(o => o.Id != userId) && eventRequest.CreatorId != userId)   
         {
             var userRegistration = eventRequest.Registrations.FirstOrDefault(x => x.UserId == userId && x is { Role: RegistrationRole.Staff, State: RegistrationState.Accepted });
 
@@ -248,7 +276,7 @@ public class EventController : ControllerBase
             .Include(x => x.Owners)
             .SingleAsync(x => x.Id == eventId, cancellationToken);
         
-        if (eventToUpload.Owners.All(o => o.Id != userId))
+        if (eventToUpload.Owners.All(o => o.Id != userId) && eventToUpload.CreatorId != userId)
         {
             return Forbid();
         }
@@ -271,7 +299,7 @@ public class EventController : ControllerBase
             .Include(x => x.Owners)
             .SingleAsync(x => x.Id == eventId, cancellationToken);
 
-        if (eventToDeleteImage.Owners.All(o => o.Id != userId))
+        if (eventToDeleteImage.Owners.All(o => o.Id != userId) && eventToDeleteImage.CreatorId != userId)
         {
             return Forbid();
         }

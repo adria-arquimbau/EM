@@ -31,7 +31,7 @@ public class EventPriceController : ControllerBase
             .Include(x => x.Owners)
             .SingleAsync(x => x.Id == priceRequest.EventId, cancellationToken);
 
-        if(sportEvent.Owners.All(o => o.Id != userId))   
+        if(sportEvent.Owners.All(o => o.Id != userId) && sportEvent.CreatorId != userId)   
         {
             return Unauthorized();
         }
@@ -51,9 +51,11 @@ public class EventPriceController : ControllerBase
         var price = await _context.EventPrices
             .Include(x => x.Event)
             .ThenInclude(x => x.Owners)
+            .Include(x => x.Event)
+            .ThenInclude(x => x.Creator)
             .SingleAsync(x => x.Id == priceId, cancellationToken);
 
-        if(price.Event.Owners.All(o => o.Id != userId))   
+        if(price.Event.Owners.All(o => o.Id != userId) && price.Event.CreatorId != userId)   
         {
             return Unauthorized();
         }

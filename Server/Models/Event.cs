@@ -18,7 +18,7 @@ public class Event
     public bool IsDeleted { get; set; }     
     public DateTime OpenRegistrationsDate { get; private set; }
     public DateTime CloseRegistrationsDate { get; private set; }
-    public virtual ICollection<Registration> Registrations { get; set; }
+    public virtual ICollection<Registration> Registrations { get; set; } = new List<Registration>();
     public ICollection<RegistrationRolePassword> RegistrationRolePasswords { get; set; } = new List<RegistrationRolePassword>();
     public ICollection<EventPrice> Prices { get; set; } = new List<EventPrice>();
     private Event() { }

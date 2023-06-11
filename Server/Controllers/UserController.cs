@@ -1,4 +1,5 @@
 ﻿using System.Security.Claims;
+using EventsManager.Server.Data;
 using EventsManager.Server.Handlers.Commands.User.ConfirmEmail;
 using EventsManager.Server.Handlers.Commands.User.DeleteUser;
 using EventsManager.Server.Handlers.Commands.User.DeleteUserImage;
@@ -14,6 +15,7 @@ using EventsManager.Shared.Requests;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace EventsManager.Server.Controllers;
 
@@ -22,10 +24,12 @@ namespace EventsManager.Server.Controllers;
 public class UserController : ControllerBase
 {
     private readonly IMediator _mediator;
+    private readonly ApplicationDbContext _dbContext;
 
-    public UserController(IMediator mediator)
+    public UserController(IMediator mediator, ApplicationDbContext dbContext)
     {
         _mediator = mediator;
+        _dbContext = dbContext;
     }   
     
     [HttpGet]
@@ -70,6 +74,35 @@ public class UserController : ControllerBase
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         var response = await _mediator.Send(new GetAllUsersQueryRequest(userId));
         return Ok(response);
+    }
+    
+    [HttpGet("all-users-to-set-owner/event/{eventId:guid}")]   
+    [Authorize(Roles = "Organizer")] 
+    public async Task<IActionResult> GetAllUsersToSetOwner([FromRoute] Guid eventId, CancellationToken cancellationToken)
+    {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        var eventEntity = await _dbContext.Events
+            .Where(x => x.Id == eventId)
+            .Include(x => x.Creator)
+            .Include(x => x.Owners)
+            .SingleOrDefaultAsync(cancellationToken: cancellationToken);
+
+        if (eventEntity == null || eventEntity.Creator.Id != userId)
+        {
+            return Forbid();
+        }
+
+        var users = await _dbContext.Users.ToListAsync(cancellationToken);
+
+        var finalList = users.Select(user => new UserDtoToSetASOwner
+        {
+            Id = user.Id,
+            UserName = user.UserName,
+            IsOwner = eventEntity.Owners.Any(x => x.Id == user.Id)
+        }).ToList();
+
+        return Ok(finalList);
     }
     
     [HttpPut("confirm-email")]   
