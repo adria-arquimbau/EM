@@ -3,13 +3,22 @@
 
 @inject HttpClient Http
 
-<h3>OwnersManager</h3>
+@if (!string.IsNullOrEmpty(warningMessage))
+{
+    <div class="alert alert-warning">
+        @warningMessage
+    </div>
+}
 
 <input type="text" class="form-control" placeholder="Search..." @oninput="OnSearch" />
 
-@if (_users == null)
+@if (string.IsNullOrWhiteSpace(searchTerm))
 {
-    <p><em>Loading...</em></p>
+    <p><em>Start typing to search for a user...</em></p>
+}
+else if (filteredUsers == null || !filteredUsers.Any())
+{
+    <p><em>No results found...</em></p>
 }
 else
 {
@@ -58,6 +67,8 @@ else
     private UserDtoToSetASOwner selectedUser;
     private string confirmationMessage;
     private bool isDeleteAction;
+    private string searchTerm = string.Empty;
+    private string warningMessage = string.Empty;
 
     protected override async Task OnInitializedAsync()
     {
@@ -68,7 +79,7 @@ else
     {
         var response = await Http.GetFromJsonAsync<List<UserDtoToSetASOwner>>($"User/all-users-to-set-owner/event/{MyEventDto.Id}");
         _users = response;
-        filteredUsers = new List<UserDtoToSetASOwner>(_users);
+        OnSearchUsers();
     }
 
     private void SetOwner(UserDtoToSetASOwner user)
@@ -94,13 +105,15 @@ else
             if (isDeleteAction)
             {
                 await Http.DeleteAsync($"Event/{MyEventDto.Id}/owner/{selectedUser.Id}");
-                Console.WriteLine("Owner was deleted, but the staff role is still active.");
+                warningMessage = "Owner was deleted, but the staff role is still active.";
             }
             else
             {
                 await Http.PutAsync($"Event/{MyEventDto.Id}/set-owner/{selectedUser.Id}", null);
+                warningMessage = string.Empty;
+                await GetAllUsers();
             }
-            await RefreshEvent.InvokeAsync();
+            
         }
         await GetAllUsers();
         showConfirmation = false;
@@ -108,7 +121,12 @@ else
 
     private void OnSearch(ChangeEventArgs e)
     {
-        var value = e.Value.ToString().ToLower();
-        filteredUsers = _users.Where(user => user.UserName.ToLower().Contains(value)).ToList();
+        searchTerm = e.Value.ToString().ToLower();
+        OnSearchUsers();
+    }
+
+    private void OnSearchUsers()
+    {
+        filteredUsers = !string.IsNullOrWhiteSpace(searchTerm) ? _users.Where(user => user.UserName.ToLower().Contains(searchTerm)).ToList() : null;
     }
 }
