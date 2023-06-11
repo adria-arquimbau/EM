@@ -73,6 +73,11 @@ public class RegistrationController : ControllerBase
             return Forbid();
         }
         
+        if (registration.Event.CreatorId == registration.User.Id)
+        {
+            return BadRequest("Cannot update creator registration");
+        }
+        
         var oldRegistrationRole = registration.Role.ToString();
         var oldRegistrationState = registration.State.ToString();
         
@@ -159,7 +164,12 @@ public class RegistrationController : ControllerBase
                 var user = await _userManager.FindByIdAsync(registration.User.Id);
                 await _userManager.RemoveFromRoleAsync(user, "Staff");
             }   
-        }   
+        }
+
+        if (registration.Event.CreatorId == registration.User.Id)
+        {
+            return BadRequest("Cannot delete creator registration");
+        }
         
         _context.Registrations.Remove(registration);
         await _context.SaveChangesAsync(cancellationToken);
