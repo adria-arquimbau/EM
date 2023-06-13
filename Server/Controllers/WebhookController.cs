@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Stripe;
+using Stripe.Checkout;
 
 namespace EventsManager.Server.Controllers;
 
@@ -33,15 +34,15 @@ public class WebhookController : Controller
             var stripeEvent = EventUtility.ConstructEvent(json,
                 Request.Headers["Stripe-Signature"], endpointSecret);
 
-            if (stripeEvent.Type == Events.PaymentIntentSucceeded)
+            if (stripeEvent.Type == Events.CheckoutSessionCompleted)
             {
-                var paymentIntent = stripeEvent.Data.Object as PaymentIntent;
-                var registrationId = paymentIntent.Metadata["RegistrationId"];
-               
+                var session = stripeEvent.Data.Object as Session;
+                var registrationId = session.Metadata["RegistrationId"];
                 var registration = await _context.Registrations.SingleAsync(x => x.Id == Guid.Parse(registrationId));
                 registration.PaymentStatus = PaymentStatus.Paid;
                 await _context.SaveChangesAsync();
             }
+
             // Handle the event
             if (stripeEvent.Type == Events.PaymentIntentCreated)
             {
