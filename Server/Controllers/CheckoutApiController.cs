@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Stripe;
 using Stripe.Checkout;
 
 namespace EventsManager.Server.Controllers;
@@ -7,12 +9,39 @@ namespace EventsManager.Server.Controllers;
 [ApiController]
 public class CheckoutApiController : Controller
 {
+    private readonly IConfiguration _configuration;
+
+    public CheckoutApiController(IConfiguration configuration)
+    {
+        _configuration = configuration;
+    }
+    
     [HttpPost]
     public ActionResult Create()
     {
-        const string domain = "https://localhost:7008";
+        var domain = _configuration["Domain"];
+        
+        string customerEmail = "customer@gmail.com";
+    
+        var customerService = new CustomerService();
+        var customerOptions = new CustomerCreateOptions
+        {
+            Email = customerEmail,
+        };
+
+        // Try to find the customer
+        var customers = customerService.List(new CustomerListOptions { Email = customerEmail });
+        Customer customer = customers.FirstOrDefault();
+    
+        // If the customer does not exist, create a new one
+        if (customer == null)
+        {
+            customer = customerService.Create(customerOptions);
+        }
+        
         var options = new SessionCreateOptions
         {
+            Customer = customer.Id,
             LineItems = new List<SessionLineItemOptions>
             {
                 new SessionLineItemOptions
