@@ -1,4 +1,5 @@
-﻿using EventsManager.Shared.Enums;
+﻿using EventsManager.Server.Controllers;
+using EventsManager.Shared.Enums;
 
 namespace EventsManager.Server.Models;
 
@@ -13,8 +14,9 @@ public class Registration
     public Event Event { get; set; }
     public string UserId { get; set; }
     public virtual ApplicationUser User { get; set; }
+    public PaymentStatus PaymentStatus { get; set; }
 
-    private Registration()
+    private Registration()  
     {
     }
 

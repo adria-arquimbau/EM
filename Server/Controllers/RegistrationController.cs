@@ -137,11 +137,7 @@ public class RegistrationController : ControllerBase
                 Role = x.Role,
                 State = x.State,
                 Bib = x.Bib,    
-                CheckedIn = x.CheckedIn,
-                RegisteredUser = new UserDto
-                {
-                    Id = x.User.Id,
-                }
+                CheckedIn = x.CheckedIn
             })
             .SingleOrDefaultAsync(cancellationToken: cancellationToken);
 

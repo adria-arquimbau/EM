@@ -23,5 +23,9 @@ public class RegistrationTypeConfiguration : IEntityTypeConfiguration<Registrati
         builder.Property(r => r.State)
             .HasConversion(v => 
                 v.ToString(), v => (RegistrationState)Enum.Parse(typeof(RegistrationState), v));
+        builder.Property(r => r.PaymentStatus)
+            .HasDefaultValue(PaymentStatus.UnPaid)
+            .HasConversion(v => 
+                v.ToString(), v => (PaymentStatus)Enum.Parse(typeof(PaymentStatus), v));
     }
 }

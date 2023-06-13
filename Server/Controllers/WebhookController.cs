@@ -1,5 +1,8 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using EventsManager.Server.Data;
+using EventsManager.Shared.Enums;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Stripe;
 
 namespace EventsManager.Server.Controllers;
@@ -9,10 +12,12 @@ namespace EventsManager.Server.Controllers;
 public class WebhookController : Controller
 {
     private readonly IConfiguration _configuration;
+    private readonly ApplicationDbContext _context;
 
-    public WebhookController(IConfiguration configuration)
+    public WebhookController(IConfiguration configuration, ApplicationDbContext context)
     {
         _configuration = configuration;
+        _context = context;
     }
     
     // This is your Stripe CLI webhook secret for testing your endpoint locally.
@@ -31,11 +36,11 @@ public class WebhookController : Controller
             if (stripeEvent.Type == Events.PaymentIntentSucceeded)
             {
                 var paymentIntent = stripeEvent.Data.Object as PaymentIntent;
-                Console.WriteLine("PaymentIntent was successful!");
-                Console.WriteLine("PaymentIntent ID: {0}", paymentIntent.Id);
-                var userId = paymentIntent.Metadata["userId"];
-                Console.WriteLine($"Payment succeeded for user ID: {userId}");
-                // log any other details you're interested in
+                var registrationId = paymentIntent.Metadata["RegistrationId"];
+               
+                var registration = await _context.Registrations.SingleAsync(x => x.Id == Guid.Parse(registrationId));
+                registration.PaymentStatus = PaymentStatus.Paid;
+                await _context.SaveChangesAsync();
             }
             // Handle the event
             if (stripeEvent.Type == Events.PaymentIntentCreated)

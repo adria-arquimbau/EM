@@ -18,7 +18,7 @@ public class CheckoutApiController : Controller
     }
     
     [HttpPost]
-    public ActionResult Create([FromForm]string userId)
+    public ActionResult Create([FromForm]string registrationId)
     {
         var domain = _configuration["Domain"];
         var options = new SessionCreateOptions
@@ -37,7 +37,7 @@ public class CheckoutApiController : Controller
             CancelUrl = domain + "/cancel.html",
             Metadata = new Dictionary<string, string>
             {
-                { "UserId", userId }
+                { "RegistrationId", registrationId }
             }
         };
         var service = new SessionService();
