@@ -79,6 +79,7 @@ else
                                                     You need to pay for the registration. Until the payment is done, your registration is not accepted.
                                                    <form method="post" action="/create-checkout-session">
                                                        <input type="hidden" name="registrationId" value="@_myRegistration.Id" />
+                                                       <input type="hidden" name="eventId" value="@EventId" />
                                                        <button class="btn btn-primary">Pay Now</button>
                                                    </form>
 

@@ -18,12 +18,12 @@ public class CheckoutApiController : Controller
     }
     
     [HttpPost]
-    public ActionResult Create([FromForm]string registrationId)
+    public ActionResult Create([FromForm]string registrationId, [FromForm] string eventId)
     {
         var domain = _configuration["Domain"];
         var options = new SessionCreateOptions
         {
-            LineItems = new List<SessionLineItemOptions>
+            LineItems = new List<SessionLineItemOptions>    
             {
                 new SessionLineItemOptions
                 {
@@ -33,7 +33,7 @@ public class CheckoutApiController : Controller
                 }
             },
             Mode = "payment",
-            SuccessUrl = domain + "/success.html",
+            SuccessUrl = domain + $"/event-detail/{eventId}",
             CancelUrl = domain + "/cancel.html",
             Metadata = new Dictionary<string, string>
             {
