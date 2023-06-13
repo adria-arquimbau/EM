@@ -129,6 +129,7 @@ public class RegistrationController : ControllerBase
         
         var registrationDto = await _context.Registrations
             .Where(x => x.Event.Id == eventId && x.User.Id == userId)
+            .Include(x => x.User)
             .Select(x => new RegistrationDto
             {
                 Id = x.Id,
@@ -139,7 +140,7 @@ public class RegistrationController : ControllerBase
                 CheckedIn = x.CheckedIn,
                 RegisteredUser = new UserDto
                 {
-                    Email = x.User.Email,
+                    Id = x.User.Id,
                 }
             })
             .SingleOrDefaultAsync(cancellationToken: cancellationToken);

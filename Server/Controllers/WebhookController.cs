@@ -8,17 +8,23 @@ namespace EventsManager.Server.Controllers;
 [ApiController]
 public class WebhookController : Controller
 {
-        
+    private readonly IConfiguration _configuration;
+
+    public WebhookController(IConfiguration configuration)
+    {
+        _configuration = configuration;
+    }
+    
     // This is your Stripe CLI webhook secret for testing your endpoint locally.
-    const string endpointSecret = "whsec_d772b04c699de5068fea60dbf46f6b42729ca644643f02d3eeace68d81f7c6a7";
+    //const string endpointSecret = "whsec_d772b04c699de5068fea60dbf46f6b42729ca644643f02d3eeace68d81f7c6a7";
 
     [HttpPost]
     public async Task<IActionResult> Index()
     {
-        Console.WriteLine("TRIGGERED");
         var json = await new StreamReader(HttpContext.Request.Body).ReadToEndAsync();
         try
         {
+            var endpointSecret = _configuration["StripeWebhookSecret"];
             var stripeEvent = EventUtility.ConstructEvent(json,
                 Request.Headers["Stripe-Signature"], endpointSecret);
 
@@ -27,6 +33,8 @@ public class WebhookController : Controller
                 var paymentIntent = stripeEvent.Data.Object as PaymentIntent;
                 Console.WriteLine("PaymentIntent was successful!");
                 Console.WriteLine("PaymentIntent ID: {0}", paymentIntent.Id);
+                var userId = paymentIntent.Metadata["userId"];
+                Console.WriteLine($"Payment succeeded for user ID: {userId}");
                 // log any other details you're interested in
             }
             // Handle the event
