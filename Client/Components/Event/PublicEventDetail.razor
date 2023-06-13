@@ -92,6 +92,12 @@ else
                                                 </div>
                                             }
                                         }
+                                        @if (_myRegistration.State == RegistrationState.Accepted && _myRegistration.Role == RegistrationRole.Rider)
+                                        {
+                                            <div class="alert alert-success" role="alert">
+                                                Your registration is accepted. You can now check-in at the event.
+                                            </div>
+                                        }
                     
                                         @if(_myRegistration.State == RegistrationState.Cancelled)
                                         {

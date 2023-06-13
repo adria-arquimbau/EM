@@ -51,9 +51,6 @@ public class WebhookController : Controller
             else if (stripeEvent.Type == Events.CheckoutSessionAsyncPaymentSucceeded)
             {
             }
-            else if (stripeEvent.Type == Events.CheckoutSessionCompleted)
-            {
-            }
             // ... handle other event types
             else
             {

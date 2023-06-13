@@ -137,7 +137,8 @@ public class RegistrationController : ControllerBase
                 Role = x.Role,
                 State = x.State,
                 Bib = x.Bib,    
-                CheckedIn = x.CheckedIn
+                CheckedIn = x.CheckedIn,
+                PaymentStatus = x.PaymentStatus,
             })
             .SingleOrDefaultAsync(cancellationToken: cancellationToken);
 
