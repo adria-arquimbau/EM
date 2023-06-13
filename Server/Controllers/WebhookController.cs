@@ -40,6 +40,7 @@ public class WebhookController : Controller
                 var registrationId = session.Metadata["RegistrationId"];
                 var registration = await _context.Registrations.SingleAsync(x => x.Id == Guid.Parse(registrationId));
                 registration.PaymentStatus = PaymentStatus.Paid;
+                registration.State = RegistrationState.Accepted;
                 await _context.SaveChangesAsync();
             }
 
