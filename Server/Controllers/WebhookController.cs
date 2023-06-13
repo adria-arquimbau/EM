@@ -63,7 +63,7 @@ public class WebhookController : Controller
         }
         catch (StripeException e)
         {
-            return BadRequest();
+            return BadRequest(e.Message);
         }
     }
 }
