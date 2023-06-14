@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using EventsManager.Shared.Requests;
+using EventsManager.Shared.Responses;
+using Microsoft.AspNetCore.Mvc;
 using Stripe.Checkout;
 
 namespace EventsManager.Server.Controllers;
@@ -15,7 +17,7 @@ public class CheckoutApiController : Controller
     }
     
     [HttpPost]
-    public ActionResult Create([FromForm]string registrationId, [FromForm] string eventId)
+    public ActionResult Create([FromBody]CheckoutRequest request)
     {
         var domain = _configuration["Domain"];
         var options = new SessionCreateOptions
@@ -30,17 +32,19 @@ public class CheckoutApiController : Controller
                 }
             },
             Mode = "payment",
-            SuccessUrl = domain + $"/event-detail/{eventId}",
-            CancelUrl = domain + $"/event-detail/{eventId}",
+            SuccessUrl = domain + $"/event-detail/{request.EventId}",
+            CancelUrl = domain + $"/event-detail/{request.EventId}",
             Metadata = new Dictionary<string, string>
             {
-                { "RegistrationId", registrationId }
+                { "RegistrationId", request.RegistrationId }
             }
         };
         var service = new SessionService();
         var session = service.Create(options);
 
-        Response.Headers.Add("Location", session.Url);
-        return new StatusCodeResult(303);
+        return Ok(new CheckoutResponse
+        {
+            Url = session.Url
+        });
     }
 }

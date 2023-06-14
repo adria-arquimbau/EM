@@ -5,6 +5,8 @@
 @using System.Security.Claims
 @using System.Net
 @using EventsManager.Shared.Enums
+@using EventsManager.Shared.Requests
+@using EventsManager.Shared.Responses
 
 @inject HttpClient Http
 @inject IHttpClientFactory HttpClientFactory
@@ -75,14 +77,10 @@ else
                                         {
                                             @if(_myRegistration.Role == RegistrationRole.Rider)
                                             {
+                                               
                                                 <div class="alert alert-danger" role="alert">
                                                     You need to pay for the registration. Until the payment is done, your registration is not accepted.
-                                                   <form method="post" action="/create-checkout-session">
-                                                       <input type="hidden" name="registrationId" value="@_myRegistration.Id" />
-                                                       <input type="hidden" name="eventId" value="@EventId" />
-                                                       <button class="btn btn-primary">Pay Now</button>
-                                                   </form>
-
+                                                    <button class="btn btn-primary" @onclick="CreateCheckoutSession">Pay Now</button>
                                                 </div>
                                             }
                                             else
@@ -214,6 +212,26 @@ else
         }
 
         return "green"; // Apply green color for OPEN state
+    }
+
+    private async Task CreateCheckoutSession()
+    {
+        var response = await Http.PostAsJsonAsync("/create-checkout-session", new CheckoutRequest
+        {
+            RegistrationId = _myRegistration.Id.ToString(),
+            EventId = EventId.ToString()
+        });
+
+        if (response.IsSuccessStatusCode)
+        {
+            var checkoutSession = await response.Content.ReadFromJsonAsync<CheckoutResponse>();
+            NavigationManager.NavigateTo(checkoutSession.Url);
+    // Here you can navigate to the checkout page or do whatever you want with the checkout session.
+        }
+        else
+        {
+    // Show an error to the user.
+        }
     }
 
 }
