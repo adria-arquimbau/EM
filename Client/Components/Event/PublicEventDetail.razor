@@ -76,7 +76,7 @@ else
                                         
                                         @if(_myRegistration.State == RegistrationState.PreRegistered)
                                         {
-                                            @if(_myRegistration.Role == RegistrationRole.Rider)
+                                            @if(_myRegistration.Role == RegistrationRole.Rider && !_eventDetail.IsFree)
                                             {
                                                
                                                 <div class="alert alert-danger" role="alert">

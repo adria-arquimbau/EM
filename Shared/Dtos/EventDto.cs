@@ -16,4 +16,5 @@ public class EventDto
     public int MaxRegistrations { get; set; }
     public DateTime OpenRegistrationsDate { get; set; }
     public DateTime CloseRegistrationsDate { get; set; }
+    public bool IsFree { get; set; }
 }
