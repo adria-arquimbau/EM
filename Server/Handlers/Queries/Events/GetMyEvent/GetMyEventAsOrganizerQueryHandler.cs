@@ -38,6 +38,7 @@ public class GetMyEventAsOrganizerQueryHandler : IRequestHandler<GetMyEventAsOrg
         {
             Id = eventEntity.Id,
             CreationDate = eventEntity.CreationDate,
+            IsFree = eventEntity.IsFree,
             Name = eventEntity.Name,
             Description = eventEntity.Description,
             Location = eventEntity.Location,

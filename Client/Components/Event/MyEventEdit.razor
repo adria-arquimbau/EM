@@ -28,9 +28,12 @@
                         <InputNumber id="maxRegistrations" @bind-Value="EventDetail.MaxRegistrations" class="form-control my-2" />
 
                     <label for="isPublic">Public Event:</label>
-                        <InputCheckbox id="isPublic" @bind-Value="EventDetail.IsPublic" class="form-check-input my-2" />
+                    <InputCheckbox id="isPublic" @bind-Value="EventDetail.IsPublic" class="form-check-input my-2" />
+                    
+                    <label for="isPublic">Free Event:</label>
+                    <InputCheckbox id="isFree" @bind-Value="EventDetail.IsFree" class="form-check-input my-2" />
                         
-                        <label for="openRegistrationsDate" class="form-label">Open Registrations Date/Time:</label>
+                    <label for="openRegistrationsDate" class="form-label">Open Registrations Date/Time:</label>
                         <input type="datetime-local" id="openRegistrationsDate" @bind="@EventDetail.OpenRegistrationsDate" />
                         
                         <label for="closeRegistrationsDate" class="form-label">Close Registrations Date/Time:</label>

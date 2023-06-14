@@ -23,4 +23,5 @@ public class MyEventDto
     public string? MarshallRegistrationPassword { get; set; }
     public string? RiderMarshallRegistrationPassword { get; set; }
     public List<EventPriceDto> Prices { get; set; }
+    public bool IsFree { get; set; }
 }
