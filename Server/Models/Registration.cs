@@ -27,7 +27,6 @@ public class Registration
         Role = role;
         State = state;
         Event = sportEvent;
-        PaymentStatus = PaymentStatus.UnPaid;
     }
 
     public void Update(int? bib, bool checkedIn, RegistrationState state)
