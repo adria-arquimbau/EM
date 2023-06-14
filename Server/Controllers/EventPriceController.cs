@@ -39,6 +39,11 @@ public class EventPriceController : ControllerBase
             return Conflict("Event is free. You can't add a price");
         }
         
+        if (priceRequest.Price < 1)
+        {
+            return Conflict("Price must be greater than 0");
+        }
+
         sportEvent.Prices.Add(new EventPrice(priceRequest.Price, priceRequest.StartDate, priceRequest.EndDate));
         await _context.SaveChangesAsync(cancellationToken);
         

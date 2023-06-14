@@ -12,7 +12,7 @@
     <DataAnnotationsValidator />
     <div class="container">
         <div class="row">
-            @if (MyEventDto?.Prices != null && MyEventDto.Prices.Count > 0)
+            @if (MyEventDto?.Prices is {Count: > 0 })
             {
                 foreach (var price in MyEventDto.Prices)
                 {
@@ -20,17 +20,9 @@
                         <div class="card">
                             <div class="card-body">
                                 <h5 class="card-title">
-                                    Price: 
-                                    @if (price.Price is 0 or null)
-                                    {
-                                        <span>FREE</span>
-                                    }
-                                    else
-                                    {
-                                        <span>@price.Price €</span>
-                                    }
+                                    Price: <span>@price.Price €</span>
                                 </h5>
-                                <p class="card-text text-muted">Start: @price.StartDate.ToString("MM/dd/yyyy") - End: @price.EndDate.ToString("MM/dd/yyyy")</p>
+                                <p class="card-text text-muted">Start: @price.StartDate.ToString("dd/MM/yyyy HH:mm") - End: @price.EndDate.ToString("dd/MM/yyyy HH:mm")</p>
                                 <button class="btn btn-danger" @onclick="(() => ConfirmRemovePrice(price))">Remove</button>
                             </div>
                         </div>
@@ -61,9 +53,15 @@
                 </button>
             </div>
             <div class="modal-body">
-                <InputNumber @bind-Value="newPrice.Price" class="form-control mb-2" placeholder="Price (leave empty for free)" />
-                <InputDate @bind-Value="newPrice.StartDate" class="form-control mb-2" placeholder="Start Date" />
-                <InputDate @bind-Value="newPrice.EndDate" class="form-control mb-2" placeholder="End Date" />
+                <InputNumber @bind-Value="newPrice.Price" class="form-control mb-2" placeholder="Price" min="1"/>
+                @if (!string.IsNullOrEmpty(_errorMessage))
+                {
+                    <div class="alert alert-danger" role="alert">
+                        @_errorMessage
+                    </div>
+                }
+                <input type="datetime-local" @bind="newPrice.StartDate" class="form-control mb-2" placeholder="Start Date" />
+                <input type="datetime-local" @bind="newPrice.EndDate" class="form-control mb-2" placeholder="End Date" />
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-primary" @onclick="AddPrice">Add</button>
@@ -72,6 +70,7 @@
         </div>
     </div>
 </div>
+
 
 @code {
     [Parameter]
@@ -85,6 +84,7 @@
     private bool isModalOpen = false;
     private bool confirmModalVisible = false; // Confirmation modal state
     private string modalClass => isModalOpen ? "modal d-block" : "modal";
+    private string? _errorMessage = null;
 
     private void OpenModal()
     {
@@ -100,16 +100,23 @@
 
     private async void AddPrice()
     {
-        var response = await Http.PostAsJsonAsync("EventPrice", newPrice);
-
-        if (response.IsSuccessStatusCode)
+        if (newPrice.Price < 1)
         {
-            CloseModal();
-            await RefreshEvent.InvokeAsync(MyEventDto);
+            _errorMessage = "Price must be greater than 0.";
         }
         else
         {
-            // Handle the error here
+            var response = await Http.PostAsJsonAsync("EventPrice", newPrice);
+
+            if (response.IsSuccessStatusCode)
+            {
+                CloseModal();
+                await RefreshEvent.InvokeAsync(MyEventDto);
+            }
+            else
+            {
+    // Handle the error here
+            }
         }
     }
 
