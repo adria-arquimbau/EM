@@ -44,7 +44,7 @@ public class EventPriceController : ControllerBase
             return Conflict("Price must be greater than 0");
         }
 
-        sportEvent.Prices.Add(new EventPrice(priceRequest.Price, priceRequest.StartDate, priceRequest.EndDate));
+        sportEvent.Prices.Add(new EventPrice(priceRequest.Price, priceRequest.StartDate.ToUniversalTime(), priceRequest.EndDate.ToUniversalTime()));
         await _context.SaveChangesAsync(cancellationToken);
         
         return Ok();

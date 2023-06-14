@@ -40,11 +40,17 @@
                     <li class="list-group-item"><strong>Max Registrations:</strong> @Event?.MaxRegistrations</li>
                     <li class="list-group-item"><strong>Is Public:</strong> @Event?.IsPublic</li>
                     <li class="list-group-item"><strong>Is Free:</strong> @Event?.IsFree</li>
-                    <li class="list-group-item"><strong>Open Registrations Date:</strong> @Event?.OpenRegistrationsDate</li>
-                    <li class="list-group-item"><strong>Close Registrations Date:</strong> @Event?.CloseRegistrationsDate</li>
-                    <li class="list-group-item"><strong>Start Date:</strong> @Event?.StartDate</li>
-                    <li class="list-group-item"><strong>Finish Date:</strong> @Event?.FinishDate</li>
-                    <li class="list-group-item"><strong>Creation Date:</strong> @Event?.CreationDate</li>
+                    @if (Event.IsFree && !Event.Prices.Any())
+                    {
+                        <div class="alert alert-warning" role="alert">
+                            <p>As you don't have any price configured, when you switch to a non-free event a first price of 1 euro would be set automatically.</p>
+                        </div>
+                    }
+                    <li class="list-group-item"><strong>Open Registrations Date:</strong> @Event?.OpenRegistrationsDate.ToLocalTime()</li>
+                    <li class="list-group-item"><strong>Close Registrations Date:</strong> @Event?.CloseRegistrationsDate.ToLocalTime()</li>
+                    <li class="list-group-item"><strong>Start Date:</strong> @Event?.StartDate.ToLocalTime()</li>
+                    <li class="list-group-item"><strong>Finish Date:</strong> @Event?.FinishDate.ToLocalTime()</li>
+                    <li class="list-group-item"><strong>Creation Date:</strong> @Event?.CreationDate.ToLocalTime()</li>
                     <li class="list-group-item"><strong>Riders Pre-registrations:</strong> @Event?.RidersPreRegistrationsCount</li>
                     <li class="list-group-item"><strong>Riders Accepted registrations:</strong> @Event?.RidersAcceptedRegistrationsCount</li>
                     <li class="list-group-item"><strong>Marshall Accepted registrations:</strong> @Event?.MarshallAcceptedRegistrationsCount</li>
@@ -67,6 +73,12 @@
                 </ul>
             </div>
         </div>
+        @if (_noPriceWithinCurrentTime)
+        {
+            <div class="alert alert-danger" role="alert">
+                <p>Any price configured within the current date time.</p>
+            </div>
+        }
     </div>
 </div>
 
@@ -80,13 +92,22 @@
 
     private bool _showConfirmDeleteModal = false;
     private bool _requesting = false;
+    
+    private bool _noPriceWithinCurrentTime = false;
+
     private Guid _selectedEventId;
     
     [Parameter]
     public EventCallback ToggleEditMode { get; set; }
     
     private string[] _allowedImageFormats  = { "image/jpeg", "image/png", "image/gif", "image/jpg" };
-
+    
+    protected override async Task OnInitializedAsync()
+    {
+        var now = DateTime.UtcNow;
+        _noPriceWithinCurrentTime = !Event.Prices.Any(price => price.StartDate <= now && price.EndDate >= now);
+    }
+    
     private string DisplayPassword(string password)
     {
         return string.IsNullOrWhiteSpace(password) ? "NO PASSWORD SET" : password;

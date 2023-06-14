@@ -1,6 +1,8 @@
 ﻿using EventsManager.Server.Data;
+using EventsManager.Server.Models;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Stripe;
 
 namespace EventsManager.Server.Handlers.Commands.Events.Update;
 
@@ -17,6 +19,7 @@ public class UpdateEventCommandHandler : IRequestHandler<UpdateEventCommandReque
     {
         var eventToUpdate = await _context.Events
             .Include(x => x.Owners)
+            .Include(x => x.Prices)
             .Include(x => x.RegistrationRolePasswords)
             .SingleAsync(e => e.Id == request.EventDto.Id, cancellationToken: cancellationToken);
 
@@ -24,9 +27,16 @@ public class UpdateEventCommandHandler : IRequestHandler<UpdateEventCommandReque
         {
             throw new Exception("You are not the owner of this event");
         }
+        
+        if (eventToUpdate.IsFree && !eventToUpdate.Prices.Any() && !request.EventDto.IsFree)
+        {
+            //Create default price
+            eventToUpdate.Prices.Add(new EventPrice(1, eventToUpdate.CreationDate, eventToUpdate.StartDate));
+        }
 
-        eventToUpdate.Update(request.EventDto.Name, request.EventDto.Description, request.EventDto.Location, request.EventDto.MaxRegistrations, request.EventDto.StartDate, request.EventDto.FinishDate, request.EventDto.OpenRegistrationsDate, request.EventDto.CloseRegistrationsDate, request.EventDto.IsPublic);
+        eventToUpdate.Update(request.EventDto.Name, request.EventDto.Description, request.EventDto.Location, request.EventDto.MaxRegistrations, request.EventDto.StartDate.ToUniversalTime(), request.EventDto.FinishDate.ToUniversalTime(), request.EventDto.OpenRegistrationsDate.ToUniversalTime(), request.EventDto.CloseRegistrationsDate.ToUniversalTime(), request.EventDto.IsPublic);
         eventToUpdate.IsFree = request.EventDto.IsFree;
+        
         await _context.SaveChangesAsync(cancellationToken);
 
     }
