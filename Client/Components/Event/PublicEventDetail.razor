@@ -12,6 +12,7 @@
 @inject IHttpClientFactory HttpClientFactory
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject NavigationManager NavigationManager
+@inject IToastService ToastService
 
 @if (_eventDetail == null)
 {
@@ -216,22 +217,30 @@ else
 
     private async Task CreateCheckoutSession()
     {
-        var response = await Http.PostAsJsonAsync("/create-checkout-session", new CheckoutRequest
+        try
         {
-            RegistrationId = _myRegistration.Id.ToString(),
-            EventId = EventId.ToString()
-        });
+            var response = await Http.PostAsJsonAsync("/create-checkout-session", new CheckoutRequest
+            {
+                RegistrationId = _myRegistration.Id.ToString(),
+                EventId = EventId.ToString()
+            });
 
-        if (response.IsSuccessStatusCode)
-        {
-            var checkoutSession = await response.Content.ReadFromJsonAsync<CheckoutResponse>();
-            NavigationManager.NavigateTo(checkoutSession.Url);
+            if (response.IsSuccessStatusCode)
+            {
+                var checkoutSession = await response.Content.ReadFromJsonAsync<CheckoutResponse>();
+                NavigationManager.NavigateTo(checkoutSession.Url);
     // Here you can navigate to the checkout page or do whatever you want with the checkout session.
+            }
+            else
+            {
+                ToastService.ShowError("Something went wrong. Please try again later.");
+            }
         }
-        else
+        catch (Exception e)
         {
-    // Show an error to the user.
+            ToastService.ShowError("Something went wrong. Please try again later.");
         }
+        
     }
 
 }

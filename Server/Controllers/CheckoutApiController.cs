@@ -1,6 +1,8 @@
-﻿using EventsManager.Shared.Requests;
+﻿using EventsManager.Server.Data;
+using EventsManager.Shared.Requests;
 using EventsManager.Shared.Responses;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Stripe;
 using Stripe.Checkout;
 
@@ -11,25 +13,37 @@ namespace EventsManager.Server.Controllers;
 public class CheckoutApiController : Controller
 {
     private readonly IConfiguration _configuration;
+    private readonly ApplicationDbContext _context;
 
-    public CheckoutApiController(IConfiguration configuration)
+    public CheckoutApiController(IConfiguration configuration, ApplicationDbContext context)
     {
         _configuration = configuration;
+        _context = context;
     }
     
     [HttpPost]
-    public ActionResult Create([FromBody]CheckoutRequest request)
+    public async Task<ActionResult> Create([FromBody]CheckoutRequest request)
     {
         var domain = _configuration["Domain"];
 
+        long currentPrice;  
+        try
+        {
+            currentPrice = await CalculatePriceForTheWeek(request.EventId);
+        }
+        catch (Exception e)
+        {
+            return NotFound(e.Message);
+        }
+       
         var priceOptions = new PriceCreateOptions
         {
-            UnitAmount = CalculatePriceForTheWeek(), // This method will return the price for the current week
+            UnitAmount = currentPrice, // This method will return the price for the current week
             Currency = "eur",
             Product = "prod_O58nBZHZmazZ7w", // Replace with your Product ID
         };
         var priceService = new PriceService();
-        var stripePrice = priceService.Create(priceOptions);
+        var stripePrice = await priceService.CreateAsync(priceOptions);
 
         var sessionOptions = new SessionCreateOptions
         {
@@ -51,7 +65,7 @@ public class CheckoutApiController : Controller
         };
     
         var sessionService = new SessionService();
-        var session = sessionService.Create(sessionOptions);
+        var session = await sessionService.CreateAsync(sessionOptions);
 
         return Ok(new CheckoutResponse
         {
@@ -59,11 +73,19 @@ public class CheckoutApiController : Controller
         });
     }
 
-    private long CalculatePriceForTheWeek()
+    private async Task<long> CalculatePriceForTheWeek(string eventId)
     {
-        // Here goes your logic to calculate the price based on the current week.
-        // The returned amount should be in cents.
-        // For example, to charge $10.99 you would return 1099.
-        return 10000;
+        var now = DateTime.UtcNow;
+    
+        var price = await _context.EventPrices
+            .Where(x => x.Event.Id == Guid.Parse(eventId))
+            .SingleOrDefaultAsync(x => x.StartDate <= now && x.EndDate >= now);
+
+        if (price == null)
+        {
+            throw new NullReferenceException("Price not found");
+        }
+        
+        return (long)(price.Price * 100);
     }
 }

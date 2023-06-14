@@ -16,6 +16,7 @@ public class Event
     public int MaxRegistrations { get; private set; }       
     public bool IsPublic { get; private set; } 
     public bool IsDeleted { get; set; }     
+    public bool IsFree { get; set; }     
     public DateTime OpenRegistrationsDate { get; private set; }
     public DateTime CloseRegistrationsDate { get; private set; }
     public virtual ICollection<Registration> Registrations { get; set; } = new List<Registration>();
