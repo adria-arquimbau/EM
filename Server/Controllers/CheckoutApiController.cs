@@ -1,6 +1,7 @@
 ﻿using EventsManager.Shared.Requests;
 using EventsManager.Shared.Responses;
 using Microsoft.AspNetCore.Mvc;
+using Stripe;
 using Stripe.Checkout;
 
 namespace EventsManager.Server.Controllers;
@@ -20,15 +21,24 @@ public class CheckoutApiController : Controller
     public ActionResult Create([FromBody]CheckoutRequest request)
     {
         var domain = _configuration["Domain"];
-        var options = new SessionCreateOptions
+
+        var priceOptions = new PriceCreateOptions
+        {
+            UnitAmount = CalculatePriceForTheWeek(), // This method will return the price for the current week
+            Currency = "eur",
+            Product = "prod_O58nBZHZmazZ7w", // Replace with your Product ID
+        };
+        var priceService = new PriceService();
+        var stripePrice = priceService.Create(priceOptions);
+
+        var sessionOptions = new SessionCreateOptions
         {
             LineItems = new List<SessionLineItemOptions>    
             {
                 new SessionLineItemOptions
                 {
-                    // Provide the exact Price ID (for example, pr_1234) of the product you want to sell
-                    Price = "price_1NIIMUKiJO2GrIfAT09sZEDL",
-                    Quantity = 1
+                    Price = stripePrice.Id,
+                    Quantity = 1,
                 }
             },
             Mode = "payment",
@@ -39,12 +49,21 @@ public class CheckoutApiController : Controller
                 { "RegistrationId", request.RegistrationId }
             }
         };
-        var service = new SessionService();
-        var session = service.Create(options);
+    
+        var sessionService = new SessionService();
+        var session = sessionService.Create(sessionOptions);
 
         return Ok(new CheckoutResponse
         {
             Url = session.Url
         });
+    }
+
+    private long CalculatePriceForTheWeek()
+    {
+        // Here goes your logic to calculate the price based on the current week.
+        // The returned amount should be in cents.
+        // For example, to charge $10.99 you would return 1099.
+        return 10000;
     }
 }
