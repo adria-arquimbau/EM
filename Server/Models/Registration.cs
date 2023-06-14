@@ -1,5 +1,4 @@
-﻿using EventsManager.Server.Controllers;
-using EventsManager.Shared.Enums;
+﻿using EventsManager.Shared.Enums;
 
 namespace EventsManager.Server.Models;
 

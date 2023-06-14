@@ -1,6 +1,4 @@
-﻿using EventsManager.Shared.Enums;
-
-namespace EventsManager.Shared.Dtos;
+﻿namespace EventsManager.Shared.Dtos;
 
 public class MyEventDto
 {

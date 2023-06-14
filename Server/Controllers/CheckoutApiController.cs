@@ -1,7 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ModelBinding.Metadata;
-using Stripe;
+﻿using Microsoft.AspNetCore.Mvc;
 using Stripe.Checkout;
 
 namespace EventsManager.Server.Controllers;
@@ -34,7 +31,7 @@ public class CheckoutApiController : Controller
             },
             Mode = "payment",
             SuccessUrl = domain + $"/event-detail/{eventId}",
-            CancelUrl = domain + "/cancel.html",
+            CancelUrl = domain + $"/event-detail/{eventId}",
             Metadata = new Dictionary<string, string>
             {
                 { "RegistrationId", registrationId }

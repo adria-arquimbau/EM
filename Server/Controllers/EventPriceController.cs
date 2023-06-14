@@ -1,6 +1,4 @@
 ﻿using System.Security.Claims;
-using Azure.Storage.Blobs;
-using Azure.Storage.Blobs.Models;
 using EventsManager.Server.Data;
 using EventsManager.Server.Models;
 using EventsManager.Shared.Dtos;
