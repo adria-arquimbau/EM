@@ -26,7 +26,7 @@ public class UpdateEventCommandHandler : IRequestHandler<UpdateEventCommandReque
         }
 
         eventToUpdate.Update(request.EventDto.Name, request.EventDto.Description, request.EventDto.Location, request.EventDto.MaxRegistrations, request.EventDto.StartDate, request.EventDto.FinishDate, request.EventDto.OpenRegistrationsDate, request.EventDto.CloseRegistrationsDate, request.EventDto.IsPublic);
-
+        eventToUpdate.IsFree = request.EventDto.IsFree;
         await _context.SaveChangesAsync(cancellationToken);
 
     }

@@ -5,6 +5,7 @@
 @using EventsManager.Client.Components.Loaders
 @using EventsManager.Client.Components.Event
 @using Microsoft.AspNetCore.Authorization
+
 @inject HttpClient Http
 
 @attribute [Authorize(Roles = "Organizer, Staff")]
@@ -15,7 +16,12 @@
     <button type="button" class="btn @(currentComponent == PageComponent.EventDetail ? "btn-primary" : "btn-outline-primary")" @onclick="(() => SetCurrentComponent(PageComponent.EventDetail))">Event Detail</button>
     <button type="button" class="btn @(currentComponent == PageComponent.RegistrationList ? "btn-primary" : "btn-outline-primary")" @onclick="(() => SetCurrentComponent(PageComponent.RegistrationList))">Registrations</button>
     <button type="button" class="btn @(currentComponent == PageComponent.RegistrationRolePasswords ? "btn-primary" : "btn-outline-primary")" @onclick="(() => SetCurrentComponent(PageComponent.RegistrationRolePasswords))">Registrations role passwords</button>
-    <button type="button" class="btn @(currentComponent == PageComponent.Price ? "btn-primary" : "btn-outline-primary")" @onclick="(() => SetCurrentComponent(PageComponent.Price))">Price</button>
+    <button type="button" 
+            class="btn @(currentComponent == PageComponent.Price ? "btn-primary" : "btn-outline-primary")"
+            @onclick="(() => SetCurrentComponent(PageComponent.Price))" 
+            disabled="@eventDetail?.IsFree">
+        Price
+    </button>
     @if (iAmTheCreator)
     {
         <button type="button" class="btn @(currentComponent == PageComponent.OwnersManagement ? "btn-primary" : "btn-outline-primary")" @onclick="(() => SetCurrentComponent(PageComponent.OwnersManagement))">Owners Management</button>
