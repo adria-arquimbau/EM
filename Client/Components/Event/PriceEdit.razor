@@ -14,13 +14,27 @@
             {
                 foreach (var price in MyEventDto.Prices)
                 {
+                    var now = DateTime.Now;
+                    var cardClass = price.EndDate.ToLocalTime() < now ? "card border-danger" : 
+                                    price.StartDate.ToLocalTime() <= now && price.EndDate.ToLocalTime() >= now ? "card border-success" : "card";
+                    var endDateClass = price.EndDate.ToLocalTime() < now ? "text-danger" : 
+                                       price.StartDate.ToLocalTime() <= now && price.EndDate.ToLocalTime() >= now ? "text-success" : "text-muted";
+                    
                     <div class="col-md-4 mb-4">
-                        <div class="card">
+                        <div class="@cardClass">
                             <div class="card-body">
                                 <h5 class="card-title">
                                     Price: <span>@price.Price €</span>
                                 </h5>
-                                <p class="card-text text-muted">Start: @price.StartDate.ToLocalTime().ToString("dd/MM/yyyy HH:mm") - End: @price.EndDate.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</p>
+                                <p class="card-text @endDateClass">Start: @price.StartDate.ToLocalTime().ToString("dd/MM/yyyy HH:mm") - End: @price.EndDate.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</p>
+                                @if (price.EndDate.ToLocalTime() < now)
+                                {
+                                    <p class="text-danger">This price has expired.</p>
+                                }
+                                @if (price.StartDate.ToLocalTime() <= now && price.EndDate.ToLocalTime() >= now)
+                                {
+                                    <p class="text-success">This price is currently active.</p>
+                                }
                                 <button class="btn btn-danger" @onclick="(() => ConfirmRemovePrice(price))">Remove</button>
                                 <button class="btn btn-secondary" @onclick="(() => OpenEditModal(price))">Edit</button>
                             </div>
