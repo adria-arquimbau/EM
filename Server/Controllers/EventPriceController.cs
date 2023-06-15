@@ -61,6 +61,8 @@ public class EventPriceController : ControllerBase
             .ThenInclude(x => x.Owners)
             .Include(x => x.Event)
             .ThenInclude(x => x.Creator)
+            .Include(x => x.Event)
+            .ThenInclude(x => x.Prices)
             .SingleAsync(x => x.Id == priceId, cancellationToken);
 
         if(price.Event.Owners.All(o => o.Id != userId) && price.Event.CreatorId != userId)   

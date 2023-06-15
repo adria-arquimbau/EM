@@ -72,6 +72,34 @@
     </div>
 </div>
 
+<div class="@modalClass">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add Price</h5>
+                <button type="button" class="close" @onclick="CloseModal">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <InputNumber @bind-Value="newPrice.Price" class="form-control mb-2" placeholder="Price" min="1"/>
+                @if (!string.IsNullOrEmpty(_errorMessage))
+                {
+                    <div class="alert alert-danger" role="alert">
+                        @_errorMessage
+                    </div>
+                }
+                <input type="datetime-local" @bind="newPrice.StartDate" class="form-control mb-2" placeholder="Start Date" />
+                <input type="datetime-local" @bind="newPrice.EndDate" class="form-control mb-2" placeholder="End Date" />
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" @onclick="AddPrice">Add</button>
+                <button type="button" class="btn btn-secondary" @onclick="CloseModal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @code {
     [Parameter]
     public MyEventDto? MyEventDto { get; set; }
