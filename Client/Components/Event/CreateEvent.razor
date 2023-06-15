@@ -46,7 +46,20 @@
         <label>Close Registrations Date:</label>
         <InputDate class="form-control" @bind-Value="_createEventRequest.CloseRegistrationsDate" />
     </div>
-
+    
+    <div class="form-group">
+        <label>Is a free event:</label>
+        <InputCheckbox @bind-Value="_createEventRequest.IsFree" class="form-check-input my-2"/>
+    </div>
+    
+    @if (!_createEventRequest.IsFree)
+    {
+        <div class="form-group">
+            <label>Starting price:</label>
+            <InputNumber class="form-control" @bind-Value="_createEventRequest.FirstPrice" />
+        </div>
+    }
+    
     <button type="submit" class="btn btn-primary">Create Event</button>
 </EditForm>
 

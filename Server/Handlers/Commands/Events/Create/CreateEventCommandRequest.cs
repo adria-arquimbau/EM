@@ -5,8 +5,8 @@ namespace EventsManager.Server.Handlers.Commands.Events.Create;
 
 public class CreateEventCommandRequest : IRequest
 {
-    public string UserId;
-    public CreateEventRequest Request;
+    public readonly string UserId;
+    public readonly CreateEventRequest Request;
 
     public CreateEventCommandRequest(CreateEventRequest request, string userId)
     {

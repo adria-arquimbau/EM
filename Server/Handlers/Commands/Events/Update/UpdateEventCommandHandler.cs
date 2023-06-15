@@ -27,12 +27,6 @@ public class UpdateEventCommandHandler : IRequestHandler<UpdateEventCommandReque
         {
             throw new Exception("You are not the owner of this event");
         }
-        
-        if (eventToUpdate.IsFree && !eventToUpdate.Prices.Any() && !request.EventDto.IsFree)
-        {
-            //Create default price
-            eventToUpdate.Prices.Add(new EventPrice(1, eventToUpdate.CreationDate, eventToUpdate.StartDate));
-        }
 
         eventToUpdate.Update(request.EventDto.Name, request.EventDto.Description, request.EventDto.Location, request.EventDto.MaxRegistrations, request.EventDto.StartDate.ToUniversalTime(), request.EventDto.FinishDate.ToUniversalTime(), request.EventDto.OpenRegistrationsDate.ToUniversalTime(), request.EventDto.CloseRegistrationsDate.ToUniversalTime(), request.EventDto.IsPublic);
         eventToUpdate.IsFree = request.EventDto.IsFree;

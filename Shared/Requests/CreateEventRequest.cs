@@ -8,6 +8,8 @@ public class CreateEventRequest
     public string Description { get; set; }
     public string Location { get; set; }
     public int MaxRegistrations { get; set; }
+    public bool IsFree { get; set; }
+    public int FirstPrice { get; set; }
     public DateTime OpenRegistrationsDate { get; set; }  
     public DateTime CloseRegistrationsDate { get; set; }
 }

@@ -67,6 +67,11 @@ public class EventPriceController : ControllerBase
         {
             return Unauthorized();
         }
+
+        if (price.Event.Prices.Count == 1)
+        {
+            return Conflict("You can't remove the last price");
+        }
         
         _context.EventPrices.Remove(price);
         await _context.SaveChangesAsync(cancellationToken);
