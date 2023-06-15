@@ -3,8 +3,6 @@
 @using Microsoft.AspNetCore.Components.Forms
 @inject HttpClient Http
 
-<h3>PriceEdit</h3>
-
 <ConfirmationModal Title="Confirmation" Message="Are you sure you want to remove this price?" 
                    Visible="@confirmModalVisible" ConfirmationChanged="OnConfirmationChanged" />
 
@@ -24,6 +22,7 @@
                                 </h5>
                                 <p class="card-text text-muted">Start: @price.StartDate.ToLocalTime().ToString("dd/MM/yyyy HH:mm") - End: @price.EndDate.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</p>
                                 <button class="btn btn-danger" @onclick="(() => ConfirmRemovePrice(price))">Remove</button>
+                                <button class="btn btn-secondary" @onclick="(() => OpenEditModal(price))">Edit</button>
                             </div>
                         </div>
                     </div>
@@ -43,34 +42,35 @@
     </div>
 </EditForm>
 
-<div class="@modalClass">
+<!-- Edit Modal -->
+
+<div class="@editModalClass">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Add Price</h5>
-                <button type="button" class="close" @onclick="CloseModal">
+                <h5 class="modal-title">Edit Price</h5>
+                <button type="button" class="close" @onclick="CloseEditModal">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <div class="modal-body">
-                <InputNumber @bind-Value="newPrice.Price" class="form-control mb-2" placeholder="Price" min="1"/>
-                @if (!string.IsNullOrEmpty(_errorMessage))
+                <InputNumber @bind-Value="editPrice.Price" class="form-control mb-2" placeholder="Price" min="1"/>
+                @if (!string.IsNullOrEmpty(_editErrorMessage))
                 {
                     <div class="alert alert-danger" role="alert">
-                        @_errorMessage
+                        @_editErrorMessage
                     </div>
                 }
-                <input type="datetime-local" @bind="newPrice.StartDate" class="form-control mb-2" placeholder="Start Date" />
-                <input type="datetime-local" @bind="newPrice.EndDate" class="form-control mb-2" placeholder="End Date" />
+                <input type="datetime-local" @bind="editPrice.StartDate" class="form-control mb-2" placeholder="Start Date" />
+                <input type="datetime-local" @bind="editPrice.EndDate" class="form-control mb-2" placeholder="End Date" />
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-primary" @onclick="AddPrice">Add</button>
-                <button type="button" class="btn btn-secondary" @onclick="CloseModal">Close</button>
+                <button type="button" class="btn btn-primary" @onclick="UpdatePrice">Update</button>
+                <button type="button" class="btn btn-secondary" @onclick="CloseEditModal">Close</button>
             </div>
         </div>
     </div>
 </div>
-
 
 @code {
     [Parameter]
@@ -79,35 +79,50 @@
     public EventCallback RefreshEvent { get; set; }
     
     private EventPriceDto newPrice = new();
-    private EventPriceDto priceToRemove; // Store the price to remove after confirmation
-
+    private EventPriceDto editPrice = new(); // Added for edit
+    private EventPriceDto priceToRemove;
+    
     private bool isModalOpen = false;
-    private bool confirmModalVisible = false; // Confirmation modal state
+    private bool isEditModalOpen = false; // Added for edit
+    private bool confirmModalVisible = false;
     private string modalClass => isModalOpen ? "modal d-block" : "modal";
+    private string editModalClass => isEditModalOpen ? "modal d-block" : "modal"; // Added for edit
     private string? _errorMessage = null;
+    private string? _editErrorMessage = null; // Added for edit
 
     private void OpenModal()
     {
         newPrice = new EventPriceDto
         {
             EventId = MyEventDto.Id,
-            StartDate = DateTime.Now,  // Set start date to today
-            EndDate = DateTime.Now.AddDays(7)  // Set end date to one week later
+            StartDate = DateTime.Now,
+            EndDate = DateTime.Now.AddDays(7)
         };
         isModalOpen = true;
     }
-
-
+    
+    private void OpenEditModal(EventPriceDto price)
+    {
+        editPrice = new EventPriceDto
+        {
+            Id = price.Id,
+            EventId = price.EventId,
+            Price = price.Price,
+            StartDate = price.StartDate,
+            EndDate = price.EndDate
+        };
+        isEditModalOpen = true;
+    }
+    
     private async void AddPrice()
     {
-        if (newPrice.Price < 1)
+        if (newPrice.Price < 0.5m)
         {
-            _errorMessage = "Price must be greater than 0.";
+            _errorMessage = "Price must be greater than 0,5.";
         }
         else
         {
             var response = await Http.PostAsJsonAsync("EventPrice", newPrice);
-
             if (response.IsSuccessStatusCode)
             {
                 CloseModal();
@@ -115,24 +130,48 @@
             }
             else
             {
-    // Handle the error here
+                // Handle the error here
             }
         }
     }
-
+    
+    private async void UpdatePrice()
+    {
+        if (editPrice.Price <  0.5m)
+        {
+            _editErrorMessage = "Price must be greater than 0,5.";
+        }
+        else
+        {
+            var response = await Http.PutAsJsonAsync($"EventPrice/{editPrice.Id}", editPrice);
+            if (response.IsSuccessStatusCode)
+            {
+                CloseEditModal();
+                await RefreshEvent.InvokeAsync(MyEventDto);
+            }
+            else
+            {
+                // Handle the error here
+            }
+        }
+    }
+    
     private void CloseModal()
     {
         isModalOpen = false;
     }
-
-    // Open the confirmation modal instead of removing directly
+    
+    private void CloseEditModal()
+    {
+        isEditModalOpen = false;
+    }
+    
     private void ConfirmRemovePrice(EventPriceDto price)
     {
         priceToRemove = price;
         confirmModalVisible = true;
     }
-
-    // Confirmation handler
+    
     private async Task OnConfirmationChanged(bool confirmed)
     {
         if (confirmed)
@@ -140,8 +179,6 @@
             await Http.DeleteAsync($"EventPrice/{priceToRemove.Id}");
             await RefreshEvent.InvokeAsync(MyEventDto);
         }
-
-    // Reset state
         priceToRemove = null;
         confirmModalVisible = false;
     }
