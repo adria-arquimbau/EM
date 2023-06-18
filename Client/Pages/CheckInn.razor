@@ -1,11 +1,21 @@
 ﻿@page "/Check-in/{RegistrationId:guid}"
 
 @using EventsManager.Shared.Dtos
+@using EventsManager.Client.Components.Loaders
 
 @inject IToastService ToastService
 @inject HttpClient Http
 
 <h3>CheckInn</h3>
+
+@if (_registrationToCheckInn == null)
+{
+    <LoadingSpinner />
+}
+@if (_registrationToCheckInn != null)
+{
+    @_registrationToCheckInn.Id
+}
 
 @code {
     [Parameter]
@@ -13,11 +23,11 @@
     
     private RegistrationToCheckInDto? _registrationToCheckInn;
     
-    protected override async void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
         try
         {
-            var response = await Http.GetAsync($"Registration/{RegistrationId}/check-in");
+            var response = await Http.GetAsync($"Registration/{RegistrationId}/Check-in");
 
             if (response.IsSuccessStatusCode)
             {
@@ -29,11 +39,9 @@
                 ToastService.ShowError(errorContent);
             }
         }
-        catch (Exception e)
+        catch (Exception)
         {
-            ToastService.ShowError($"Exception: {e.Message}, something went wrong, please try again later");
+            ToastService.ShowError("Something went wrong, please try again later");
         }
     }
-
-
 }

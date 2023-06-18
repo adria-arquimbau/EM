@@ -24,6 +24,39 @@ public class RegistrationController : ControllerBase
         _userManager = userManager;
     }
     
+    [HttpGet("{registrationId:guid}/Check-in")]
+    [Authorize(Roles = "User")] 
+    public async Task<IActionResult> Register([FromRoute] Guid registrationId, CancellationToken cancellationToken)
+    {
+        var requesterId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        var registration = await _context.Registrations
+            .Where(x => x.Id == registrationId)
+            .Include(x => x.User)
+            .SingleAsync(cancellationToken);
+
+        var checkInDto = new RegistrationToCheckInDto
+        {
+            Id = registration.Id,
+            CreationDate = registration.CreationDate,
+            Role = registration.Role,
+            State = registration.State,
+            Bib = registration.Bib,
+            CheckedIn = registration.CheckedIn,
+            PaymentStatus = registration.PaymentStatus,
+            RegisteredUser = new UserDto
+            {
+                Id = registration.User.Id,
+                UserName = registration.User.UserName,
+                Email = registration.User.Email,
+                Name = registration.User.Name,
+                Country = registration.User.Country
+            }
+        };
+        
+        return Ok(checkInDto); 
+    }   
+    
     [HttpPost("event/{eventId:guid}/{registrationRole}/password/{password?}")]
     [Authorize(Roles = "User")] 
     public async Task<IActionResult> Register([FromRoute] Guid eventId, [FromRoute] RegistrationRole registrationRole, [FromRoute] string? password, CancellationToken cancellationToken)

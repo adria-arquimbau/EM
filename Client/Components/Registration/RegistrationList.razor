@@ -3,9 +3,11 @@
 @using EventsManager.Shared.Requests
 @using EventsManager.Client.Components.Modals
 @using EventsManager.Client.Components.Loaders
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
 
 @inject HttpClient Http
 @inject IToastService ToastService
+@inject NavigationManager NavigationManager
 
 @if (_registrations == null)
 {
@@ -63,7 +65,7 @@ else
                             </select>
                         </td>
                         <td>@registration.Bib</td>
-                        <td>@registration.CheckedIn</td>
+                        <td>@registration.CheckedIn <button class="btn btn-success" @onclick="() => GoToCheckIn(registration.Id)">Go</button></td>
                         <td>@registration.RegisteredUser.UserName</td>
                         <td>@registration.RegisteredUser.Email</td>
                         <td>
@@ -165,5 +167,10 @@ else
         
             await LoadRegistrations();
         }
+    }
+
+    private void GoToCheckIn(Guid registrationId)
+    {
+        NavigationManager.NavigateTo($"/Check-in/{registrationId}");
     }
 }
