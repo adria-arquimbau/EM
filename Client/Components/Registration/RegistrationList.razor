@@ -136,7 +136,8 @@ else
         var response = await Http.DeleteAsync($"Registration/{id}");
         if (!response.IsSuccessStatusCode)
         {
-            ToastService.ShowError("Something went wrong while updating your information");
+            var errorContent = await response.Content.ReadAsStringAsync();
+            ToastService.ShowError(errorContent);
         }
         await LoadRegistrations();
     }
@@ -158,7 +159,8 @@ else
             var response = await Http.PutAsJsonAsync($"Registration", updateRequest);
             if (!response.IsSuccessStatusCode)
             {
-                ToastService.ShowError("Something went wrong while updating the registration");
+                var errorContent = await response.Content.ReadAsStringAsync();
+                ToastService.ShowError(errorContent);
             }   
         
             await LoadRegistrations();

@@ -1,0 +1,39 @@
+﻿@page "/Check-in/{RegistrationId:guid}"
+
+@using EventsManager.Shared.Dtos
+
+@inject IToastService ToastService
+@inject HttpClient Http
+
+<h3>CheckInn</h3>
+
+@code {
+    [Parameter]
+    public Guid? RegistrationId { get; set; }
+    
+    private RegistrationToCheckInDto? _registrationToCheckInn;
+    
+    protected override async void OnInitialized()
+    {
+        try
+        {
+            var response = await Http.GetAsync($"Registration/{RegistrationId}/check-in");
+
+            if (response.IsSuccessStatusCode)
+            {
+                _registrationToCheckInn = await response.Content.ReadFromJsonAsync<RegistrationToCheckInDto>();
+            }
+            else
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                ToastService.ShowError(errorContent);
+            }
+        }
+        catch (Exception e)
+        {
+            ToastService.ShowError($"Exception: {e.Message}, something went wrong, please try again later");
+        }
+    }
+
+
+}
