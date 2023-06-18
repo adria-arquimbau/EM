@@ -35,6 +35,16 @@ public class RegistrationController : ControllerBase
             .Include(x => x.User)
             .SingleAsync(cancellationToken);
 
+        var requesterIsStaff = await _context.Registrations
+            .Where(x => x.Id == registrationId)
+            .SelectMany(x => x.Event.Registrations.Where(r => r.Role == RegistrationRole.Staff && r.State == RegistrationState.Accepted && r.User.Id == requesterId))
+            .AnyAsync(cancellationToken: cancellationToken);
+
+        if (!requesterIsStaff)
+        {
+            return BadRequest("Only event owners or staff can check-in registrations");
+        }
+        
         var checkInDto = new RegistrationToCheckInDto
         {
             Id = registration.Id,

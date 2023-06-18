@@ -6,23 +6,46 @@
 @inject IToastService ToastService
 @inject HttpClient Http
 
-<h3>CheckInn</h3>
+<h3 class="mb-3">CheckInn</h3>
 
 @if (_registrationToCheckInn == null)
 {
     <LoadingSpinner />
 }
-@if (_registrationToCheckInn != null)
+else
 {
-    @_registrationToCheckInn.Id
+    <div class="card">
+        <div class="card-header">
+            <div class="text-center">
+                <h1 class="display-1 d-inline">Bib: </h1>
+                <h1 class="display-1 d-inline">@_registrationToCheckInn.Bib</h1>
+            </div>
+        </div>
+        <div class="card-body">
+            <p class="card-text">
+                User name: @_registrationToCheckInn.RegisteredUser.UserName<br/>
+                Email: @_registrationToCheckInn.RegisteredUser.Email<br/>
+                Phone Number: @_registrationToCheckInn.RegisteredUser.PhoneNumber <br/>
+                Role: @_registrationToCheckInn.Role <br/>
+                Registration State: @_registrationToCheckInn.State <br/>
+                Checked In: @_registrationToCheckInn.CheckedIn <br/>
+                Payment Status: @_registrationToCheckInn.PaymentStatus <br/>
+                Registration Date: @_registrationToCheckInn.CreationDate.ToString("g") <br/>
+            </p>
+            @if(!_registrationToCheckInn.CheckedIn)
+            {
+                <button class="btn btn-success">Check In</button>
+            }
+        </div>
+    </div>
 }
 
 @code {
     [Parameter]
     public Guid? RegistrationId { get; set; }
-    
+
     private RegistrationToCheckInDto? _registrationToCheckInn;
-    
+
     protected override async Task OnInitializedAsync()
     {
         try
