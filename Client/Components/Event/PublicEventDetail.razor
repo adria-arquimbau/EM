@@ -7,6 +7,7 @@
 @using EventsManager.Shared.Enums
 @using EventsManager.Shared.Requests
 @using EventsManager.Shared.Responses
+@using QRCoder
 
 @inject HttpClient Http
 @inject IHttpClientFactory HttpClientFactory
@@ -72,6 +73,10 @@ else
                                         @if(_myRegistration.Role == RegistrationRole.Staff && _myRegistration.State == RegistrationState.Accepted)
                                         {
                                             <button class="btn btn-success" @onclick="NavigateToOrganizerPanel">Go to Organizer Panel</button>
+                                            @if (checkInQrCode != null)
+                                            {
+                                                <img src="@checkInQrCode" alt="QR Code" class="img-fluid" />
+                                            }
                                         }
                                         
                                         @if(_myRegistration.State == RegistrationState.PreRegistered)
@@ -96,6 +101,10 @@ else
                                             <div class="alert alert-success" role="alert">
                                                 Your registration is accepted. You can now check-in at the event.
                                             </div>
+                                            @if (checkInQrCode != null)
+                                            {
+                                                <img src="@checkInQrCode" alt="QR Code" class="img-fluid" />
+                                            }
                                         }
                     
                                         @if(_myRegistration.State == RegistrationState.Cancelled)
@@ -137,6 +146,7 @@ else
     
     private EventDto? _eventDetail;
     private RegistrationDto? _myRegistration;
+    private string? checkInQrCode;
     private bool _isModalOpen;
     private ClaimsPrincipal? _user;
     
@@ -161,6 +171,10 @@ else
                 if (response != null)
                 {
                     _myRegistration = response;
+                    if (_myRegistration.State == RegistrationState.Accepted)
+                    {
+                        checkInQrCode = GenerateQRCode($"{NavigationManager.BaseUri}Check-in/{_myRegistration.Id}");
+                    }   
                 }
             }
             catch (Exception)
@@ -242,5 +256,14 @@ else
         }
         
     }
-
+    
+    private string GenerateQRCode(string input) 
+    {
+        using var qrGenerator = new QRCodeGenerator();
+        using var qrCodeData = qrGenerator.CreateQrCode(input, QRCodeGenerator.ECCLevel.Q);
+        using var pngQrCode = new PngByteQRCode(qrCodeData);
+        var graphic = pngQrCode.GetGraphic(10);
+        var base64String = Convert.ToBase64String(graphic, 0, graphic.Length); // Convert the bytes to base64 string  
+        return $"data:image/png;base64,{base64String}";
+    }
 }
