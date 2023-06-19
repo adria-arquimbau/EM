@@ -55,17 +55,9 @@ else
                                         <h5>Your Registration Details</h5>
                                     </div>
                                     <div class="card-body">
-                                        <p><strong>Registration date:</strong> @_myRegistration.CreationDate.ToString("g")</p>
+                                        <p><strong>Registration date:</strong> @_myRegistration.CreationDate.ToLocalTime().ToString("g")</p>
                                         <p><strong>Role:</strong> @_myRegistration.Role</p>
                                         <p><strong>State:</strong> @_myRegistration.State</p>
-                                        @if (_myRegistration.Bib == null)
-                                        {
-                                            <p style="color:red;"><strong>Bib:</strong> No Bib</p>
-                                        }
-                                        else
-                                        {
-                                            <p><strong>Bib:</strong> @_myRegistration.Bib</p>
-                                        }
                                         <p><strong>Checked In:</strong> @(_myRegistration.CheckedIn ? "Yes" : "No")</p>
                                         
                                         <button class="btn btn-success" @onclick="NavigateToTicket">Open a ticket</button>
@@ -75,6 +67,7 @@ else
                                             <button class="btn btn-success" @onclick="NavigateToOrganizerPanel">Go to Organizer Panel</button>
                                             @if (checkInQrCode != null)
                                             {
+                                                <p>Here is your QR Code to check-in at the event:</p>
                                                 <img src="@checkInQrCode" alt="QR Code" class="img-fluid" />
                                             }
                                         }
