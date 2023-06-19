@@ -2,7 +2,7 @@
 
 @using EventsManager.Shared.Dtos
 @using EventsManager.Client.Components.Loaders
-
+@inject AuthenticationStateProvider AuthenticationStateProvider
 @inject IToastService ToastService
 @inject HttpClient Http
 
@@ -48,23 +48,34 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        try
-        {
-            var response = await Http.GetAsync($"Registration/{RegistrationId}/Check-in");
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var isAuthenticated = authState.User.Identity?.IsAuthenticated ?? false;
 
-            if (response.IsSuccessStatusCode)
+        if (isAuthenticated)
+        {
+            try
             {
-                _registrationToCheckInn = await response.Content.ReadFromJsonAsync<RegistrationToCheckInDto>();
+                var response = await Http.GetAsync($"Registration/{RegistrationId}/Check-in");
+
+                if (response.IsSuccessStatusCode)
+                {
+                    _registrationToCheckInn = await response.Content.ReadFromJsonAsync<RegistrationToCheckInDto>();
+                }
+                else
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    ToastService.ShowError(errorContent, settings => settings.DisableTimeout = true);
+                }
             }
-            else
+            catch (Exception)
             {
-                var errorContent = await response.Content.ReadAsStringAsync();
-                ToastService.ShowError(errorContent);
+                ToastService.ShowError("Something went wrong, please try again later.");
             }
         }
-        catch (Exception)
+
+        if (!isAuthenticated)
         {
-            ToastService.ShowError("Something went wrong, please try again later");
+            ToastService.ShowError("You must be authenticated and a member of the event staff to access this page.", settings => settings.DisableTimeout = true);
         }
     }
 }
