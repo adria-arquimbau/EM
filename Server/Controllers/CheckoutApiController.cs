@@ -1,4 +1,5 @@
 ﻿using EventsManager.Server.Data;
+using EventsManager.Shared.Enums;
 using EventsManager.Shared.Requests;
 using EventsManager.Shared.Responses;
 using Microsoft.AspNetCore.Mvc;
@@ -22,8 +23,22 @@ public class CheckoutApiController : Controller
     }
     
     [HttpPost]
-    public async Task<ActionResult> Create([FromBody]CheckoutRequest request)
+    public async Task<ActionResult> Create([FromBody]CheckoutRequest request, CancellationToken cancellationToken)
     {
+        var eventMaxRegistrations = await _context.Events
+            .Where(x => x.Id == Guid.Parse(request.EventId))
+            .Select(x => x.MaxRegistrations)
+            .SingleAsync(cancellationToken);
+        
+        var ridersAcceptedCount = await _context.Registrations
+            .Where(x => x.State == RegistrationState.Accepted && x.Role == RegistrationRole.Rider)
+            .CountAsync(cancellationToken);
+
+        if (eventMaxRegistrations <= ridersAcceptedCount)
+        {
+            return BadRequest("No more registrations allowed for this event.");
+        }
+        
         var domain = _configuration["Domain"];
 
         long currentPrice;  
@@ -49,7 +64,7 @@ public class CheckoutApiController : Controller
         {
             LineItems = new List<SessionLineItemOptions>    
             {
-                new SessionLineItemOptions
+                new()
                 {
                     Price = stripePrice.Id,
                     Quantity = 1,

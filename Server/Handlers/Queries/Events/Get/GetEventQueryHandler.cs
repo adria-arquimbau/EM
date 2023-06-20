@@ -31,7 +31,7 @@ public class GetEventQueryHandler : IRequestHandler<GetEventQueryRequest, EventD
                 Location = x.Location,
                 ImageUrl = x.ImageUrl,
                 PreAndAcceptedRidersRegistrationsCount = x.Registrations.Count(r => r.Role == RegistrationRole.Rider &&
-                    (r.State == RegistrationState.PreRegistered || r.State == RegistrationState.Accepted)),
+                    (r.State == RegistrationState.Accepted)),
                 RiderMarshallHaveRegistrationRolePassword = x.RegistrationRolePasswords.Any(y => y.Role == RegistrationRole.RiderMarshal),
                 RiderHaveRegistrationRolePassword = x.RegistrationRolePasswords.Any(y => y.Role == RegistrationRole.Rider),
                 StaffHaveRegistrationRolePassword = x.RegistrationRolePasswords.Any(y => y.Role == RegistrationRole.Staff),

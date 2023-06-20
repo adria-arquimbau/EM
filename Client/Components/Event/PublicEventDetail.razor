@@ -65,10 +65,12 @@ else
                                         @if(_myRegistration.Role == RegistrationRole.Staff && _myRegistration.State == RegistrationState.Accepted)
                                         {
                                             <button class="btn btn-success" @onclick="NavigateToOrganizerPanel">Go to Organizer Panel</button>
-                                            @if (checkInQrCode != null)
+                                            @if (_checkInQrCode != null)
                                             {
-                                                <p>Here is your QR Code to check-in at the event:</p>
-                                                <img src="@checkInQrCode" alt="QR Code" class="img-fluid" />
+                                                <div>
+                                                    <p>Here is your QR Code to check-in at the event:</p>
+                                                    <img src="@_checkInQrCode" alt="QR Code" class="img-fluid" />
+                                                </div>
                                             }
                                         }
                                         
@@ -94,9 +96,12 @@ else
                                             <div class="alert alert-success" role="alert">
                                                 Your registration is accepted. You can now check-in at the event.
                                             </div>
-                                            @if (checkInQrCode != null)
+                                            @if (_checkInQrCode != null)
                                             {
-                                                <img src="@checkInQrCode" alt="QR Code" class="img-fluid" />
+                                                <div>
+                                                    <p>Here is your QR Code to check-in at the event:</p>
+                                                    <img src="@_checkInQrCode" alt="QR Code" class="img-fluid" />
+                                                </div>
                                             }
                                         }
                     
@@ -139,7 +144,7 @@ else
     
     private EventDto? _eventDetail;
     private RegistrationDto? _myRegistration;
-    private string? checkInQrCode;
+    private string? _checkInQrCode;
     private bool _isModalOpen;
     private ClaimsPrincipal? _user;
     
@@ -166,7 +171,7 @@ else
                     _myRegistration = response;
                     if (_myRegistration.State == RegistrationState.Accepted)
                     {
-                        checkInQrCode = GenerateQRCode($"{NavigationManager.BaseUri}Check-in/{_myRegistration.Id}");
+                        _checkInQrCode = GenerateQRCode($"{NavigationManager.BaseUri}Check-in/{_myRegistration.Id}");
                     }   
                 }
             }
@@ -236,11 +241,11 @@ else
             {
                 var checkoutSession = await response.Content.ReadFromJsonAsync<CheckoutResponse>();
                 NavigationManager.NavigateTo(checkoutSession.Url);
-    // Here you can navigate to the checkout page or do whatever you want with the checkout session.
             }
             else
             {
-                ToastService.ShowError("Something went wrong. Please try again later.");
+                var errorMessage = await response.Content.ReadAsStringAsync();
+                ToastService.ShowError(errorMessage);
             }
         }
         catch (Exception e)
