@@ -8,7 +8,7 @@ public class Registration
     public DateTime CreationDate { get; private set; }
     public RegistrationRole Role { get; private set; }
     public RegistrationState State { get; set; }
-    public int? Bib { get; private set; }
+    public int? Bib { get; set; }
     public bool CheckedIn { get; private set; }
     public Event Event { get; set; }
     public string UserId { get; set; }
