@@ -37,7 +37,9 @@ public class WebhookController : Controller
             {
                 var session = stripeEvent.Data.Object as Session;
                 var registrationId = session.Metadata["RegistrationId"];
-                var registration = await _context.Registrations.SingleAsync(x => x.Id == Guid.Parse(registrationId));
+                var registration = await _context.Registrations
+                    .Include(x => x.Event)
+                    .SingleAsync(x => x.Id == Guid.Parse(registrationId));
                 registration.PaymentStatus = PaymentStatus.Paid;
                 registration.State = RegistrationState.Accepted;
                 await _context.SaveChangesAsync();
