@@ -34,6 +34,11 @@ public class CheckoutApiController : Controller
             .Where(x => x.State == RegistrationState.Accepted && x.Role == RegistrationRole.Rider)
             .CountAsync(cancellationToken);
 
+        var productId = await _context.Events
+            .Where(x => x.Id == Guid.Parse(request.EventId))
+            .Select(x => x.ProductId)
+            .SingleAsync(cancellationToken);
+        
         if (eventMaxRegistrations <= ridersAcceptedCount)
         {
             return BadRequest("No more registrations allowed for this event.");
@@ -53,12 +58,12 @@ public class CheckoutApiController : Controller
        
         var priceOptions = new PriceCreateOptions
         {
-            UnitAmount = currentPrice, // This method will return the price for the current week
+            UnitAmount = currentPrice,
             Currency = "eur",
-            Product = "prod_O58nBZHZmazZ7w", // Replace with your Product ID
+            Product = productId
         };
         var priceService = new PriceService();
-        var stripePrice = await priceService.CreateAsync(priceOptions);
+        var stripePrice = await priceService.CreateAsync(priceOptions, cancellationToken: cancellationToken);
 
         var sessionOptions = new SessionCreateOptions
         {
@@ -76,11 +81,12 @@ public class CheckoutApiController : Controller
             Metadata = new Dictionary<string, string>
             {
                 { "RegistrationId", request.RegistrationId }
-            }
+            },
+            ExpiresAt = DateTime.UtcNow + new TimeSpan(0, 5, 0)
         };
     
         var sessionService = new SessionService();
-        var session = await sessionService.CreateAsync(sessionOptions);
+        var session = await sessionService.CreateAsync(sessionOptions, cancellationToken: cancellationToken);
 
         return Ok(new CheckoutResponse
         {

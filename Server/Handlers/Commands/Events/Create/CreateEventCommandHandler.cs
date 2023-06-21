@@ -3,6 +3,8 @@ using EventsManager.Server.Models;
 using EventsManager.Shared.Enums;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Stripe;
+using Event = EventsManager.Server.Models.Event;
 
 namespace EventsManager.Server.Handlers.Commands.Events.Create;
 
@@ -26,8 +28,26 @@ public class CreateEventCommandHandler : IRequestHandler<CreateEventCommandReque
         
         newEvent.Prices.Add(new EventPrice(request.Request.FirstPrice == 0 ? 1 : request.Request.FirstPrice,  request.Request.StartDate.ToUniversalTime(),  request.Request.FinishDate.ToUniversalTime()));
         
+        var productName = "Event Product: " + newEvent.Name;
+        var productId = await CreateProductInStripeAsync(productName);
+        newEvent.ProductId = productId; 
+            
         _context.Events.Add(newEvent);
         await _context.SaveChangesAsync(cancellationToken);
     }
+    
+    private static async Task<string> CreateProductInStripeAsync(string productName)
+    {
+        var productOptions = new ProductCreateOptions
+        {
+            Name = productName
+        };
+
+        var productService = new ProductService();
+        var product = await productService.CreateAsync(productOptions);
+
+        return product.Id;
+    }
+
 }
     

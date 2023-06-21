@@ -22,6 +22,8 @@ public class Event
     public virtual ICollection<Registration> Registrations { get; set; } = new List<Registration>();
     public ICollection<RegistrationRolePassword> RegistrationRolePasswords { get; set; } = new List<RegistrationRolePassword>();
     public ICollection<EventPrice> Prices { get; set; } = new List<EventPrice>();
+    public string ProductId { get; set; }
+
     private Event() { }
     
     public Event(string name, string description, string location, int maxRegistrations, ApplicationUser creator, DateTime startDate, DateTime finishDate, DateTime openRegistrationsDate, DateTime closeRegistrationsDate)
