@@ -78,11 +78,19 @@ else
                                         {
                                             @if(_myRegistration.Role == RegistrationRole.Rider && !_eventDetail.IsFree)
                                             {
-                                               
-                                                <div class="alert alert-danger" role="alert">
-                                                    You need to pay for the registration. Until the payment is done, your registration is not accepted.
-                                                    <button class="btn btn-primary" @onclick="CreateCheckoutSession">Pay Now</button>
-                                                </div>
+                                               @if (GetRegistrationStateText() == "OPEN")
+                                               {
+                                                   <div class="alert alert-warning" role="alert">
+                                                       You need to pay for the registration. Until the payment is done, your registration is not accepted.
+                                                       <button class="btn btn-primary" @onclick="CreateCheckoutSession">Pay Now</button>
+                                                   </div>
+                                               }
+                                                @if (GetRegistrationStateText() == "CLOSED")
+                                                {
+                                                    <div class="alert alert-danger" role="alert">
+                                                        The registrations are closed. You can't pay for the registration anymore.
+                                                    </div>
+                                                }
                                             }
                                             else
                                             {

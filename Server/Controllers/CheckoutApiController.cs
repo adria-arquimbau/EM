@@ -25,25 +25,21 @@ public class CheckoutApiController : Controller
     [HttpPost]
     public async Task<ActionResult> Create([FromBody]CheckoutRequest request, CancellationToken cancellationToken)
     {
-        var eventMaxRegistrations = await _context.Events
+        var isRegistrationAllowed = await _context.Events
             .Where(x => x.Id == Guid.Parse(request.EventId))
-            .Select(x => x.MaxRegistrations)
+            .Select(x => x.MaxRegistrations > _context.Registrations.Count(r => r.Event.Id == x.Id && r.State == RegistrationState.Accepted && r.Role == RegistrationRole.Rider))
             .SingleAsync(cancellationToken);
-        
-        var ridersAcceptedCount = await _context.Registrations
-            .Where(x => x.State == RegistrationState.Accepted && x.Role == RegistrationRole.Rider)
-            .CountAsync(cancellationToken);
 
-        var productId = await _context.Events
-            .Where(x => x.Id == Guid.Parse(request.EventId))
-            .Select(x => x.ProductId)
-            .SingleAsync(cancellationToken);
-        
-        if (eventMaxRegistrations <= ridersAcceptedCount)
+        if (!isRegistrationAllowed)
         {
             return BadRequest("No more registrations allowed for this event.");
         }
         
+        var productId = await _context.Events
+            .Where(x => x.Id == Guid.Parse(request.EventId))
+            .Select(x => x.ProductId)
+            .SingleAsync(cancellationToken);
+
         var domain = _configuration["Domain"];
 
         long currentPrice;  
