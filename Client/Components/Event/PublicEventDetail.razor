@@ -51,17 +51,16 @@ else
                             @if(_myRegistration != null)
                             {
                                 <div class="card mt-4">
-                                    <div class="card-header">
-                                        <h5>Your Registration Details</h5>
+                                    <div class="card-header d-flex justify-content-between align-items-center">
+                                        <h5 class="mb-0">Your Registration Details</h5>
+                                        <button class="btn btn-success" @onclick="NavigateToTicket">Open a ticket</button>
                                     </div>
                                     <div class="card-body">
                                         <p><strong>Registration date:</strong> @_myRegistration.CreationDate.ToLocalTime().ToString("g")</p>
                                         <p><strong>Role:</strong> @_myRegistration.Role</p>
                                         <p><strong>State:</strong> @_myRegistration.State</p>
                                         <p><strong>Checked In:</strong> @(_myRegistration.CheckedIn ? "Yes" : "No")</p>
-                                        
-                                        <button class="btn btn-success" @onclick="NavigateToTicket">Open a ticket</button>
-                                        
+
                                         @if(_myRegistration.Role == RegistrationRole.Staff && _myRegistration.State == RegistrationState.Accepted)
                                         {
                                             <button class="btn btn-success" @onclick="NavigateToOrganizerPanel">Go to Organizer Panel</button>
@@ -83,6 +82,15 @@ else
                                                    <div class="alert alert-warning" role="alert">
                                                        You need to pay for the registration. Until the payment is done, your registration is not accepted.
                                                        <button class="btn btn-primary" @onclick="CreateCheckoutSession">Pay Now</button>
+                                                       
+                                                       **TEST SYSTEM, any charge would be applyed. Palabra del Arki, use this card numbers for specific cases: Test Card for Success: 4242 4242 4242 4242
+                                                                                                                                                               Test Card for Authentication Required: 4000 0025 0000 3155
+                                                                                                                                                               Test Card for Insufficient Funds: 4000 0000 0000 9995
+                                                                                                                                                               Test Card for Declined: 4000 0000 0000 0002
+                                                                                                                                                               Test Card for Expired Card: 4000 0000 0000 0069
+                                                                                                                                                               Test Card for Incorrect CVC: 4000 0000 0000 0127
+                                                                                                                                                               Test Card for Card Declined: 4000 0000 0000 0119
+                                                                                                                                                               Test Card for Processing Error: 4000 0000 0000 0101
                                                    </div>
                                                }
                                                 @if (GetRegistrationStateText() == "CLOSED")
