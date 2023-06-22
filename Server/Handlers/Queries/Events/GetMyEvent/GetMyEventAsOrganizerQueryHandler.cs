@@ -37,6 +37,7 @@ public class GetMyEventAsOrganizerQueryHandler : IRequestHandler<GetMyEventAsOrg
         return new MyEventDto
         {
             Id = eventEntity.Id,
+            ProductId = eventEntity.ProductId,
             CreationDate = eventEntity.CreationDate,
             IsFree = eventEntity.IsFree,
             Name = eventEntity.Name,

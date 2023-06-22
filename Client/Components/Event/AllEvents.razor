@@ -31,33 +31,40 @@
 }
 else
 {
-    <div class="row">
-        @foreach (var sportEvent in FilteredEvents)
-        {
-            <div class="col-sm-6 col-md-4 col-lg-3">
-                <div class="card mb-4 clickable" @onclick="(() => NavigateToEventDetail(sportEvent.Id))">
-                    <div class="image-container">
-                        @if (sportEvent.ImageUrl != null)
-                        {
-                            <img src="@sportEvent.ImageUrl" alt="@sportEvent.Name">
-                        }
-                        else
-                        {
-                            <div style="width: 100%; height: 100%;"></div>
-                        }
-                    </div>
-                    <div class="card-body">
-                        <h5 class="card-title">@sportEvent.Name</h5>
-                        <p class="card-text">@sportEvent.Description</p>
-                    </div>
-                    <div class="card-footer">
-                        <small class="text-muted">@sportEvent.StartDate.ToString("g")</small>
-                        <div>@sportEvent.Location</div>
+    @if (FilteredEvents.Any())
+    {
+        <div class="row">
+            @foreach (var sportEvent in FilteredEvents)
+            {
+                <div class="col-sm-6 col-md-4 col-lg-3">
+                    <div class="card mb-4 clickable" @onclick="(() => NavigateToEventDetail(sportEvent.Id))">
+                        <div class="image-container">
+                            @if (sportEvent.ImageUrl != null)
+                            {
+                                <img src="@sportEvent.ImageUrl" alt="@sportEvent.Name">
+                            }
+                            else
+                            {
+                                <div style="width: 100%; height: 100%;"></div>
+                            }
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title">@sportEvent.Name</h5>
+                            <p class="card-text">@sportEvent.Description</p>
+                        </div>
+                        <div class="card-footer">
+                            <small class="text-muted">@sportEvent.StartDate.ToString("g")</small>
+                            <div>@sportEvent.Location</div>
+                        </div>
                     </div>
                 </div>
-            </div>
-        }
-    </div>
+            }
+        </div>
+    }
+    else
+    {
+        <p>No events available.</p>
+    }
 }
 
 
