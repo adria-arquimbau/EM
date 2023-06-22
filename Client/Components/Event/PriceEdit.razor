@@ -2,6 +2,7 @@
 @using EventsManager.Client.Components.Modals
 @using Microsoft.AspNetCore.Components.Forms
 @inject HttpClient Http
+@inject IToastService ToastService
 
 <ConfirmationModal Title="Confirmation" Message="Are you sure you want to remove this price?" 
                    Visible="@confirmModalVisible" ConfirmationChanged="OnConfirmationChanged" />
@@ -218,8 +219,21 @@
     {
         if (confirmed)
         {
-            await Http.DeleteAsync($"EventPrice/{priceToRemove.Id}");
-            await RefreshEvent.InvokeAsync(MyEventDto);
+            try
+            {
+                var response = await Http.DeleteAsync($"EventPrice/{priceToRemove.Id}");
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    var errorMessage = await response.Content.ReadAsStringAsync();
+                    ToastService.ShowError(errorMessage);
+                }
+                await RefreshEvent.InvokeAsync(MyEventDto);
+            }
+            catch (Exception e)
+            {
+                ToastService.ShowError("An error occurred while deleting the price.");
+            }
         }
         priceToRemove = null;
         confirmModalVisible = false;
