@@ -3,6 +3,7 @@
 @using EventsManager.Shared.Dtos
 @using EventsManager.Client.Components.Event
 @inject IHttpClientFactory HttpClientFactory
+@inject IToastService ToastService
 
 <PageTitle>@eventName</PageTitle>
 
@@ -23,7 +24,14 @@
     private async Task GetBasicInfoAboutEventDetails()
     {
         var http = HttpClientFactory.CreateClient("EventsManager.ServerAPI.Anonymous");
-        var response = await http.GetFromJsonAsync<EventDto>($"Event/{EventId}");
-        eventName = response.Name;
+        try
+        {
+            var response = await http.GetFromJsonAsync<EventDto>($"Event/{EventId}");
+            eventName = response.Name;
+        }
+        catch (Exception)
+        {
+            ToastService.ShowError("Something went wrong. Please try again later.");
+        }
     }
 }

@@ -3,6 +3,8 @@
 @using EventsManager.Client.Components.Event
 @using EventsManager.Shared.Dtos
 @inject HttpClient Http
+@inject IToastService ToastService
+
 
 @attribute [Authorize(Roles = "Organizer")]
 
@@ -41,7 +43,14 @@
 
     private async Task CloseModal()
     {
-        myEvents = await Http.GetFromJsonAsync<List<MyEventDto>>("Event/my-events");
+        try
+        {
+            myEvents = await Http.GetFromJsonAsync<List<MyEventDto>>("Event/my-events");
+        }
+        catch (Exception)
+        {
+            ToastService.ShowError("Something went wrong. Please try again later.");
+        }
         showModal = false;
     }
 }

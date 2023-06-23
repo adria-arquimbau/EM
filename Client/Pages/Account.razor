@@ -5,6 +5,7 @@
 @using Microsoft.AspNetCore.Authorization
 
 @inject HttpClient Http
+@inject IToastService ToastService
 @inject AuthenticationStateProvider AuthenticationStateProvider
 
 @attribute [Authorize(Roles = "User")] 
@@ -36,6 +37,13 @@
 
     private async Task GetUserInformation()
     {
-        User = await Http.GetFromJsonAsync<UserDto>("User");
+        try
+        {
+            User = await Http.GetFromJsonAsync<UserDto>("User");
+        }
+        catch (Exception)
+        {
+            ToastService.ShowError("Something went wrong while getting user information.");
+        }
     }
 }
