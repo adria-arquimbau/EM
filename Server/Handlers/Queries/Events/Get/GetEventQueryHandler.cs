@@ -38,7 +38,8 @@ public class GetEventQueryHandler : IRequestHandler<GetEventQueryRequest, EventD
                 MarshallHaveRegistrationRolePassword = x.RegistrationRolePasswords.Any(y => y.Role == RegistrationRole.Marshal),
                 MaxRegistrations = x.MaxRegistrations,
                 OpenRegistrationsDate = x.OpenRegistrationsDate,
-                CloseRegistrationsDate = x.CloseRegistrationsDate
+                CloseRegistrationsDate = x.CloseRegistrationsDate,
+                CurrentPrice = x.Prices.FirstOrDefault(p => p.StartDate <= DateTime.Now && p.EndDate >= DateTime.Now).Price,
             })
             .SingleAsync(cancellationToken: cancellationToken);
     }

@@ -45,6 +45,23 @@ else
                     <p><strong>Location:</strong> @_eventDetail.Location</p>
                     <p><strong>Open registrations date:</strong> @_eventDetail.OpenRegistrationsDate</p>
                     <p><strong>Registrations state:</strong> <span style="color: @(GetRegistrationStateColor())">@GetRegistrationStateText()</span></p>
+                    @if(_eventDetail.IsFree)
+                    {
+                        <p><strong>Price:</strong> Free</p>
+                    }
+                    @if(!_eventDetail.IsFree)
+                    {
+                        @if (_eventDetail.CurrentPrice.HasValue)
+                        {
+                            <p><strong>Price:</strong> @_eventDetail.CurrentPrice €</p> 
+                        }
+                        @if (!_eventDetail.CurrentPrice.HasValue)
+                        { 
+                            <div class="alert alert-warning" role="alert">
+                                An administrator has not set the price yet.
+                            </div>
+                        }
+                    }
                     <p><strong>Accepted registrations:</strong> @_eventDetail.PreAndAcceptedRidersRegistrationsCount/@_eventDetail.MaxRegistrations</p>
                     <AuthorizeView>
                         <Authorized>
@@ -228,6 +245,11 @@ else
             return "CLOSED";
         }
 
+        if (_eventDetail.CurrentPrice == null)
+        {
+            return "CLOSED";
+        }
+    
         return "OPEN";
     }
 
@@ -238,6 +260,11 @@ else
             || DateTime.UtcNow > _eventDetail.CloseRegistrationsDate)
         {
             return "red"; // Apply red color for CLOSED state
+        }
+        
+        if (_eventDetail.CurrentPrice == null)
+        {
+            return "red";
         }
 
         return "green"; // Apply green color for OPEN state
