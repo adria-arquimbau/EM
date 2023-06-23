@@ -17,7 +17,7 @@
 @inject NavigationManager NavigationManager
 @inject IToastService ToastService
 
-<FluentCalendar OutOfMonthSelectable="true"   Readonly=false SelectedDates="_calendarEventsDates" />
+<FluentCalendar SelectedDates="_calendarEventsDates"/>
 
 <h3>Next Events</h3>
 
@@ -75,7 +75,6 @@ else
     private List<EventDto>? _events;
     private List<DateOnly> _calendarEventsDates = new();
     private string? _searchTerm = string.Empty;
-    private IEnumerable<EventDto> _filteredEvents;
 
     private IEnumerable<EventDto> FilteredEvents
     {
@@ -83,7 +82,6 @@ else
         {
             return _events?.Where(e => e.Name.Contains(_searchTerm, StringComparison.OrdinalIgnoreCase));
         }
-        set => _filteredEvents = value;
     }
 
     protected override async Task OnInitializedAsync()
@@ -114,10 +112,5 @@ else
     private void NavigateToEventDetail(Guid eventId)
     {
         NavigationManager.NavigateTo($"/event-detail/{eventId}");
-    }
-
-    private void Call(DateOnly date)
-    {
-        _filteredEvents = _events?.Where(e => e.StartDate.Date == new DateTime(date.Year, date.Month, date.Day)).ToList();
     }
 }   
