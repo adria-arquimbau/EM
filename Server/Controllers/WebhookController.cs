@@ -51,8 +51,11 @@ public class WebhookController : Controller
                 {
                     registration.Bib = 1;
                 }
-                registration.Bib = maxBibNumber + 1;
-
+                if (maxBibNumber != null)
+                {
+                    registration.Bib = maxBibNumber + 1;
+                }
+                
                 await _context.SaveChangesAsync();
             }
 
