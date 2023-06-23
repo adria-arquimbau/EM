@@ -11,12 +11,13 @@
 </style>
 
 @using EventsManager.Shared.Dtos
+@using System.Dynamic
 
 @inject IHttpClientFactory HttpClientFactory
 @inject NavigationManager NavigationManager
 @inject IToastService ToastService
 
-<FluentCalendar Readonly=true SelectedDates="calendarEventsDates" />
+<FluentCalendar OutOfMonthSelectable="true"   Readonly=false SelectedDates="_calendarEventsDates" />
 
 <h3>Next Events</h3>
 
@@ -72,9 +73,18 @@ else
 
 @code {
     private List<EventDto>? _events;
-    private List<DateOnly> calendarEventsDates = new List<DateOnly>();
+    private List<DateOnly> _calendarEventsDates = new();
     private string? _searchTerm = string.Empty;
-    private IEnumerable<EventDto> FilteredEvents => _events?.Where(e => e.Name.Contains(_searchTerm, StringComparison.OrdinalIgnoreCase));
+    private IEnumerable<EventDto> _filteredEvents;
+
+    private IEnumerable<EventDto> FilteredEvents
+    {
+        get
+        {
+            return _events?.Where(e => e.Name.Contains(_searchTerm, StringComparison.OrdinalIgnoreCase));
+        }
+        set => _filteredEvents = value;
+    }
 
     protected override async Task OnInitializedAsync()
     {
@@ -83,7 +93,7 @@ else
             var http = HttpClientFactory.CreateClient("EventsManager.ServerAPI.Anonymous");
             _events = await http.GetFromJsonAsync<List<EventDto>>("Event");
         
-            calendarEventsDates = _events.Select(e => new DateOnly(e.StartDate.Year, e.StartDate.Month, e.StartDate.Day)).Distinct().ToList();
+            _calendarEventsDates = _events.Select(e => new DateOnly(e.StartDate.Year, e.StartDate.Month, e.StartDate.Day)).Distinct().ToList();
             
             if (_events == null)
             {
@@ -105,4 +115,9 @@ else
     {
         NavigationManager.NavigateTo($"/event-detail/{eventId}");
     }
-}
+
+    private void Call(DateOnly date)
+    {
+        _filteredEvents = _events?.Where(e => e.StartDate.Date == new DateTime(date.Year, date.Month, date.Day)).ToList();
+    }
+}   
