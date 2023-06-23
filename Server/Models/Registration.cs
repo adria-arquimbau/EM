@@ -14,8 +14,9 @@ public class Registration
     public string UserId { get; set; }
     public virtual ApplicationUser User { get; set; }
     public PaymentStatus PaymentStatus { get; set; }
+    public decimal? Price { get; set; }
 
-    private Registration()  
+    private Registration()      
     {
     }
 

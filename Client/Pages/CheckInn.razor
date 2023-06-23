@@ -28,7 +28,7 @@ else
                 Role: @_registrationToCheckInn.Role <br/>
                 Registration State: @_registrationToCheckInn.State <br/>
                 Checked In: @_registrationToCheckInn.CheckedIn <br/>
-                Payment Status: @_registrationToCheckInn.PaymentStatus <br/>
+                Payment Status: @_registrationToCheckInn.PaymentStatus <br/> / @_registrationToCheckInn.AmountPaid €
                 Registration Date: @_registrationToCheckInn.CreationDate.ToString("g") <br/>
             </p>
             @if(!_registrationToCheckInn.CheckedIn)

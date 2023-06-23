@@ -42,7 +42,9 @@ public class WebhookController : Controller
                     .SingleAsync(x => x.Id == Guid.Parse(registrationId));
                 registration.PaymentStatus = PaymentStatus.Paid;
                 registration.State = RegistrationState.Accepted;
+                registration.Price = session.AmountTotal;
                 await _context.SaveChangesAsync();
+                
                 var maxBibNumber = await _context.Registrations
                     .Where(x => x.Event.Id == registration.Event.Id && x.Bib != null)
                     .MaxAsync(x => x.Bib);
