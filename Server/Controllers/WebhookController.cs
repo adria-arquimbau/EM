@@ -42,7 +42,7 @@ public class WebhookController : Controller
                     .SingleAsync(x => x.Id == Guid.Parse(registrationId));
                 registration.PaymentStatus = PaymentStatus.Paid;
                 registration.State = RegistrationState.Accepted;
-                registration.Price = session.AmountTotal;
+                registration.Price = session.AmountTotal / 100.0m;
                 await _context.SaveChangesAsync();
                 
                 var maxBibNumber = await _context.Registrations
