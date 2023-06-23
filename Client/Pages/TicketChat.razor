@@ -1,68 +1,97 @@
-﻿@page "/ticket-chat/{EventId:guid}"
-
+﻿@page "/ticket-chat/{RegistrationId:guid}/event/{EventId:guid}"
+@using EventsManager.Shared.Dtos
+@using EventsManager.Shared.Requests
 
 @inject NavigationManager NavigationManager
 @inject HttpClient Http
+@inject IToastService ToastService
 
-<h3>Chat with Event Owner</h3>
+<h3>Create Ticket</h3>
 
-<div class="chat-box border p-2 mb-3" style="height: 400px; overflow-y: scroll">
-    @foreach (var message in messages)
-    {
-        <div class="border p-2 mb-2">
-            <p><b>@message.User:</b> @message.Text</p>
-            <p><small>@message.Timestamp.ToString("g")</small></p>
-        </div>
-    }
-</div>
-
-<div class="input-group">
-    <input type="text" class="form-control" placeholder="Type your message here..." @bind="newMessage" />
-    <div class="input-group-append">
-        <button class="btn btn-primary" type="button" @onclick="SendMessage">Send</button>
+@if (createdTicket != null)
+{
+    <div class="ticket-view">
+        <h4>@createdTicket.Title</h4>
+        <p>@createdTicket.Text</p>
     </div>
-</div>
+}
+else
+{
+    <div class="ticket-form">
+        <div class="form-group">
+            <label for="ticketTitle">Title:</label>
+            <input id="ticketTitle" type="text" class="form-control" @bind="_newTicket.Title" />
+        </div>
+
+        <div class="form-group">
+            <label for="ticketText">Explanation:</label>
+            <textarea id="ticketText" class="form-control" rows="5" @bind="_newTicket.Text"></textarea>
+        </div>
+
+        <button class="btn btn-primary" @onclick="CreateTicket">Create Ticket</button>
+    </div>
+}
 
 <button class="btn btn-primary" @onclick="NavigateToEvent">Back to event</button>
 
 @code {
     [Parameter]
+    public Guid RegistrationId { get; set; }
+    [Parameter]
     public Guid EventId { get; set; }
     
-    private string newMessage = string.Empty;
+    private List<TicketDto> _tickets = new List<TicketDto>();
 
-    private List<ChatMessage> messages = new List<ChatMessage>();
-
-    private async Task SendMessage()
+    private TicketDto _newTicket = new TicketDto();  
+    private TicketRequest createdTicket;
+    
+    protected override async Task OnInitializedAsync()
     {
-        if (!string.IsNullOrWhiteSpace(newMessage))
+        try
         {
-            var message = new ChatMessage
-            {
-                User = "Rider", // Replace with actual rider name
-                Text = newMessage,
-                Timestamp = DateTime.UtcNow
-            };
-
-            await Http.PostAsJsonAsync("api/chat", message);
-
-    // Add the new message to the chat
-            messages.Add(message);
-
-    // Clear the input field
-            newMessage = string.Empty;
+            var response = await Http.GetFromJsonAsync<List<TicketDto>>($"Registration/{RegistrationId}/ticket");
+            _tickets = response;
+        }
+        catch (Exception e)
+        {
+            ToastService.ShowError("Something went wrong, please try again later");
         }
     }
 
-    public class ChatMessage
+    private async Task CreateTicket()
     {
-        public string User { get; set; }
-        public string Text { get; set; }
-        public DateTime Timestamp { get; set; }
+        if (!string.IsNullOrWhiteSpace(_newTicket.Title) && !string.IsNullOrWhiteSpace(_newTicket.Text))
+        {
+            createdTicket = new TicketRequest()
+            {
+                Title = _newTicket.Title,
+                Text = _newTicket.Text
+            };
+            
+            try
+            {
+                var response = await Http.PostAsJsonAsync($"Registration/{RegistrationId}/ticket", createdTicket);
+                if (response.IsSuccessStatusCode)
+                {
+                    ToastService.ShowSuccess("Ticket created");
+                }
+                else
+                {
+                    var error = await response.Content.ReadAsStringAsync();
+                    ToastService.ShowError(error);
+                }
+            }
+            catch (Exception e)
+            {
+                ToastService.ShowError("Something went wrong, please try again later");
+            }
+            _newTicket = new TicketDto();
+        }
     }
-    
+
     private void NavigateToEvent()
     {
         NavigationManager.NavigateTo($"event-detail/{EventId}");
     }
+    
 }

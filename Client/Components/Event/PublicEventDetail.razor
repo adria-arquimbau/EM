@@ -232,7 +232,7 @@ else
 
     private void NavigateToTicket()
     {
-        NavigationManager.NavigateTo($"ticket-chat/{EventId}");
+        NavigationManager.NavigateTo($"ticket-chat/{_myRegistration.Id}/event/{EventId}");
     }
     
     private string GetRegistrationStateText()

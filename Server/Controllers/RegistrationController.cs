@@ -228,4 +228,56 @@ public class RegistrationController : ControllerBase
         
         return Ok();
     }
+    
+    [HttpGet("{RegistrationId:guid}/ticket")]
+    [Authorize(Roles = "User")]
+    public async Task<IActionResult> GetMyTickets([FromRoute] Guid registrationId, CancellationToken cancellationToken)
+    {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            
+        var registration = await _context.Registrations
+            .Where(x => x.Id == registrationId)
+            .Include(x => x.User)
+            .Include(x => x.Tickets)
+            .SingleAsync(cancellationToken);
+
+        if (registration.User.Id != userId)
+        {
+            return Forbid("User is not the owner of the registration");
+        }
+
+        var response = registration.Tickets.Select(x => new TicketDto
+        {
+            Title = x.Title,
+            Text = x.Text,
+            Solved = x.Solved
+        }).ToList();
+        
+
+        return Ok(response);
+    }
+    
+    [HttpPost("{RegistrationId:guid}/ticket")]
+    [Authorize(Roles = "User")]
+    public async Task<IActionResult> CreateATicket([FromRoute] Guid registrationId, [FromBody] TicketRequest ticketRequest, CancellationToken cancellationToken)
+    {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            
+        var registration = await _context.Registrations
+            .Where(x => x.Id == registrationId)
+            .Include(x => x.User)
+            .SingleAsync(cancellationToken);
+
+        if (registration.User.Id != userId)
+        {
+            return Forbid("User is not the owner of the registration");
+        }
+
+        var newTicket = new Ticket(ticketRequest.Title, ticketRequest.Text);
+        registration.Tickets.Add(newTicket);
+        
+        await _context.SaveChangesAsync(cancellationToken);
+
+        return Ok();
+    }
 }

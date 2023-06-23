@@ -15,6 +15,7 @@ public class Registration
     public virtual ApplicationUser User { get; set; }
     public PaymentStatus PaymentStatus { get; set; }
     public decimal? Price { get; set; }
+    public List<Ticket> Tickets { get; set; } = new();
 
     private Registration()      
     {
