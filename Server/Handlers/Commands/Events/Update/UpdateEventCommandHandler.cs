@@ -27,6 +27,12 @@ public class UpdateEventCommandHandler : IRequestHandler<UpdateEventCommandReque
         {
             throw new Exception("You are not the owner of this event");
         }
+        
+        var existingEvent = await _context.Events.SingleOrDefaultAsync(x => x.Name == request.EventDto.Name && x.Id != request.EventDto.Id, cancellationToken);
+        if (existingEvent != null)
+        {
+            throw new Exception("Event with this name already exists");
+        }
 
         eventToUpdate.Update(request.EventDto.Name, request.EventDto.Description, request.EventDto.Location, request.EventDto.MaxRegistrations, request.EventDto.StartDate.ToUniversalTime(), request.EventDto.FinishDate.ToUniversalTime(), request.EventDto.OpenRegistrationsDate.ToUniversalTime(), request.EventDto.CloseRegistrationsDate.ToUniversalTime(), request.EventDto.IsPublic);
         eventToUpdate.IsFree = request.EventDto.IsFree;

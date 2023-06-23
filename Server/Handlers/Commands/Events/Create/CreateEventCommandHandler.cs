@@ -21,6 +21,12 @@ public class CreateEventCommandHandler : IRequestHandler<CreateEventCommandReque
     {
         var owner = await _context.Users.SingleAsync(x => x.Id == request.UserId, cancellationToken);
 
+        var existingEvent = await _context.Events.SingleOrDefaultAsync(x => x.Name == request.Request.Name, cancellationToken);
+        if (existingEvent != null)
+        {
+            throw new Exception("Event with this name already exists");
+        }
+        
         var newEvent = new Event(request.Request.Name, request.Request.Description, request.Request.Location, request.Request.MaxRegistrations, owner, request.Request.StartDate.ToUniversalTime(), request.Request.FinishDate.ToUniversalTime(), request.Request.OpenRegistrationsDate.ToUniversalTime(), request.Request.CloseRegistrationsDate.ToUniversalTime());
         
         newEvent.Registrations.Add(new Registration(owner, RegistrationRole.Staff, RegistrationState.Accepted, newEvent));

@@ -164,7 +164,14 @@ public class EventController : ControllerBase
     public async Task<IActionResult> CreateAnEvent([FromBody] CreateEventRequest request)
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        await _mediator.Send(new CreateEventCommandRequest(request, userId));
+        try
+        {
+            await _mediator.Send(new CreateEventCommandRequest(request, userId));
+        }
+        catch (Exception e)
+        {
+            return BadRequest(e.Message);
+        }
         return Ok(); 
     }
     
@@ -181,8 +188,15 @@ public class EventController : ControllerBase
     [Authorize(Roles = "Organizer")] 
     public async Task<IActionResult> UpdateAnEvent([FromBody] MyEventDto eventDto)
     {
-        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;  
-        await _mediator.Send(new UpdateEventCommandRequest(eventDto, userId));
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        try
+        {
+            await _mediator.Send(new UpdateEventCommandRequest(eventDto, userId));
+        }
+        catch (Exception e)
+        {
+            return BadRequest(e.Message);
+        }
         return Ok(); 
     }
     

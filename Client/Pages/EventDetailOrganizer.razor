@@ -7,6 +7,7 @@
 @using Microsoft.AspNetCore.Authorization
 
 @inject HttpClient Http
+@inject IToastService ToastService
 
 @attribute [Authorize(Roles = "Organizer, Staff")]
 
@@ -113,7 +114,13 @@ else
     
     private async Task HandleValidSubmit(MyEventDto updatedEvent)
     {
-        await Http.PutAsJsonAsync($"Event", eventDetail);
+        var response = await Http.PutAsJsonAsync($"Event", eventDetail);
+        if (!response.IsSuccessStatusCode)
+        {
+            var error = await response.Content.ReadAsStringAsync();
+            ToastService.ShowError(error);
+        }
+        
         await LoadEventDetail();
         isEditMode = false;
     }

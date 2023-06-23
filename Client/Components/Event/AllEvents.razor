@@ -17,6 +17,8 @@
 @inject NavigationManager NavigationManager
 @inject IToastService ToastService
 
+<FluentCalendar Readonly=true SelectedDates="calendarEventsDates" />
+
 <h3>Next Events</h3>
 
 <div class="row">
@@ -71,7 +73,9 @@ else
 
 @code {
     private List<EventDto>? _events;
+    private List<DateOnly> calendarEventsDates = new List<DateOnly>();
     private string? _searchTerm = string.Empty;
+    private IEnumerable<EventDto> FilteredEvents => _events?.Where(e => e.Name.Contains(_searchTerm, StringComparison.OrdinalIgnoreCase));
 
     protected override async Task OnInitializedAsync()
     {
@@ -80,6 +84,8 @@ else
             var http = HttpClientFactory.CreateClient("EventsManager.ServerAPI.Anonymous");
             _events = await http.GetFromJsonAsync<List<EventDto>>("Event");
         
+            calendarEventsDates = _events.Select(e => new DateOnly(e.StartDate.Year, e.StartDate.Month, e.StartDate.Day)).Distinct().ToList();
+            
             if (_events == null)
             {
                 ToastService.ShowError("Failed to retrieve events. Please try again later.");
@@ -95,9 +101,6 @@ else
     {
         _searchTerm = e.Value?.ToString();
     }
-
-    private IEnumerable<EventDto> FilteredEvents => _events?
-        .Where(e => e.Name.Contains(_searchTerm, StringComparison.OrdinalIgnoreCase));
     
     private void NavigateToEventDetail(Guid eventId)
     {

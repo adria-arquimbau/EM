@@ -79,7 +79,8 @@
         
         if (!response.IsSuccessStatusCode)
         {
-            ToastService.ShowError("Something went wrong while updating your information");
+            var error = await response.Content.ReadAsStringAsync();
+            ToastService.ShowError(error);
         }
         if (response.IsSuccessStatusCode)
         {
