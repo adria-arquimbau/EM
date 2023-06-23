@@ -38,7 +38,7 @@ else
     @switch (currentComponent)
         {
             case PageComponent.EventDetail:
-                <MyEventDetail Event="eventDetail" ToggleEditMode="ToggleEditMode" />
+                <MyEventDetail Event="eventDetail" ToggleEditMode="ToggleEditMode" HandleValidSubmit="HandleValidSubmit" />
                 break;
             case PageComponent.RegistrationList:
                 <RegistrationList EventId="@EventId" />
