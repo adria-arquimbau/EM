@@ -6,7 +6,6 @@
 
 @inject HttpClient Http
 
-
 <div class="card">
     <div class="card-header bg-primary text-white">
         <div class="d-flex justify-content-between align-items-center">
@@ -31,11 +30,14 @@
                     </div>
                 }
                 <div>
-                    <label for="isPublic">Public Event:</label>
-                    <input id="isPublic" type="checkbox" @onchange="OpenModalPublicState" checked="@Event.IsPublic" class="form-check-input my-2" />
-                                    
-                    <label for="isFree">Free Event:</label>
-                    <input id="isFree" type="checkbox" @onchange="OpenModalFreeState" checked="@Event.IsFree" class="form-check-input my-2" />
+                    <div>
+                        <label for="isPublic">Public Event:</label>
+                        <input id="isPublic" type="checkbox" @onchange="OpenModalPublicState" checked="@Event.IsPublic" class="form-check-input my-2"/>
+                    </div>
+                    <div>
+                        <label for="isFree">Free Event:</label>
+                        <input id="isFree" type="checkbox" @onchange="OpenModalFreeState" checked="@Event.IsFree" class="form-check-input my-2"/>
+                    </div>
                 </div>
             </div>
             <div class="col-md-8">
