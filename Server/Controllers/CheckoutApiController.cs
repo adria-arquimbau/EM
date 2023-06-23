@@ -25,6 +25,15 @@ public class CheckoutApiController : Controller
     [HttpPost]
     public async Task<ActionResult> Create([FromBody]CheckoutRequest request, CancellationToken cancellationToken)
     {
+        var registration = await _context.Registrations
+            .Include(x => x.User)
+            .SingleOrDefaultAsync(x => x.Id == Guid.Parse(request.RegistrationId), cancellationToken);
+
+        if (registration == null)
+        {
+            return NotFound("Registration not found");
+        }
+        
         var isRegistrationAllowed = await _context.Events
             .Where(x => x.Id == Guid.Parse(request.EventId))
             .Select(x => x.MaxRegistrations > _context.Registrations.Count(r => r.Event.Id == x.Id && r.State == RegistrationState.Accepted && r.Role == RegistrationRole.Rider))
@@ -72,13 +81,14 @@ public class CheckoutApiController : Controller
                 }
             },
             Mode = "payment",
+            CustomerEmail = registration.User.Email,
             SuccessUrl = domain + $"/event-detail/{request.EventId}",
             CancelUrl = domain + $"/event-detail/{request.EventId}",
             Metadata = new Dictionary<string, string>
             {
                 { "RegistrationId", request.RegistrationId }
             },
-            ExpiresAt = DateTime.UtcNow + new TimeSpan(0, 5, 0)
+            ExpiresAt = DateTime.UtcNow + new TimeSpan(0, 30, 0)
         };
     
         var sessionService = new SessionService();

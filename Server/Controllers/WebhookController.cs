@@ -46,7 +46,13 @@ public class WebhookController : Controller
                 var maxBibNumber = await _context.Registrations
                     .Where(x => x.Event.Id == registration.Event.Id && x.Bib != null)
                     .MaxAsync(x => x.Bib);
+
+                if (maxBibNumber == null)
+                {
+                    registration.Bib = 1;
+                }
                 registration.Bib = maxBibNumber + 1;
+
                 await _context.SaveChangesAsync();
             }
 
