@@ -6,11 +6,15 @@ public class Ticket
     public string Title { get; set; }
     public string Text { get; set; }
     public bool Solved { get; set; }
+    public DateTime CreationDate { get; set; }
+    public DateTime? SolvedDate { get; set; }
+    public ApplicationUser SolvedBy { get; set; }
     public Registration Registration { get; set; }
     
-    public Ticket(string title, string text)
+    public Ticket(string title, string text, DateTime creationDate)
     {
         Title = title;
         Text = text;
+        CreationDate = creationDate;
     }
 }

@@ -273,7 +273,7 @@ public class RegistrationController : ControllerBase
             return Forbid("User is not the owner of the registration");
         }
 
-        var newTicket = new Ticket(ticketRequest.Title, ticketRequest.Text);
+        var newTicket = new Ticket(ticketRequest.Title, ticketRequest.Text, DateTime.UtcNow);
         registration.Tickets.Add(newTicket);
         
         await _context.SaveChangesAsync(cancellationToken);
