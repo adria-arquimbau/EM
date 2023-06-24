@@ -9,4 +9,5 @@ public class TicketDto
     public string? SolvedBy { get; set; }   
     public DateTime CreationDate { get; set; }
     public DateTime? SolvedDate { get; set; }
+    public List<TicketResponseDto> TicketResponses { get; set; }
 }

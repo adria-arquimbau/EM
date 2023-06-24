@@ -240,6 +240,9 @@ public class RegistrationController : ControllerBase
             .Include(x => x.User)
             .Include(x => x.Tickets)
             .ThenInclude(x => x.SolvedBy)
+            .Include(x => x.Tickets)
+            .ThenInclude(x => x.Responses)
+            .ThenInclude(x => x.RespondedBy)
             .SingleAsync(cancellationToken);
 
         if (registration.User.Id != userId)
@@ -255,9 +258,15 @@ public class RegistrationController : ControllerBase
             Solved = x.Solved,
             CreationDate = x.CreationDate,
             SolvedDate = x.SolvedDate,
-            SolvedBy = x.SolvedBy?.UserName
-        }).OrderBy(x => x.CreationDate)
-            .ToList();
+            SolvedBy = x.SolvedBy?.UserName,
+            TicketResponses = x.Responses.Select(r => new TicketResponseDto
+            {
+                Text = r.Text,
+                ResponseDate = r.ResponseDate,
+                IsAdminResponse = r.IsAdminResponse,
+                RespondedBy = r.RespondedBy.UserName
+            }).OrderBy(o => o.ResponseDate).ToList()
+        }).OrderBy(x => x.CreationDate).ToList();
         
         return Ok(response);
     }
@@ -280,6 +289,30 @@ public class RegistrationController : ControllerBase
 
         var newTicket = new Ticket(ticketRequest.Title, ticketRequest.Text, DateTime.UtcNow);
         registration.Tickets.Add(newTicket);
+        
+        await _context.SaveChangesAsync(cancellationToken);
+
+        return Ok();
+    }
+    
+    [HttpPost("ticket/{ticketId:guid}/response")]
+    [Authorize(Roles = "User")]
+    public async Task<IActionResult> CreateATicketUserResponse([FromRoute] Guid ticketId, [FromBody] TicketResponseRequest ticketRequest, CancellationToken cancellationToken)
+    {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            
+        var ticket = await _context.Tickets
+            .Where(x => x.Id == ticketId)
+            .Include(x => x.Registration)
+            .ThenInclude(x => x.User)
+            .SingleAsync(cancellationToken);
+    
+        if (ticket.Registration.User.Id != userId)
+        {
+            return Forbid("User is not the owner of the registration");
+        }
+
+        ticket.Responses.Add(new TicketResponse(ticketRequest.Text, ticket.Registration.User));
         
         await _context.SaveChangesAsync(cancellationToken);
 

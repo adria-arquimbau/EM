@@ -20,13 +20,47 @@
             <div class="card mb-3">
                 <div class="card-header">
                     <h5 class="card-title">@ticket.Title</h5>
+                    <p class="card-text">@ticket.CreationDate.ToLocalTime().ToString("g")</p>
                 </div>
                 <div class="card-body">
-                    <p class="card-text">@ticket.Text</p>
-                    <p class="card-text">Creation Date: @ticket.CreationDate</p>
+                    <p>@ticket.Text</p>
+                    <FluentDivider></FluentDivider>
+                    <div class="chat-box">
+                        @foreach (var response in ticket.TicketResponses)
+                        {
+                            @if (response.IsAdminResponse)
+                            {
+                                <div class="d-flex justify-content-end">
+                                    <div class="alert alert-primary">
+                                        <p><strong>@response.RespondedBy</strong> (@response.ResponseDate.ToLocalTime().ToString("g")): @response.Text</p>
+                                        Admin
+                                    </div>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="d-flex justify-content-start">
+                                    <div class="alert alert-secondary">
+                                        <p><strong>@response.RespondedBy</strong> (@response.ResponseDate.ToLocalTime().ToString("g")): @response.Text</p>
+                                    </div>
+                                </div>
+                            }
+                        }
+                    </div>
+                    
+                    @if (ticket.TicketResponses.LastOrDefault()?.IsAdminResponse == true && !ticket.Solved)
+                    {
+                        <div class="input-group">
+                            <textarea id="responseText" class="form-control" @bind="_responseText"></textarea>
+                            <div class="input-group-append">
+                                <button class="btn btn-primary" @onclick="() => RespondToTicket(ticket.Id)">Send</button>
+                            </div>
+                        </div>
+                    }
+
                     @if (ticket.Solved)
                     {
-                        <p class="card-text text-success">Solved by: @ticket.SolvedBy on @ticket.SolvedDate</p>
+                        <p class="card-text text-success">Solved by: @ticket.SolvedBy on @ticket.SolvedDate.Value.ToLocalTime().ToString("g")</p>
                     }
                     else
                     {
@@ -39,6 +73,7 @@
 
     @if (_allTicketsSolved)
     {
+        <FluentDivider></FluentDivider>
         <div class="mt-4">
             <h4>Create a new Ticket:</h4>
             <div class="ticket-form">
@@ -69,6 +104,8 @@
     private List<TicketDto>? _tickets;
     
     private bool _allTicketsSolved;
+    
+    private string _responseText = string.Empty;
 
     private TicketDto _newTicket = new();
 
@@ -114,12 +151,40 @@
                     ToastService.ShowError(error);
                 }
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 ToastService.ShowError("Something went wrong, please try again later");
             }
             _newTicket = new TicketDto();
         }
+    }
+    
+    private async Task RespondToTicket(Guid ticketId)
+    {
+        try
+        {
+            var response = await Http.PostAsJsonAsync($"Registration/ticket/{ticketId}/response", new TicketResponseRequest
+            {
+                Text = _responseText
+            });
+            
+            if (response.IsSuccessStatusCode)
+            {
+                ToastService.ShowSuccess("Response sent.");
+                await RefreshTickets();
+            }
+            else
+            {
+                var error = await response.Content.ReadAsStringAsync();
+                ToastService.ShowError(error);
+            }
+        }
+        catch (Exception)
+        {
+            ToastService.ShowError("Something went wrong, please try again later");
+        }
+
+        _responseText = string.Empty;
     }
 
     private void NavigateToEvent()
