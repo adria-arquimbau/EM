@@ -239,6 +239,7 @@ public class RegistrationController : ControllerBase
             .Where(x => x.Id == registrationId)
             .Include(x => x.User)
             .Include(x => x.Tickets)
+            .ThenInclude(x => x.SolvedBy)
             .SingleAsync(cancellationToken);
 
         if (registration.User.Id != userId)
@@ -248,12 +249,15 @@ public class RegistrationController : ControllerBase
 
         var response = registration.Tickets.Select(x => new TicketDto
         {
+            Id = x.Id,
             Title = x.Title,
             Text = x.Text,
-            Solved = x.Solved
-        }).ToList();
+            Solved = x.Solved,
+            CreationDate = x.CreationDate,
+            SolvedBy = x.SolvedBy?.UserName
+        }).OrderBy(x => x.CreationDate)
+            .ToList();
         
-
         return Ok(response);
     }
     

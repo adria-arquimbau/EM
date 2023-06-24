@@ -8,15 +8,33 @@
 
 <h3>Create Ticket</h3>
 
-@if (createdTicket != null)
+@if (_tickets == null)
 {
-    <div class="ticket-view">
-        <h4>@createdTicket.Title</h4>
-        <p>@createdTicket.Text</p>
-    </div>
+    <LoadingSpinner></LoadingSpinner>
 }
 else
 {
+    @foreach(var ticket in _tickets)
+    {
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title">@ticket.Title</h5>
+            </div>
+            <div class="card-body">
+                <p class="card-text">@ticket.Text</p>
+                <p class="card-text">@ticket.CreationDate</p>
+                <p class="card-text">@ticket.Solved</p>
+                <p class="card-text">@ticket.SolvedBy</p>
+                <p class="card-text">@ticket.SolvedDate</p>
+                
+            </div>
+        </div>
+    }
+}
+
+@if(_allTicketsSolved)
+{
+    <p>Create a new Ticket:</p>
     <div class="ticket-form">
         <div class="form-group">
             <label for="ticketTitle">Title:</label>
@@ -40,17 +58,23 @@ else
     [Parameter]
     public Guid EventId { get; set; }
     
-    private List<TicketDto> _tickets = new List<TicketDto>();
-
-    private TicketDto _newTicket = new TicketDto();  
-    private TicketRequest createdTicket;
+    private List<TicketDto>? _tickets;
     
+    private bool _allTicketsSolved;
+
+    private TicketDto _newTicket = new();
+
     protected override async Task OnInitializedAsync()
+    {
+        await RefreshTickets();
+    }
+
+    private async Task RefreshTickets()
     {
         try
         {
-            var response = await Http.GetFromJsonAsync<List<TicketDto>>($"Registration/{RegistrationId}/ticket");
-            _tickets = response;
+            _tickets = await Http.GetFromJsonAsync<List<TicketDto>>($"Registration/{RegistrationId}/ticket");
+            _allTicketsSolved = _tickets.All(t => t.Solved);
         }
         catch (Exception e)
         {
@@ -62,7 +86,7 @@ else
     {
         if (!string.IsNullOrWhiteSpace(_newTicket.Title) && !string.IsNullOrWhiteSpace(_newTicket.Text))
         {
-            createdTicket = new TicketRequest()
+            var request = new TicketRequest()
             {
                 Title = _newTicket.Title,
                 Text = _newTicket.Text
@@ -70,7 +94,7 @@ else
             
             try
             {
-                var response = await Http.PostAsJsonAsync($"Registration/{RegistrationId}/ticket", createdTicket);
+                var response = await Http.PostAsJsonAsync($"Registration/{RegistrationId}/ticket", request);
                 if (response.IsSuccessStatusCode)
                 {
                     ToastService.ShowSuccess("Ticket created");
@@ -86,6 +110,8 @@ else
                 ToastService.ShowError("Something went wrong, please try again later");
             }
             _newTicket = new TicketDto();
+            
+            await RefreshTickets();
         }
     }
 
@@ -93,5 +119,4 @@ else
     {
         NavigationManager.NavigateTo($"event-detail/{EventId}");
     }
-    
 }
