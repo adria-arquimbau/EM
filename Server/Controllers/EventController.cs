@@ -366,4 +366,44 @@ public class EventController : ControllerBase
         await _context.SaveChangesAsync(cancellationToken);
         return Ok();
     }
+    
+    [HttpGet("{eventId:guid}/all-tickets")] 
+    [Authorize(Roles = "Organizer")]
+    public async Task<ActionResult> GetAllEventTickets([FromRoute] Guid eventId, CancellationToken cancellationToken)
+    {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        
+        var canIRetrieveTheTickets = await _context.Events
+            .Where(x => x.Id == eventId && (x.CreatorId == userId || x.Owners.Any(o => o.Id == userId)))
+            .AnyAsync(cancellationToken);
+
+        if (!canIRetrieveTheTickets)
+        {
+            return Unauthorized("You can't retrieve the tickets of this event");
+        }
+        
+        var tickets = await _context.Tickets
+            .Where(x => x.Registration.Event.Id == eventId)
+            .Select(x => new TicketDto
+            {
+                Id = x.Id,
+                Title = x.Title,
+                Text = x.Text,
+                Solved = x.Solved,
+                SolvedBy = x.SolvedBy.UserName,
+                CreationDate = x.CreationDate,
+                SolvedDate = x.SolvedDate,
+                CreatedBy = x.Registration.User.UserName,
+                TicketResponses = x.Responses.Select(r => new TicketResponseDto
+                {
+                    Text = r.Text,
+                    ResponseDate = r.ResponseDate,
+                    IsAdminResponse = r.IsAdminResponse,
+                    RespondedBy = r.RespondedBy.UserName
+                }).ToList()
+            })
+            .ToListAsync(cancellationToken);
+        
+        return Ok(tickets);
+    }   
 }

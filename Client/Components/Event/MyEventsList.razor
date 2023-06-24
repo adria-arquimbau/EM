@@ -4,14 +4,14 @@
 
 <h3>My events</h3>
 
-@if (myEvents is null)
+@if (MyEvents is null)
 {
     <LoadingSpinner />
 }
 else
 {
     <div class="row">
-        @foreach (var sportEvent in myEvents)
+        @foreach (var sportEvent in MyEvents)
         {
             <div class="col-sm-12 col-md-6 col-lg-4 mb-4">
                 <div class="card h-100">
@@ -54,21 +54,21 @@ else
     </div>
 }
 
-@if (showConfirmDeleteModal)
+@if (_showConfirmDeleteModal)
 {
     <div class="modal show d-block" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">Confirm Delete</h5>
-                    <button type="button" class="btn-close" @onclick="() => showConfirmDeleteModal = false"></button>
+                    <button type="button" class="btn-close" @onclick="() => _showConfirmDeleteModal = false"></button>
                 </div>
                 <div class="modal-body">
                     <p>Are you sure you want to delete this event?</p>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" @onclick="() => showConfirmDeleteModal = false">No</button>
-                    <button type="button" class="btn btn-danger" @onclick="() => DeleteEvent(eventToDeleteId)">Yes</button>
+                    <button type="button" class="btn btn-secondary" @onclick="() => _showConfirmDeleteModal = false">No</button>
+                    <button type="button" class="btn btn-danger" @onclick="() => DeleteEvent(_eventToDeleteId)">Yes</button>
                 </div>
             </div>
         </div>
@@ -77,27 +77,27 @@ else
 }
 
 @code {
-    private bool showConfirmDeleteModal = false;
-    private Guid eventToDeleteId;
+    private bool _showConfirmDeleteModal = false;
+    private Guid _eventToDeleteId;
     [Parameter] 
-    public List<MyEventDto>? myEvents { get; set; }
+    public List<MyEventDto>? MyEvents { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
-        myEvents = await Http.GetFromJsonAsync<List<MyEventDto>>("Event/my-events");
+        MyEvents = await Http.GetFromJsonAsync<List<MyEventDto>>("Event/my-events");
     }
 
     private void ConfirmDelete(Guid eventId)
     {
-        eventToDeleteId = eventId;  
-        showConfirmDeleteModal = true;  
+        _eventToDeleteId = eventId;  
+        _showConfirmDeleteModal = true;  
     }
 
     private async Task DeleteEvent(Guid eventId)
     {
         await Http.DeleteAsync($"Event/{eventId}");
-        showConfirmDeleteModal = false;
-        myEvents = await Http.GetFromJsonAsync<List<MyEventDto>>("Event/my-events");
+        _showConfirmDeleteModal = false;
+        MyEvents = await Http.GetFromJsonAsync<List<MyEventDto>>("Event/my-events");
     }
     
     private void NavigateToEventDetail(Guid eventId)

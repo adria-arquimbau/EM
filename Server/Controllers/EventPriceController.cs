@@ -111,5 +111,5 @@ public class EventPriceController : ControllerBase
         await _context.SaveChangesAsync(cancellationToken);
         
         return Ok();
-    }   
+    }
 }

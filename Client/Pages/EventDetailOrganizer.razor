@@ -22,6 +22,7 @@
             disabled="@eventDetail?.IsFree">
         Price
     </button>
+    <button type="button" class="btn @(currentComponent == PageComponent.Tickets ? "btn-primary" : "btn-outline-primary")" @onclick="(() => SetCurrentComponent(PageComponent.Tickets))">Tickets</button>
     @if (iAmTheCreator)
     {
         <button type="button" class="btn @(currentComponent == PageComponent.OwnersManagement ? "btn-primary" : "btn-outline-primary")" @onclick="(() => SetCurrentComponent(PageComponent.OwnersManagement))">Owners Management</button>
@@ -52,6 +53,9 @@ else
             case PageComponent.OwnersManagement:
                 <OwnersManager MyEventDto="@eventDetail" RefreshEvent="LoadEventDetail" />
                 break;
+            case PageComponent.Tickets:
+                <TicketsManager EventId="@eventDetail.Id"/>
+                break;
             // Add more cases as necessary
         }
 
@@ -69,6 +73,7 @@ else
         RegistrationRolePasswords,
         Price,
         OwnersManagement,
+        Tickets
         // Add more components as necessary
     }
 

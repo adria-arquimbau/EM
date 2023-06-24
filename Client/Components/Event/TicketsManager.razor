@@ -1,0 +1,57 @@
+﻿@using EventsManager.Shared.Dtos
+
+@inject HttpClient Http
+@inject IToastService ToastService
+
+@if (_tickets == null)
+{
+    <LoadingSpinner></LoadingSpinner>
+}
+else
+{
+    <div class="list-group">
+        @foreach (var ticket in _tickets)
+        {
+            <a class="list-group-item list-group-item-action">
+                <div class="d-flex w-100 justify-content-between">
+                    <h5 class="mb-1">@ticket.Title</h5>
+                    <small>Created by: @ticket.CreatedBy</small>
+                    <small>@ticket.CreationDate.ToLocalTime().ToLongDateString() at @ticket.CreationDate.ToLocalTime().ToShortTimeString()</small>
+                </div>
+                <p class="mb-1">@ticket.Text</p>
+                <small class="@(ticket.Solved ? "text-success" : "text-danger")">@(ticket.Solved ? $"Solved by {ticket.SolvedBy}" : "Unsolved")</small>
+            </a>
+        }
+    </div>
+}
+
+@code {
+    [Parameter]
+    public Guid? EventId { get; set; }
+    
+    private List<TicketDto>? _tickets;
+    
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var response = await Http.GetAsync($"Event/{EventId}/all-tickets");
+
+            if (response.IsSuccessStatusCode)
+            {
+                _tickets = (await response.Content.ReadFromJsonAsync<List<TicketDto>>())
+                    .OrderByDescending(t => t.CreationDate)
+                    .ToList();
+            }
+            else
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                ToastService.ShowError(errorContent, settings => settings.DisableTimeout = true);
+            }
+        }
+        catch (Exception)
+        {
+            ToastService.ShowError("Something went wrong, please try again later");
+        }
+    }
+}
