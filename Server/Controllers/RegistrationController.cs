@@ -254,6 +254,7 @@ public class RegistrationController : ControllerBase
             Text = x.Text,
             Solved = x.Solved,
             CreationDate = x.CreationDate,
+            SolvedDate = x.SolvedDate,
             SolvedBy = x.SolvedBy?.UserName
         }).OrderBy(x => x.CreationDate)
             .ToList();

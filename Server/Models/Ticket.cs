@@ -10,6 +10,7 @@ public class Ticket
     public DateTime? SolvedDate { get; set; }
     public ApplicationUser SolvedBy { get; set; }
     public Registration Registration { get; set; }
+    public List<TicketResponse> Responses { get; set; } = new List<TicketResponse>();
     
     public Ticket(string title, string text, DateTime creationDate)
     {

@@ -15,6 +15,7 @@ public class ApplicationDbContext : ApiAuthorizationDbContext<ApplicationUser>
     public override DbSet<ApplicationUser> Users { get; set; }  
     public DbSet<EventPrice> EventPrices { get; set; }  
     public DbSet<Ticket> Tickets { get; set; }
+    public DbSet<TicketResponse> TicketResponses { get; set; }
     
     public ApplicationDbContext(DbContextOptions options, IOptions<OperationalStoreOptions> operationalStoreOptions) : base(options, operationalStoreOptions)
     {
@@ -28,6 +29,7 @@ public class ApplicationDbContext : ApiAuthorizationDbContext<ApplicationUser>
         modelBuilder.ApplyConfiguration(new RegistrationRolePasswordTypeConfiguration());
         modelBuilder.ApplyConfiguration(new EventPricesTypeConfiguration());
         modelBuilder.ApplyConfiguration(new TicketTypeConfiguration());
+        modelBuilder.ApplyConfiguration(new TicketResponseTypeConfiguration());
         
         modelBuilder.Entity<Event>()
             .HasQueryFilter(entity => !entity.IsDeleted);

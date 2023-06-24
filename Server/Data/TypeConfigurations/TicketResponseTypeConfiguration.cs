@@ -4,9 +4,9 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace EventsManager.Server.Data.TypeConfigurations;
 
-public class TicketTypeConfiguration : IEntityTypeConfiguration<Ticket>
+public class TicketResponseTypeConfiguration: IEntityTypeConfiguration<TicketResponse>
 {
-    public void Configure(EntityTypeBuilder<Ticket> builder) 
+    public void Configure(EntityTypeBuilder<TicketResponse> builder) 
     {
         builder.HasKey(x => x.Id);
     }
