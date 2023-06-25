@@ -1,55 +1,57 @@
 ﻿@page "/Suggestions"
 @using System.ComponentModel.DataAnnotations
+@using EventsManager.Shared.Requests
 @using Microsoft.AspNetCore.Authorization
+@inject IToastService ToastService
+@inject HttpClient Http
 
 @attribute [Authorize(Roles = "User")]
 
 <h3>Suggestions</h3>
 <p>Thank you for using our app. As we are in alpha version, we would appreciate your feedback. Please let us know how we can improve.</p>
 
-<EditForm Model="userSuggestion" OnValidSubmit="HandleValidSubmit">
-    <DataAnnotationsValidator />
-    <ValidationSummary />
+@if (!_suggestionSubmitted)
+{
+    <EditForm Model="_userSuggestion" OnValidSubmit="HandleValidSubmit">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
 
-    <div class="form-group">
-        <label for="name">Your Name:</label>
-        <InputText id="name" class="form-control" @bind-Value="userSuggestion.Name" />
-        <ValidationMessage For="@(() => userSuggestion.Name)" />
-    </div>
+        <div class="form-group">
+            <label for="suggestion">Your Suggestion:</label>
+            <InputTextArea id="suggestion" class="form-control" @bind-Value="_userSuggestion.Content" />
+        </div>
 
-    <div class="form-group">
-        <label for="email">Your Email:</label>
-        <InputText id="email" class="form-control" @bind-Value="userSuggestion.Email" />
-        <ValidationMessage For="@(() => userSuggestion.Email)" />
-    </div>
-
-    <div class="form-group">
-        <label for="suggestion">Your Suggestion:</label>
-        <InputTextArea id="suggestion" class="form-control" @bind-Value="userSuggestion.Suggestion" />
-        <ValidationMessage For="@(() => userSuggestion.Suggestion)" />
-    </div>
-
-    <button type="submit" class="btn btn-primary">Submit</button>
-</EditForm>
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </EditForm>
+}
+else
+{
+    <p>Thank you for your suggestion!</p>
+}
 
 @code {
-    private UserSuggestion userSuggestion = new UserSuggestion();
+    private SuggestionRequest _userSuggestion = new();
+    private bool _suggestionSubmitted = false;
 
-    private void HandleValidSubmit()
+    private async Task HandleValidSubmit()
     {
-    // Put your code here to handle the suggestion, e.g. sending it to an API or database.
-        Console.WriteLine("Suggestion submitted successfully");
-    }
-
-    public class UserSuggestion
-    {
-        [Required, MaxLength(50)]
-        public string Name { get; set; }
-
-        [Required, EmailAddress]
-        public string Email { get; set; }
-
-        [Required, MaxLength(500)]
-        public string Suggestion { get; set; }
+        try
+        {
+            var response = await Http.PostAsJsonAsync($"Suggestion", _userSuggestion);
+            if (response.IsSuccessStatusCode)
+            {
+                ToastService.ShowSuccess("Suggestion sent successfully");
+                _suggestionSubmitted = true;
+            }
+            else
+            {
+                var error = await response.Content.ReadAsStringAsync();
+                ToastService.ShowError(error);
+            }
+        }
+        catch (Exception)
+        {
+            ToastService.ShowError("Something went wrong, please try again later");
+        }
     }
 }

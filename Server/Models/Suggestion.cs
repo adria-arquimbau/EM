@@ -8,9 +8,10 @@ public class Suggestion
     public ApplicationUser User { get; private set; }
 
     private Suggestion() { }
-    public Suggestion(string content)
+    public Suggestion(string content, ApplicationUser user)
     {
         Content = content;
+        User = user;
         CreatedOn = DateTime.UtcNow;
     }
 }
