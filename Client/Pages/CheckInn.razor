@@ -1,6 +1,7 @@
 ﻿@page "/Check-in/{RegistrationId:guid}"
 
 @using EventsManager.Shared.Dtos
+@using EventsManager.Client.Components.Modals
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject IToastService ToastService
 @inject HttpClient Http
@@ -57,11 +58,21 @@ else
     </div>
 }
 
+<ConfirmationModal 
+    Title="Confirmation" 
+    Message="Are you sure you want to change the state of the registration?" 
+    ConfirmationChanged="ConfirmCheckInOut" 
+    Visible="_showConfirmationModal">
+</ConfirmationModal>
+
 @code {
     [Parameter]
     public Guid? RegistrationId { get; set; }
 
     private RegistrationToCheckInDto? _registrationToCheckInn;
+    
+    private bool _showConfirmationModal = false;
+    private bool _checkInConfirmation;
 
     protected override async Task OnInitializedAsync()
     {
@@ -96,27 +107,36 @@ else
         }
     }
     
-    private async Task CheckInOut(bool checkIn)
+    private void CheckInOut(bool checkIn)
     {
-        try
-        {
-            var response = await Http.PostAsync($"Registration/{RegistrationId}/check-in/{checkIn}", null);
-
-            if (response.IsSuccessStatusCode)
-            {
-                _registrationToCheckInn.CheckedIn = checkIn;
-                ToastService.ShowSuccess(checkIn ? "Checked in successfully" : "Checked out successfully");
-            }
-            else
-            {
-                var errorContent = await response.Content.ReadAsStringAsync();
-                ToastService.ShowError(errorContent);
-            }
-        }
-        catch (Exception)
-        {
-            ToastService.ShowError("Something went wrong, please try again later.");
-        }
+        _checkInConfirmation = checkIn;
+        _showConfirmationModal = true;
     }
 
+    private async Task ConfirmCheckInOut(bool confirmed)
+    {
+        if (confirmed)
+        {
+            try
+            {
+                var response = await Http.PostAsync($"Registration/{RegistrationId}/check-in/{_checkInConfirmation}", null);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    _registrationToCheckInn.CheckedIn = _checkInConfirmation;
+                    ToastService.ShowSuccess(_checkInConfirmation ? "Checked in successfully" : "Checked out successfully");
+                }
+                else
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    ToastService.ShowError(errorContent);
+                }
+            }
+            catch (Exception)
+            {
+                ToastService.ShowError("Something went wrong, please try again later.");
+            }
+        }
+        _showConfirmationModal = false;
+    }
 }
