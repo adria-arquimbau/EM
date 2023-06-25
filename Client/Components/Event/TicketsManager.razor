@@ -26,6 +26,13 @@ else
     </div>
 }
 
+@if (_tickets is {Count: 0 })
+{
+    <div class="alert alert-info" role="alert">
+        There are no tickets yet for this event.
+    </div>
+}
+
 <ManageTicket Ticket="_selectedTicket" OnClose="CloseTicketModal"></ManageTicket>
 
 @code {
