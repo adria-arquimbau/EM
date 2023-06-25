@@ -9,7 +9,7 @@ public class Registration
     public RegistrationRole Role { get; private set; }
     public RegistrationState State { get; set; }
     public int? Bib { get; set; }
-    public bool CheckedIn { get; private set; }
+    public bool CheckedIn { get; set; }
     public Event Event { get; set; }
     public string UserId { get; set; }
     public virtual ApplicationUser User { get; set; }

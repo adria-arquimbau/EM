@@ -26,7 +26,7 @@ public class RegistrationController : ControllerBase
     
     [HttpGet("{registrationId:guid}/Check-in")]
     [Authorize(Roles = "User")] 
-    public async Task<IActionResult> Register([FromRoute] Guid registrationId, CancellationToken cancellationToken)
+    public async Task<IActionResult> GetRegistrationToCheckIn([FromRoute] Guid registrationId, CancellationToken cancellationToken)
     {
         var requesterId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
@@ -54,6 +54,7 @@ public class RegistrationController : ControllerBase
             Bib = registration.Bib,
             CheckedIn = registration.CheckedIn,
             PaymentStatus = registration.PaymentStatus,
+            AmountPaid = registration.Price ?? 0,
             RegisteredUser = new UserDto
             {
                 Id = registration.User.Id,
@@ -314,6 +315,38 @@ public class RegistrationController : ControllerBase
 
         ticket.Responses.Add(new TicketResponse(ticketRequest.Text, ticket.Registration.User, false));
         
+        await _context.SaveChangesAsync(cancellationToken);
+
+        return Ok();
+    }
+    
+    [HttpPost("{registrationId:guid}/check-in/{checkIn:bool}")]
+    [Authorize(Roles = "User")]
+    public async Task<IActionResult> CreateATicketUserResponse([FromRoute] Guid registrationId, [FromRoute] bool checkIn, CancellationToken cancellationToken)
+    {
+        var requesterId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        var registration = await _context.Registrations
+            .Where(x => x.Id == registrationId)
+            .Include(x => x.User)
+            .SingleAsync(cancellationToken);
+
+        var requesterIsStaff = await _context.Registrations
+            .Where(x => x.Id == registrationId)
+            .SelectMany(x => x.Event.Registrations.Where(r => r.Role == RegistrationRole.Staff && r.State == RegistrationState.Accepted && r.User.Id == requesterId))
+            .AnyAsync(cancellationToken: cancellationToken);
+
+        if (!requesterIsStaff)
+        {
+            return BadRequest("Only event owners or staff can check-in registrations");
+        }
+
+        if (registration.PaymentStatus != PaymentStatus.Paid)
+        {
+            return BadRequest("Cannot check-in a registration that has not paid");
+        }
+        
+        registration.CheckedIn = checkIn;
         await _context.SaveChangesAsync(cancellationToken);
 
         return Ok();

@@ -28,13 +28,18 @@ else
                 Role: @_registrationToCheckInn.Role <br/>
                 Registration State: @_registrationToCheckInn.State <br/>
                 Checked In: @_registrationToCheckInn.CheckedIn <br/>
-                Payment Status: @_registrationToCheckInn.PaymentStatus <br/> / @_registrationToCheckInn.AmountPaid €
+                Payment Status: @_registrationToCheckInn.PaymentStatus / @_registrationToCheckInn.AmountPaid € <br/> 
                 Registration Date: @_registrationToCheckInn.CreationDate.ToString("g") <br/>
             </p>
             @if(!_registrationToCheckInn.CheckedIn)
             {
-                <button class="btn btn-success">Check In</button>
+                <button class="btn btn-success" @onclick="()=> CheckInOut(true)">Check In</button>
             }
+            else
+            {
+                <button class="btn btn-danger" @onclick="()=> CheckInOut(false)">Check Out</button>
+            }
+
         </div>
     </div>
 }
@@ -77,4 +82,28 @@ else
             ToastService.ShowError("You must be authenticated and a member of the event staff to access this page.", settings => settings.DisableTimeout = true);
         }
     }
+    
+    private async Task CheckInOut(bool checkIn)
+    {
+        try
+        {
+            var response = await Http.PostAsync($"Registration/{RegistrationId}/check-in/{checkIn}", null);
+
+            if (response.IsSuccessStatusCode)
+            {
+                _registrationToCheckInn.CheckedIn = checkIn;
+                ToastService.ShowSuccess(checkIn ? "Checked in successfully" : "Checked out successfully");
+            }
+            else
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                ToastService.ShowError(errorContent);
+            }
+        }
+        catch (Exception)
+        {
+            ToastService.ShowError("Something went wrong, please try again later.");
+        }
+    }
+
 }
