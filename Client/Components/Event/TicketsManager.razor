@@ -1,4 +1,5 @@
 ﻿@using EventsManager.Shared.Dtos
+@using EventsManager.Client.Components.Ticket
 
 @inject HttpClient Http
 @inject IToastService ToastService
@@ -12,7 +13,7 @@ else
     <div class="list-group">
         @foreach (var ticket in _tickets)
         {
-            <a class="list-group-item list-group-item-action">
+            <a class="list-group-item list-group-item-action" @onclick="() => OpenTicketModal(ticket)" >
                 <div class="d-flex w-100 justify-content-between">
                     <h5 class="mb-1">@ticket.Title</h5>
                     <small>Created by: @ticket.CreatedBy</small>
@@ -25,13 +26,21 @@ else
     </div>
 }
 
+<ManageTicket Ticket="_selectedTicket" OnClose="CloseTicketModal"></ManageTicket>
+
 @code {
     [Parameter]
     public Guid? EventId { get; set; }
     
     private List<TicketDto>? _tickets;
+    private TicketDto? _selectedTicket;
     
     protected override async Task OnInitializedAsync()
+    {
+        await GetTickets();
+    }
+
+    private async Task GetTickets()
     {
         try
         {
@@ -53,5 +62,16 @@ else
         {
             ToastService.ShowError("Something went wrong, please try again later");
         }
+    }
+
+    private void OpenTicketModal(TicketDto ticket)
+    {
+        _selectedTicket = ticket;
+    }
+    
+    private async Task CloseTicketModal()
+    {
+        _selectedTicket = null;
+        await GetTickets();
     }
 }

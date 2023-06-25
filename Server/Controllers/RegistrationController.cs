@@ -312,7 +312,7 @@ public class RegistrationController : ControllerBase
             return Forbid("User is not the owner of the registration");
         }
 
-        ticket.Responses.Add(new TicketResponse(ticketRequest.Text, ticket.Registration.User));
+        ticket.Responses.Add(new TicketResponse(ticketRequest.Text, ticket.Registration.User, false));
         
         await _context.SaveChangesAsync(cancellationToken);
 

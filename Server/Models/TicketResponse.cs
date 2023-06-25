@@ -10,10 +10,11 @@ public class TicketResponse
     public Ticket Ticket { get; set; }
 
     private TicketResponse() { }
-    public TicketResponse(string text, ApplicationUser user)
+    public TicketResponse(string text, ApplicationUser user, bool isAdminResponse)
     {
         Text = text;
         RespondedBy = user;
+        IsAdminResponse = isAdminResponse;
         ResponseDate = DateTime.UtcNow;
     }
 }

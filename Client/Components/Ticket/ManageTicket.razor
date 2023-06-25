@@ -1,0 +1,98 @@
+﻿@using EventsManager.Shared.Dtos
+@using EventsManager.Shared.Requests
+@inject HttpClient Http
+@inject IToastService ToastService
+
+@if (Ticket != null)
+{
+    <div class="modal" tabindex="-1" style="display:block;">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">@Ticket.Title</h5>
+                    <button type="button" class="close" @onclick="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <!-- The scrollable area for the ticket responses. -->
+                    <div style="height:200px; overflow-y: scroll;">
+                        @foreach (var response in Ticket.TicketResponses)
+                        {
+                            <div class="border-bottom">
+                                <p>@response.Text</p>
+                                <small>@response.ResponseDate.ToLocalTime().ToLongDateString() at @response.ResponseDate.ToLocalTime().ToShortTimeString() by @(response.IsAdminResponse ? "Admin" : "User"): @response.RespondedBy</small>
+                            </div>
+                        }
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <div class="input-group">
+                        <input type="text" class="form-control" placeholder="Type your response here..." @bind="_responseText" />
+                        <div class="input-group-append">
+                            <button class="btn btn-outline-secondary" type="button" @onclick="PostResponse">Respond</button>
+                            @if (!Ticket.Solved)
+                            {
+                                <button class="btn btn-outline-success" type="button" @onclick="SolveTicket">Solve Ticket</button>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public TicketDto? Ticket { get; set; }
+
+    [Parameter]
+    public EventCallback OnClose { get; set; }
+
+    private string? _responseText;
+
+    private void Close()
+    {
+        OnClose.InvokeAsync();
+    }
+
+    private async Task PostResponse()
+    {
+        try
+        {
+            var response = await Http.PostAsJsonAsync($"Ticket/{Ticket.Id}/admin-response", new TicketResponseRequest
+            {
+                Text = _responseText
+            });
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                ToastService.ShowError(errorContent, settings => settings.DisableTimeout = true);
+            }
+        }
+        catch (Exception)
+        {
+            ToastService.ShowError("Something went wrong, please try again later");
+        }
+        
+        _responseText = null;
+
+        try
+        {
+           Ticket = await Http.GetFromJsonAsync<TicketDto>($"Ticket/{Ticket.Id}");
+        }
+        catch (Exception)
+        {
+            ToastService.ShowError("Something went wrong, please try again later");
+        }
+        
+    }
+
+    private async Task SolveTicket()
+    {
+        // Here, send a request to mark the ticket as solved.
+        // Remember to refresh the ticket after it's marked as solved.
+    }
+}
