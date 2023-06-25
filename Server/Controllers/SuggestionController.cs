@@ -1,6 +1,7 @@
 ﻿using System.Security.Claims;
 using EventsManager.Server.Data;
 using EventsManager.Server.Models;
+using EventsManager.Shared.Dtos;
 using EventsManager.Shared.Requests;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -34,5 +35,24 @@ public class SuggestionController: ControllerBase
         await _context.SaveChangesAsync(cancellationToken);
         
         return Ok(); 
+    }
+    
+    [HttpGet]
+    [Authorize(Roles = "Administrator")]
+    public async Task<IActionResult> GetAllSuggestions(CancellationToken cancellationToken)
+    {
+        var suggestions = await _context.Suggestions
+            .Select(x => new SuggestionDto
+            {
+                Content = x.Content,
+                CreatedOn = x.CreatedOn,
+                User = new UserDto
+                {
+                    UserName = x.User.UserName
+                }
+            })
+            .ToListAsync(cancellationToken);
+    
+        return Ok(suggestions);
     }
 }

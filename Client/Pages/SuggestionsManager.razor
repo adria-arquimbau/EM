@@ -1,0 +1,59 @@
+﻿@page "/suggestions-manager"
+
+@using EventsManager.Shared.Dtos
+@using Microsoft.AspNetCore.Authorization
+@inject HttpClient Http
+@inject IToastService ToastService
+
+@attribute [Authorize(Roles = "Administrator")] 
+
+<h3>Suggestions Manager</h3>
+
+@if (_suggestions == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+        <tr>
+            <th>Username</th>
+            <th>Suggestion</th>
+            <th>Created On</th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var suggestion in _suggestions)
+        {
+            <tr>
+                <td>@suggestion.User.UserName</td>
+                <td>@suggestion.Content</td>
+                <td>@suggestion.CreatedOn.ToLocalTime().ToString("f")</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<SuggestionDto>? _suggestions;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadSuggestions();
+    }
+
+    private async Task LoadSuggestions()
+    {
+        try
+        {
+            _suggestions = await Http.GetFromJsonAsync<List<SuggestionDto>>("Suggestion");
+            _suggestions = _suggestions.OrderBy(s => s.CreatedOn).ToList();
+        }
+        catch (Exception e)
+        {
+            ToastService.ShowError("Something went wrong, please try again later");
+        }
+    }
+}

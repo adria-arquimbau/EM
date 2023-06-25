@@ -50,6 +50,15 @@
                 </div>
             </Authorized>
         </AuthorizeView>
+        <AuthorizeView Roles="Administrator">
+            <Authorized>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="suggestions-manager" Match="NavLinkMatch.All">
+                        <span class="oi oi-comment-square" aria-hidden="true"></span> Suggestions manager
+                    </NavLink>
+                </div>
+            </Authorized>
+        </AuthorizeView>
     </nav>
 </div>
 
