@@ -18,8 +18,11 @@
         @foreach (var ticket in _tickets)
         {
               <div class="card mb-3">
-                  <div class="card-header" @onclick="() => ToggleCard(ticket.Id)">
-                      <h5 class="card-title">@ticket.Title</h5>
+                  <div class="card-header" @onclick="() => ToggleCard(ticket.Id)" style="cursor: pointer;">
+                      <h5 class="card-title">
+                          <i class="bi @(ticket.Solved ? "bi-check-circle-fill text-success" : "bi-exclamation-circle-fill text-danger")"></i>
+                          @ticket.Title
+                      </h5>
                       <p class="card-text">@ticket.CreationDate.ToLocalTime().ToString("g")</p>
                   </div>
                   @if (_expandedTicketId == ticket.Id)
@@ -66,7 +69,7 @@
                     }
                     else
                     {
-                        <p class="card-text text-danger">Not solved yet</p>
+                        <p class="card-text text-danger">Not solved yet, wait for the admin response...</p>
                     }
                 </div>
                   }
