@@ -30,11 +30,6 @@ public class RegistrationController : ControllerBase
     {
         var requesterId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-        var registration = await _context.Registrations
-            .Where(x => x.Id == registrationId)
-            .Include(x => x.User)
-            .SingleAsync(cancellationToken);
-
         var requesterIsStaff = await _context.Registrations
             .Where(x => x.Id == registrationId)
             .SelectMany(x => x.Event.Registrations.Where(r => r.Role == RegistrationRole.Staff && r.State == RegistrationState.Accepted && r.User.Id == requesterId))
@@ -44,28 +39,32 @@ public class RegistrationController : ControllerBase
         {
             return BadRequest("Only event owners or staff can check-in registrations");
         }
-        
-        var checkInDto = new RegistrationToCheckInDto
-        {
-            Id = registration.Id,
-            CreationDate = registration.CreationDate,
-            Role = registration.Role,
-            State = registration.State,
-            Bib = registration.Bib,
-            CheckedIn = registration.CheckedIn,
-            PaymentStatus = registration.PaymentStatus,
-            AmountPaid = registration.Price ?? 0,
-            RegisteredUser = new UserDto
+
+        var registration = await _context.Registrations
+            .Where(x => x.Id == registrationId)
+            .Select(registration => new RegistrationToCheckInDto
             {
-                Id = registration.User.Id,
-                UserName = registration.User.UserName,
-                Email = registration.User.Email,
-                Name = registration.User.Name,
-                Country = registration.User.Country
-            }
-        };
+                Id = registration.Id,
+                CreationDate = registration.CreationDate,
+                Role = registration.Role,
+                State = registration.State,
+                Bib = registration.Bib,
+                CheckedIn = registration.CheckedIn,
+                PaymentStatus = registration.PaymentStatus,
+                AmountPaid = registration.Price ?? 0,
+                IsFreeEvent = registration.Event.IsFree,
+                RegisteredUser = new UserDto
+                {
+                    Id = registration.User.Id,
+                    UserName = registration.User.UserName,
+                    Email = registration.User.Email,
+                    Name = registration.User.Name,
+                    Country = registration.User.Country
+                }
+            })
+            .SingleAsync(cancellationToken);
         
-        return Ok(checkInDto); 
+        return Ok(registration); 
     }   
     
     [HttpPost("event/{eventId:guid}/{registrationRole}/password/{password?}")]
@@ -99,9 +98,31 @@ public class RegistrationController : ControllerBase
         {
             return BadRequest("Invalid role registration password");
         }
-        
-        var registration = new Registration(user, registrationRole, RegistrationState.PreRegistered, eventToRegister);
-        
+
+        var registrationState = RegistrationState.PreRegistered;
+        int? bibNumber = null;
+        if (eventToRegister.IsFree)
+        {
+            registrationState = RegistrationState.Accepted;
+            var maxBibNumber = await _context.Registrations
+                .Where(x => x.Event.Id == eventId && x.Bib != null)
+                .MaxAsync(x => x.Bib, cancellationToken: cancellationToken);
+
+            if (maxBibNumber == null)
+            {
+                bibNumber = 1;
+            }
+            if (maxBibNumber != null)
+            {
+                bibNumber = maxBibNumber + 1;
+            }
+        }
+            
+        var registration = new Registration(user, registrationRole, registrationState, eventToRegister)
+        {
+            Bib = bibNumber
+        };
+
         _context.Registrations.Add(registration);
         await _context.SaveChangesAsync(cancellationToken);
         
@@ -159,7 +180,7 @@ public class RegistrationController : ControllerBase
                 }   
             }   
         }
-        
+
         await _context.SaveChangesAsync(cancellationToken);
         
         return Ok(); 
@@ -322,14 +343,14 @@ public class RegistrationController : ControllerBase
     
     [HttpPost("{registrationId:guid}/check-in/{checkIn:bool}")]
     [Authorize(Roles = "User")]
-    public async Task<IActionResult> CreateATicketUserResponse([FromRoute] Guid registrationId, [FromRoute] bool checkIn, CancellationToken cancellationToken)
+    public async Task<IActionResult> CheckIn([FromRoute] Guid registrationId, [FromRoute] bool checkIn, CancellationToken cancellationToken)
     {
         var requesterId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
         var registration = await _context.Registrations
             .Where(x => x.Id == registrationId)
             .Include(x => x.User)
-            .SingleAsync(cancellationToken);
+            .SingleAsync(cancellationToken);    
 
         var requesterIsStaff = await _context.Registrations
             .Where(x => x.Id == registrationId)
@@ -341,7 +362,7 @@ public class RegistrationController : ControllerBase
             return BadRequest("Only event owners or staff can check-in registrations");
         }
 
-        if (registration.PaymentStatus != PaymentStatus.Paid && registration.Role != RegistrationRole.Rider)
+        if (registration.PaymentStatus != PaymentStatus.Paid && registration.Role == RegistrationRole.Rider)
         {
             return BadRequest("Cannot check-in a registration that has not paid");
         }

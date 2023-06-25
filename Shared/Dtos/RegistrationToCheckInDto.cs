@@ -13,4 +13,5 @@ public class RegistrationToCheckInDto
     public UserDto RegisteredUser { get; set; }
     public PaymentStatus PaymentStatus { get; set; }
     public decimal? AmountPaid { get; set; }
+    public bool IsFreeEvent { get; set; }
 }

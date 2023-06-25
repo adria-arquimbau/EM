@@ -34,8 +34,15 @@ else
                  Role: @_registrationToCheckInn.Role <br/>
                  Registration State: @_registrationToCheckInn.State <br/>
                  Checked In: @_registrationToCheckInn.CheckedIn <br/>
-                 Payment Status: @_registrationToCheckInn.PaymentStatus / @_registrationToCheckInn.AmountPaid € <br/>
-                 Registration Date: @_registrationToCheckInn.CreationDate.ToString("g") <br/>
+                 @if (!_registrationToCheckInn.IsFreeEvent)
+                 {
+                     <p>Payment Status: @_registrationToCheckInn.PaymentStatus / @_registrationToCheckInn.AmountPaid €</p> <br/>
+                 }
+                  @if (_registrationToCheckInn.IsFreeEvent)
+                  {
+                      <p>Payment Status: FREE EVENT </p> <br/>
+                  }
+                 Registration Date: @_registrationToCheckInn.CreationDate.ToLocalTime().ToLongDateString() at @_registrationToCheckInn.CreationDate.ToLocalTime().ToShortTimeString() <br/>
              </p>
              @if (!_registrationToCheckInn.CheckedIn)
              {
