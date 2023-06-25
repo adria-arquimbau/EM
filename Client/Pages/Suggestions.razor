@@ -1,5 +1,8 @@
 ﻿@page "/Suggestions"
 @using System.ComponentModel.DataAnnotations
+@using Microsoft.AspNetCore.Authorization
+
+@attribute [Authorize(Roles = "User")]
 
 <h3>Suggestions</h3>
 <p>Thank you for using our app. As we are in alpha version, we would appreciate your feedback. Please let us know how we can improve.</p>

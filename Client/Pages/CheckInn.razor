@@ -2,11 +2,14 @@
 
 @using EventsManager.Shared.Dtos
 @using EventsManager.Client.Components.Modals
+@using Microsoft.AspNetCore.Authorization
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject IToastService ToastService
 @inject HttpClient Http
 
-<h3 class="mb-3">CheckInn</h3>
+@attribute [Authorize(Roles = "Organizer, Staff")]
+
+<h3 class="mb-3">Check Inn</h3>
 
 @if (_registrationToCheckInn == null)
 {
