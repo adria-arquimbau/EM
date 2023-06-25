@@ -7,7 +7,7 @@
 @inject IToastService ToastService
 
 <div class="container my-4">
-    <h3 class="mb-3">Create Ticket</h3>
+    <h3 class="mb-3">My tickets for event @EventId</h3>
 
     @if (_tickets == null)
     {
@@ -17,12 +17,14 @@
     {
         @foreach (var ticket in _tickets)
         {
-            <div class="card mb-3">
-                <div class="card-header">
-                    <h5 class="card-title">@ticket.Title</h5>
-                    <p class="card-text">@ticket.CreationDate.ToLocalTime().ToString("g")</p>
-                </div>
-                <div class="card-body">
+              <div class="card mb-3">
+                  <div class="card-header" @onclick="() => ToggleCard(ticket.Id)">
+                      <h5 class="card-title">@ticket.Title</h5>
+                      <p class="card-text">@ticket.CreationDate.ToLocalTime().ToString("g")</p>
+                  </div>
+                  @if (_expandedTicketId == ticket.Id)
+                  {
+                       <div class="card-body">
                     <p>@ticket.Text</p>
                     <FluentDivider></FluentDivider>
                     <div class="chat-box">
@@ -67,7 +69,8 @@
                         <p class="card-text text-danger">Not solved yet</p>
                     }
                 </div>
-            </div>
+                  }
+              </div>
         }
     }
 
@@ -100,13 +103,10 @@
     public Guid RegistrationId { get; set; }
     [Parameter]
     public Guid EventId { get; set; }
-    
     private List<TicketDto>? _tickets;
-    
+    private Guid _expandedTicketId = Guid.Empty;
     private bool _allTicketsSolved;
-    
     private string _responseText = string.Empty;
-
     private TicketDto _newTicket = new();
 
     protected override async Task OnInitializedAsync()
@@ -186,6 +186,12 @@
 
         _responseText = string.Empty;
     }
+    
+    private void ToggleCard(Guid ticketId)
+    {
+        _expandedTicketId = _expandedTicketId == ticketId ? Guid.Empty : ticketId;
+    }
+
 
     private void NavigateToEvent()
     {
