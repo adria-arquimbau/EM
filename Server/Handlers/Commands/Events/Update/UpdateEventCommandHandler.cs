@@ -1,8 +1,6 @@
 ﻿using EventsManager.Server.Data;
-using EventsManager.Server.Models;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using Stripe;
 
 namespace EventsManager.Server.Handlers.Commands.Events.Update;
 
