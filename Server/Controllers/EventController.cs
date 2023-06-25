@@ -98,9 +98,11 @@ public class EventController : ControllerBase
 
         if (!registrationAlreadyExist)
         {
-            eventToUpdate.Registrations.Add(new Registration(owner, RegistrationRole.Staff, RegistrationState.Accepted, eventToUpdate));
+            var registration = new Registration(owner, RegistrationRole.Staff, RegistrationState.Accepted, eventToUpdate);
+            registration.CheckedIn = true;
+            eventToUpdate.Registrations.Add(registration);
         }
-        
+            
         await _context.SaveChangesAsync(cancellationToken);
         return Ok();
     }

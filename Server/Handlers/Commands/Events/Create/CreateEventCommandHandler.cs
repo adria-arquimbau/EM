@@ -28,9 +28,13 @@ public class CreateEventCommandHandler : IRequestHandler<CreateEventCommandReque
         }
         
         var newEvent = new Event(request.Request.Name, request.Request.Description, request.Request.Location, request.Request.MaxRegistrations, owner, request.Request.StartDate.ToUniversalTime(), request.Request.FinishDate.ToUniversalTime(), request.Request.OpenRegistrationsDate.ToUniversalTime(), request.Request.CloseRegistrationsDate.ToUniversalTime());
-        
-        newEvent.Registrations.Add(new Registration(owner, RegistrationRole.Staff, RegistrationState.Accepted, newEvent));
-        newEvent.IsFree = request.Request.IsFree;
+
+        var registration = new Registration(owner, RegistrationRole.Staff, RegistrationState.Accepted, newEvent)
+        {
+            CheckedIn = true
+        };
+        newEvent.Registrations.Add(registration);
+        newEvent.IsFree = request.Request.IsFree;   
         
         newEvent.Prices.Add(new EventPrice(request.Request.FirstPrice == 0 ? 1 : request.Request.FirstPrice,  request.Request.OpenRegistrationsDate.ToUniversalTime(),  request.Request.CloseRegistrationsDate.ToUniversalTime()));
         

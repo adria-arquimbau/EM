@@ -341,7 +341,7 @@ public class RegistrationController : ControllerBase
             return BadRequest("Only event owners or staff can check-in registrations");
         }
 
-        if (registration.PaymentStatus != PaymentStatus.Paid)
+        if (registration.PaymentStatus != PaymentStatus.Paid && registration.Role != RegistrationRole.Rider)
         {
             return BadRequest("Cannot check-in a registration that has not paid");
         }
