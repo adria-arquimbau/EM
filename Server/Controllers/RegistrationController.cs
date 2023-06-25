@@ -349,7 +349,7 @@ public class RegistrationController : ControllerBase
 
         var registration = await _context.Registrations
             .Where(x => x.Id == registrationId)
-            .Include(x => x.User)
+            .Include(x => x.Event)
             .SingleAsync(cancellationToken);    
 
         var requesterIsStaff = await _context.Registrations
@@ -362,7 +362,7 @@ public class RegistrationController : ControllerBase
             return BadRequest("Only event owners or staff can check-in registrations");
         }
 
-        if (registration.PaymentStatus != PaymentStatus.Paid && registration.Role == RegistrationRole.Rider)
+        if (registration.PaymentStatus != PaymentStatus.Paid && registration is { Role: RegistrationRole.Rider, Event.IsFree: false })
         {
             return BadRequest("Cannot check-in a registration that has not paid");
         }
