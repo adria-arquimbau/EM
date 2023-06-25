@@ -23,7 +23,7 @@
                           <i class="bi @(ticket.Solved ? "bi-check-circle-fill text-success" : "bi-exclamation-circle-fill text-danger")"></i>
                           @ticket.Title
                       </h5>
-                      <p class="card-text">@ticket.CreationDate.ToLocalTime().ToString("g")</p>
+                      <p class="card-text">@ticket.CreationDate.ToLocalTime().ToLongDateString() at @ticket.CreationDate.ToLocalTime().ToShortTimeString()</p>
                   </div>
                   @if (_expandedTicketId == ticket.Id)
                   {
@@ -36,9 +36,8 @@
                             @if (response.IsAdminResponse)
                             {
                                 <div class="d-flex justify-content-end">
-                                    <div class="alert alert-primary">
-                                        <p><strong>@response.RespondedBy</strong> (@response.ResponseDate.ToLocalTime().ToString("g")): @response.Text</p>
-                                        Admin
+                                    <div class="alert alert-primary" style="background-color: #D9EFFF; border: 1px solid #3C90DF;">
+                                        <p><strong>@response.RespondedBy (Admin)</strong> (@response.ResponseDate.ToLocalTime().ToString("dd MMMM, yyyy - h:mm tt")): @response.Text</p>
                                     </div>
                                 </div>
                             }
@@ -46,7 +45,7 @@
                             {
                                 <div class="d-flex justify-content-start">
                                     <div class="alert alert-secondary">
-                                        <p><strong>@response.RespondedBy</strong> (@response.ResponseDate.ToLocalTime().ToString("g")): @response.Text</p>
+                                        <p><strong>@response.RespondedBy</strong> (@response.ResponseDate.ToLocalTime().ToString("dd MMMM, yyyy - h:mm tt")): @response.Text</p>
                                     </div>
                                 </div>
                             }

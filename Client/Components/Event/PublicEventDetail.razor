@@ -40,9 +40,10 @@ else
                 </div>
                 <div class="col-md-8">
                     <p>@_eventDetail.Description</p>
-                    <p><strong>Start Date:</strong> @_eventDetail.StartDate.ToString("g")</p>
+                    <p><strong>Start Date:</strong> @_eventDetail.StartDate.ToLocalTime().ToLongDateString() at @_eventDetail.StartDate.ToLocalTime().ToShortTimeString()</p>
+                    <p><strong>End Date:</strong> @_eventDetail.EndDate.ToLocalTime().ToLongDateString() at @_eventDetail.EndDate.ToLocalTime().ToShortTimeString()</p>
                     <p><strong>Location:</strong> @_eventDetail.Location</p>
-                    <p><strong>Open registrations date:</strong> @_eventDetail.OpenRegistrationsDate</p>
+                    <p><strong>Open registrations date:</strong> @_eventDetail.OpenRegistrationsDate.ToLocalTime().ToLongDateString() at @_eventDetail.OpenRegistrationsDate.ToLocalTime().ToShortTimeString()</p>
                     <p><strong>Registrations state:</strong> <span style="color: @(GetRegistrationStateColor())">@GetRegistrationStateText()</span></p>
                     @if(_eventDetail.IsFree)
                     {

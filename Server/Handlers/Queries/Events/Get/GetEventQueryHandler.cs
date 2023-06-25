@@ -25,6 +25,7 @@ public class GetEventQueryHandler : IRequestHandler<GetEventQueryRequest, EventD
             {
                 Id = x.Id,
                 StartDate = x.StartDate,
+                EndDate = x.FinishDate,
                 IsFree = x.IsFree,
                 Name = x.Name,
                 Description = x.Description,
