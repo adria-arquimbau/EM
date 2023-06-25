@@ -13,34 +13,40 @@
 }
 else
 {
-    <div class="card">
-        <div class="card-header">
-            <div class="text-center">
-                <h1 class="display-1 d-inline">Bib: </h1>
-                <h1 class="display-1 d-inline">@_registrationToCheckInn.Bib</h1>
-            </div>
-        </div>
-        <div class="card-body">
-            <p class="card-text">
-                User name: @_registrationToCheckInn.RegisteredUser.UserName<br/>
-                Email: @_registrationToCheckInn.RegisteredUser.Email<br/>
-                Phone Number: @_registrationToCheckInn.RegisteredUser.PhoneNumber <br/>
-                Role: @_registrationToCheckInn.Role <br/>
-                Registration State: @_registrationToCheckInn.State <br/>
-                Checked In: @_registrationToCheckInn.CheckedIn <br/>
-                Payment Status: @_registrationToCheckInn.PaymentStatus / @_registrationToCheckInn.AmountPaid € <br/> 
-                Registration Date: @_registrationToCheckInn.CreationDate.ToString("g") <br/>
-            </p>
-            @if(!_registrationToCheckInn.CheckedIn)
-            {
-                <button class="btn btn-success" @onclick="()=> CheckInOut(true)">Check In</button>
-            }
-            else
-            {
-                <button class="btn btn-danger" @onclick="()=> CheckInOut(false)">Check Out</button>
-            }
+   <div class="card">
+         <div class="card-header">
+             <div class="text-center">
+                 <h1 class="display-1 d-inline">Bib: </h1>
+                 <h1 class="display-1 d-inline">@_registrationToCheckInn.Bib</h1>
+             </div>
+         </div>
+         @if(_registrationToCheckInn.CheckedIn)
+         {
+             <div class="alert alert-danger" role="alert">
+                 WARNING: This registration is already checked in.
+             </div>
+         }
+         <div class="card-body">
+             <p class="card-text">
+                 User name: @_registrationToCheckInn.RegisteredUser.UserName<br/>
+                 Email: @_registrationToCheckInn.RegisteredUser.Email<br/>
+                 Phone Number: @_registrationToCheckInn.RegisteredUser.PhoneNumber <br/>
+                 Role: @_registrationToCheckInn.Role <br/>
+                 Registration State: @_registrationToCheckInn.State <br/>
+                 Checked In: @_registrationToCheckInn.CheckedIn <br/>
+                 Payment Status: @_registrationToCheckInn.PaymentStatus / @_registrationToCheckInn.AmountPaid € <br/>
+                 Registration Date: @_registrationToCheckInn.CreationDate.ToString("g") <br/>
+             </p>
+             @if (!_registrationToCheckInn.CheckedIn)
+             {
+                 <button class="btn btn-success" @onclick="() => CheckInOut(true)">Check In</button>
+             }
+             else
+             {
+                 <button class="btn btn-danger" @onclick="() => CheckInOut(false)">Check Out</button>
+             }
 
-        </div>
+         </div>
     </div>
 }
 
