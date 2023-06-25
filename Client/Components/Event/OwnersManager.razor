@@ -2,17 +2,18 @@
 @using EventsManager.Client.Components.Modals
 
 @inject HttpClient Http
+@inject IToastService ToastService
 
-@if (!string.IsNullOrEmpty(warningMessage))
+@if (!string.IsNullOrEmpty(_warningMessage))
 {
     <div class="alert alert-warning">
-        @warningMessage
+        @_warningMessage
     </div>
 }
 
 <input type="text" class="form-control" placeholder="Search..." @oninput="OnSearch" />
 
-@if (string.IsNullOrWhiteSpace(searchTerm))
+@if (string.IsNullOrWhiteSpace(_searchTerm))
 {
     <p><em>Start typing to search for a user...</em></p>
 }
@@ -52,15 +53,28 @@ else
 }
 
 <h2>Owners List</h2>
-<ul>
-    @foreach (var user in currentOwners)
+<table class="table">
+    <thead>
+    <tr>
+        <th scope="col">User Name</th>
+        <th scope="col">Action</th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var user in _currentOwners)
     {
-        <li>@user.UserName</li>
+        <tr>
+            <td>@user.UserName</td>
+            <td>
+                <button class="btn btn-danger" @onclick="() => StartDeleteOwner(user)">Delete Owner</button>
+            </td>
+        </tr>
     }
-</ul>
+    </tbody>
+</table>
 
-<ConfirmationModal Title="Confirmation" Message="@confirmationMessage"
-                   Visible="showConfirmation" ConfirmationChanged="HandleConfirmation">
+<ConfirmationModal Title="Confirmation" Message="@_confirmationMessage"
+                   Visible="_showConfirmation" ConfirmationChanged="HandleConfirmation">
 </ConfirmationModal>
 
 @code {
@@ -71,13 +85,13 @@ else
 
     private List<UserDtoToSetASOwner>? _users;
     private List<UserDtoToSetASOwner>? _filteredUsers = new List<UserDtoToSetASOwner>();
-    private List<UserDtoToSetASOwner> currentOwners = new List<UserDtoToSetASOwner>();
-    private bool showConfirmation;
-    private UserDtoToSetASOwner selectedUser;
-    private string confirmationMessage;
-    private bool isDeleteAction;
-    private string searchTerm = string.Empty;
-    private string warningMessage = string.Empty;
+    private List<UserDtoToSetASOwner> _currentOwners = new List<UserDtoToSetASOwner>();
+    private bool _showConfirmation;
+    private UserDtoToSetASOwner _selectedUser;
+    private string _confirmationMessage;
+    private bool _isDeleteAction;
+    private string _searchTerm = string.Empty;
+    private string _warningMessage = string.Empty;
 
     protected override async Task OnInitializedAsync()
     {
@@ -93,50 +107,76 @@ else
 
     private void SetOwner(UserDtoToSetASOwner user)
     {
-        selectedUser = user;
-        confirmationMessage = "Are you sure you want to set this user as the owner?";
-        isDeleteAction = false;
-        showConfirmation = true;    
+        _selectedUser = user;
+        _confirmationMessage = "Are you sure you want to set this user as the owner?";
+        _isDeleteAction = false;
+        _showConfirmation = true;    
     }
 
     private void StartDeleteOwner(UserDtoToSetASOwner user)
     {
-        selectedUser = user;
-        confirmationMessage = "Are you sure you want to delete this owner?";
-        isDeleteAction = true;
-        showConfirmation = true;
+        _selectedUser = user;
+        _confirmationMessage = "Are you sure you want to delete this owner?";
+        _isDeleteAction = true;
+        _showConfirmation = true;
     }
 
     private async Task HandleConfirmation(bool confirmed)
     {   
         if (confirmed)
         {
-            if (isDeleteAction)
+            if (_isDeleteAction)
             {
-                await Http.DeleteAsync($"Event/{MyEventDto.Id}/owner/{selectedUser.Id}");
-                warningMessage = "Owner was deleted, but the staff role is still active.";
+                try
+                {
+                    var response = await Http.DeleteAsync($"Event/{MyEventDto.Id}/owner/{_selectedUser.Id}");
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        _warningMessage = "Owner was deleted, but the staff role is still active.";
+
+                    }
+                    if (!response.IsSuccessStatusCode)
+                    {
+                        var errorMessage = await response.Content.ReadAsStringAsync();
+                        ToastService.ShowError(errorMessage);
+                    }
+                }
+                catch (Exception)
+                {
+                    ToastService.ShowError("An error occurred while deleting the price.");
+                }
             }
             else
             {
-                await Http.PutAsync($"Event/{MyEventDto.Id}/set-owner/{selectedUser.Id}", null);
-                warningMessage = string.Empty;
+                var response = await Http.PutAsync($"Event/{MyEventDto.Id}/set-owner/{_selectedUser.Id}", null);
+                if (response.IsSuccessStatusCode)
+                {
+                    _warningMessage = string.Empty;
+
+                }
+                if (!response.IsSuccessStatusCode)
+                {
+                    var errorMessage = await response.Content.ReadAsStringAsync();
+                    ToastService.ShowError(errorMessage);
+                }
                 await GetAllUsers();
             }
             
         }
         await GetAllUsers();
-        showConfirmation = false;
+        _showConfirmation = false;
     }
 
     private void OnSearch(ChangeEventArgs e)
     {
-        searchTerm = e.Value.ToString().ToLower();
+        _searchTerm = e.Value.ToString().ToLower();
         OnSearchUsers();
     }
 
     private void OnSearchUsers()
     {
-        _filteredUsers = !string.IsNullOrWhiteSpace(searchTerm) ? _users.Where(user => user.UserName.ToLower().Contains(searchTerm)).ToList() : new List<UserDtoToSetASOwner>();
-        currentOwners = _users.Where(user => user.IsOwner).ToList();
+        _filteredUsers = !string.IsNullOrWhiteSpace(_searchTerm) ? _users.Where(user => user.UserName.ToLower().Contains(_searchTerm)).ToList() : new List<UserDtoToSetASOwner>();
+        _currentOwners = _users.Where(user => user.IsOwner).ToList();
     }
 }
