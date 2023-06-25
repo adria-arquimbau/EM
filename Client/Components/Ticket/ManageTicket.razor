@@ -3,38 +3,73 @@
 @inject HttpClient Http
 @inject IToastService ToastService
 
+<style>
+    .chat-bubble {
+        border-radius: 5px;
+        margin: 10px;
+        padding: 10px;
+    }
+    
+    .admin {
+        background-color: #007bff;
+        color: white;
+        text-align: right;
+        margin-left: 20%;
+    }
+    
+    .user {
+        background-color: #f8f9fa;
+        color: black;
+        text-align: left;
+        margin-right: 20%;
+    }
+</style>
+
 @if (Ticket != null)
 {
     <div class="modal" tabindex="-1" style="display:block;">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">@Ticket.Title</h5>
+                    <div class="d-flex justify-content-between w-100 mt-3">
+                        <div>
+                            <p><strong>Created By:</strong> @Ticket.CreatedBy</p>
+                            <p><strong>Created At:</strong> @Ticket.CreationDate.ToLocalTime().ToLongDateString() at @Ticket.CreationDate.ToLocalTime().ToShortTimeString()</p>
+                        </div>
+                        <div>
+                            <p><strong>Solved By:</strong> @Ticket.SolvedBy</p>
+                            <p><strong>Status:</strong> <span class="badge badge-pill" style="background-color: @(Ticket.Solved ? "green" : "red"); color: white;">@(Ticket.Solved ? "Solved" : "Unsolved")</span></p>
+                        </div>
+                    </div>
                     <button type="button" class="close" @onclick="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body">
                     <!-- The scrollable area for the ticket responses. -->
-                    <div style="height:200px; overflow-y: scroll;">
+                    <div style="height:400px; overflow-y: scroll;">
                         @foreach (var response in Ticket.TicketResponses.OrderBy(r => r.ResponseDate))
                         {
-                            <div class="border-bottom">
+                            <div class="@("chat-bubble " + (response.IsAdminResponse ? "admin" : "user"))">
                                 <p>@response.Text</p>
                                 <small>@response.ResponseDate.ToLocalTime().ToLongDateString() at @response.ResponseDate.ToLocalTime().ToShortTimeString() by @(response.IsAdminResponse ? "Admin" : "User"): @response.RespondedBy</small>
                             </div>
                         }
                     </div>
-
                 </div>
                 <div class="modal-footer">
                     <div class="input-group">
                         <input type="text" class="form-control" placeholder="Type your response here..." @bind="_responseText" />
                         <div class="input-group-append">
                             <button class="btn btn-outline-secondary" type="button" @onclick="PostResponse">Respond</button>
-                            @if (!Ticket.Solved)
+                            @if (Ticket.Solved)
                             {
-                                <button class="btn btn-outline-success" type="button" @onclick="SolveTicket">Solve Ticket</button>
+                                <button class="btn btn-outline-danger" type="button" @onclick="()=>SolveTicket(false)">Unsolve Ticket</button>
+                            }
+                            else
+                            {
+                                <button class="btn btn-outline-success" type="button" @onclick="()=>SolveTicket(true)">Solve Ticket</button>
                             }
                         </div>
                     </div>
@@ -43,6 +78,8 @@
         </div>
     </div>
 }
+
+
 
 @code {
     [Parameter]
@@ -79,21 +116,39 @@
         }
         
         _responseText = null;
+        await RefreshTicket();
+    }
 
+    private async Task SolveTicket(bool solved)
+    {
         try
         {
-           Ticket = await Http.GetFromJsonAsync<TicketDto>($"Ticket/{Ticket.Id}");
+            var response = await Http.GetAsync($"Ticket/{Ticket.Id}/solve/{solved}");
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                ToastService.ShowError(errorContent, settings => settings.DisableTimeout = true);
+            }
         }
         catch (Exception)
         {
             ToastService.ShowError("Something went wrong, please try again later");
         }
-        
+
+        await RefreshTicket();
     }
 
-    private async Task SolveTicket()
+    private async Task RefreshTicket()
     {
-        // Here, send a request to mark the ticket as solved.
-        // Remember to refresh the ticket after it's marked as solved.
+        try
+        {
+            Ticket = await Http.GetFromJsonAsync<TicketDto>($"Ticket/{Ticket.Id}");
+        }
+        catch (Exception)
+        {
+            ToastService.ShowError("Something went wrong, please try again later");
+        }
     }
+
 }

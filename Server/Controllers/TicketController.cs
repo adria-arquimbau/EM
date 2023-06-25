@@ -88,4 +88,30 @@ public class TicketController : ControllerBase
                 .ToList()
         });
     }   
+    
+    [HttpGet("{TicketId:guid}/solve/{solved:bool}")]
+    [Authorize(Roles = "Organizer")] 
+    public async Task<IActionResult> SolveTicket([FromRoute] Guid ticketId, [FromRoute] bool solved, CancellationToken cancellationToken)
+    {
+        var requesterId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        var user = await _userManager.FindByIdAsync(requesterId);
+        
+        var ticket = await _context.Tickets
+            .Include(t => t.Registration)
+            .ThenInclude(r => r.Event)
+            .ThenInclude(e => e.Owners)
+            .SingleAsync(t => t.Id == ticketId, cancellationToken);
+
+        if (ticket.Registration.Event.Owners.All(o => o.Id != requesterId))
+        {
+            return Unauthorized();
+        }
+
+        ticket.Solved = solved;
+        ticket.SolvedBy = solved ? user : null;
+        
+        await _context.SaveChangesAsync(cancellationToken);
+        
+        return Ok();
+    }   
 }
