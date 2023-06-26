@@ -19,4 +19,6 @@ public class EventDto
     public DateTime CloseRegistrationsDate { get; set; }
     public bool IsFree { get; set; }
     public decimal? CurrentPrice { get; set; }
+    public List<EventPriceDto> Prices { get; set; }
 }
+    

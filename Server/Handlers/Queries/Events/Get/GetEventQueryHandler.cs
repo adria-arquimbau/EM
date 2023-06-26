@@ -41,6 +41,13 @@ public class GetEventQueryHandler : IRequestHandler<GetEventQueryRequest, EventD
                 OpenRegistrationsDate = x.OpenRegistrationsDate,
                 CloseRegistrationsDate = x.CloseRegistrationsDate,
                 CurrentPrice = x.Prices.FirstOrDefault(p => p.StartDate <= DateTime.Now && p.EndDate >= DateTime.Now).Price,
+                Prices = x.Prices.Select(p => new EventPriceDto
+                {
+                    Id = p.Id,
+                    StartDate = p.StartDate,
+                    EndDate = p.EndDate,
+                    Price = p.Price
+                }).ToList(),
             })
             .SingleAsync(cancellationToken: cancellationToken);
     }

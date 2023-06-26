@@ -43,8 +43,8 @@ else
                     <p><strong>Start Date:</strong> @_eventDetail.StartDate.ToLocalTime().ToLongDateString() at @_eventDetail.StartDate.ToLocalTime().ToShortTimeString()</p>
                     <p><strong>End Date:</strong> @_eventDetail.EndDate.ToLocalTime().ToLongDateString() at @_eventDetail.EndDate.ToLocalTime().ToShortTimeString()</p>
                     <p><strong>Location:</strong> @_eventDetail.Location</p>
-                    <p><strong>Open registrations date:</strong> @_eventDetail.OpenRegistrationsDate.ToLocalTime().ToLongDateString() at @_eventDetail.OpenRegistrationsDate.ToLocalTime().ToShortTimeString()</p>
                     <p><strong>Registrations state:</strong> <span style="color: @(GetRegistrationStateColor())">@GetRegistrationStateText()</span></p>
+                    <p><strong>Open registrations date:</strong> @_eventDetail.OpenRegistrationsDate.ToLocalTime().ToLongDateString() at @_eventDetail.OpenRegistrationsDate.ToLocalTime().ToShortTimeString()</p>
                     @if(_eventDetail.IsFree)
                     {
                         <p><strong>Price:</strong> Free</p>
@@ -53,12 +53,31 @@ else
                     {
                         @if (_eventDetail.CurrentPrice.HasValue)
                         {
-                            <p><strong>Price:</strong> @_eventDetail.CurrentPrice €</p> 
+                            <table class="table">
+                                <thead>
+                                <tr>
+                                    <th>Price</th>
+                                    <th>End Date</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                @foreach (var price in _eventDetail.Prices.OrderBy(x => x.StartDate))
+                                {
+                                    var today = DateTime.Today;
+                                    var isCurrentPrice = today >= price.StartDate && today <= price.EndDate;
+                                    <tr style="color:@(isCurrentPrice ? "green" : "black")">
+                                        <td>@price.Price €</td>
+                                        <td>@price.EndDate.ToLocalTime().ToString("d/M/yy") at @price.EndDate.ToLocalTime().ToShortTimeString()</td>
+                                    </tr>
+                                }
+                                </tbody>
+                            </table>
+
                         }
                         @if (!_eventDetail.CurrentPrice.HasValue)
                         { 
                             <div class="alert alert-warning" role="alert">
-                                An administrator has not set the price yet.
+                                An administrator has not set the price yet for this current period.
                             </div>
                         }
                     }

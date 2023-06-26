@@ -17,7 +17,7 @@
         <div class="row">
             @if (MyEventDto?.Prices is {Count: > 0 })
             {
-                foreach (var price in MyEventDto.Prices)
+                foreach (var price in MyEventDto.Prices.OrderBy(x => x.StartDate))
                 {
                     var now = DateTime.Now;
                     var cardClass = price.EndDate.ToLocalTime() < now ? "card border-danger" : 
