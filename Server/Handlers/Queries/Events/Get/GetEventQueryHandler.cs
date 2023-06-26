@@ -21,33 +21,37 @@ public class GetEventQueryHandler : IRequestHandler<GetEventQueryRequest, EventD
             .Where(x => x.Id == request.EventId)
             .Include(x => x.Registrations)
             .Include(x => x.RegistrationRolePasswords)
+            .Select(x => new 
+            {
+                Event = x,
+                OrderedPrices = x.Prices.OrderBy(p => p.EndDate).ToList()
+            })
             .Select(x => new EventDto
             {
-                Id = x.Id,
-                StartDate = x.StartDate,
-                EndDate = x.FinishDate,
-                IsFree = x.IsFree,
-                Name = x.Name,
-                Description = x.Description,
-                Location = x.Location,
-                ImageUrl = x.ImageUrl,
-                PreAndAcceptedRidersRegistrationsCount = x.Registrations.Count(r => r.Role == RegistrationRole.Rider &&
+                Id = x.Event.Id,
+                StartDate = x.Event.StartDate,
+                EndDate = x.Event.FinishDate,
+                IsFree = x.Event.IsFree,
+                Name = x.Event.Name,
+                Description = x.Event.Description,
+                Location = x.Event.Location,
+                ImageUrl = x.Event.ImageUrl,
+                PreAndAcceptedRidersRegistrationsCount = x.Event.Registrations.Count(r => r.Role == RegistrationRole.Rider &&
                     (r.State == RegistrationState.Accepted)),
-                RiderMarshallHaveRegistrationRolePassword = x.RegistrationRolePasswords.Any(y => y.Role == RegistrationRole.RiderMarshal),
-                RiderHaveRegistrationRolePassword = x.RegistrationRolePasswords.Any(y => y.Role == RegistrationRole.Rider),
-                StaffHaveRegistrationRolePassword = x.RegistrationRolePasswords.Any(y => y.Role == RegistrationRole.Staff),
-                MarshallHaveRegistrationRolePassword = x.RegistrationRolePasswords.Any(y => y.Role == RegistrationRole.Marshal),
-                MaxRegistrations = x.MaxRegistrations,
-                OpenRegistrationsDate = x.OpenRegistrationsDate,
-                CloseRegistrationsDate = x.CloseRegistrationsDate,
-                CurrentPrice = x.Prices.FirstOrDefault(p => p.StartDate <= DateTime.Now && p.EndDate >= DateTime.Now).Price,
-                Prices = x.Prices.Select(p => new EventPriceDto
+                RiderMarshallHaveRegistrationRolePassword = x.Event.RegistrationRolePasswords.Any(y => y.Role == RegistrationRole.RiderMarshal),
+                RiderHaveRegistrationRolePassword = x.Event.RegistrationRolePasswords.Any(y => y.Role == RegistrationRole.Rider),
+                StaffHaveRegistrationRolePassword = x.Event.RegistrationRolePasswords.Any(y => y.Role == RegistrationRole.Staff),
+                MarshallHaveRegistrationRolePassword = x.Event.RegistrationRolePasswords.Any(y => y.Role == RegistrationRole.Marshal),
+                MaxRegistrations = x.Event.MaxRegistrations,
+                OpenRegistrationsDate = x.Event.OpenRegistrationsDate,
+                CloseRegistrationsDate = x.Event.CloseRegistrationsDate,
+                CurrentPrice = x.OrderedPrices.First(p => p.EndDate >= DateTime.Now).Price,
+                Prices = x.OrderedPrices.Select(p => new EventPriceDto
                 {
                     Id = p.Id,
-                    StartDate = p.StartDate,
                     EndDate = p.EndDate,
                     Price = p.Price
-                }).ToList(),
+                }).ToList()
             })
             .SingleAsync(cancellationToken: cancellationToken);
     }

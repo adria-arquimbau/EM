@@ -114,8 +114,12 @@
     protected override async Task OnInitializedAsync()
     {
         var now = DateTime.UtcNow;
-        _noPriceWithinCurrentTime = !Event.Prices.Any(price => price.StartDate <= now && price.EndDate >= now);
+        var orderedPrices = Event.Prices.OrderBy(price => price.EndDate).ToList();
+        var currentPrice = orderedPrices.LastOrDefault(price => price.EndDate >= now);
+    
+        _noPriceWithinCurrentTime = currentPrice == null || Event.OpenRegistrationsDate > now;
     }
+
     
     private string DisplayPassword(string password)
     {

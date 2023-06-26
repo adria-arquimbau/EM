@@ -62,9 +62,8 @@ public class GetMyEventAsOrganizerQueryHandler : IRequestHandler<GetMyEventAsOrg
             {
                 Id = x.Id,
                 Price = x.Price,
-                StartDate = x.StartDate,
                 EndDate = x.EndDate
-            }).ToList()
+            }).OrderBy(p => p.EndDate).ToList()
         };
     }
 }

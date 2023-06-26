@@ -49,20 +49,20 @@ public class UpdateEventCommandHandler : IRequestHandler<UpdateEventCommandReque
         var registrationEnd = request.EventDto.CloseRegistrationsDate;
 
         var pricesDuringRegistration = eventToUpdate.Prices
-            .Where(p => p.StartDate <= registrationEnd && p.EndDate >= registrationStart)
-            .OrderBy(p => p.StartDate)
+            .Where(p => p.EndDate >= registrationStart)
+            .OrderBy(p => p.EndDate)
             .ToList();
 
         if (pricesDuringRegistration.Count == 0 ||
-            pricesDuringRegistration.First().StartDate > registrationStart ||
             pricesDuringRegistration.Last().EndDate < registrationEnd)
         {
             throw new Exception("The updated registration period is not covered by any price, please add a price that covers the entire registration period before updating the event.");
         }
 
+        // Check if there are gaps between the prices
         for (var i = 0; i < pricesDuringRegistration.Count - 1; i++)
         {
-            if (pricesDuringRegistration[i].EndDate < pricesDuringRegistration[i + 1].StartDate)
+            if (pricesDuringRegistration[i].EndDate < pricesDuringRegistration[i + 1].EndDate)
             {
                 throw new Exception("The updated registration period is not covered by any price, please add a price that covers the entire registration period before updating the event.");
             }

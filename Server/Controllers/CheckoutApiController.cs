@@ -103,16 +103,19 @@ public class CheckoutApiController : Controller
     private async Task<long> CalculatePriceForTheWeek(string eventId)
     {
         var now = DateTime.UtcNow;
-    
-        var price = await _context.EventPrices
-            .Where(x => x.Event.Id == Guid.Parse(eventId))
-            .SingleOrDefaultAsync(x => x.StartDate <= now && x.EndDate >= now);
 
-        if (price == null)
+        var price = await _context.EventPrices
+            .Include(x => x.Event)
+            .Where(x => x.Event.Id == Guid.Parse(eventId))
+            .OrderByDescending(x => x.EndDate)
+            .FirstOrDefaultAsync(x => x.EndDate >= now);
+
+        if (price == null || price.Event.OpenRegistrationsDate > now)
         {
             throw new NullReferenceException("Price not found");
         }
         
         return (long)(price.Price * 100);
     }
+
 }

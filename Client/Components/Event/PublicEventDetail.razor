@@ -61,10 +61,10 @@ else
                                 </tr>
                                 </thead>
                                 <tbody>
-                                @foreach (var price in _eventDetail.Prices.OrderBy(x => x.StartDate))
+                                @foreach (var price in _eventDetail.Prices.OrderBy(x => x.EndDate))
                                 {
                                     var today = DateTime.Today;
-                                    var isCurrentPrice = today >= price.StartDate && today <= price.EndDate;
+                                    var isCurrentPrice = today >= _eventDetail.OpenRegistrationsDate && today <= price.EndDate;
                                     <tr style="color:@(isCurrentPrice ? "green" : "black")">
                                         <td>@price.Price €</td>
                                         <td>@price.EndDate.ToLocalTime().ToString("d/M/yy") at @price.EndDate.ToLocalTime().ToShortTimeString()</td>
