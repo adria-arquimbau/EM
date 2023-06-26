@@ -118,6 +118,8 @@ public class EventPriceController : ControllerBase
             .ThenInclude(x => x.Owners)
             .Include(x => x.Event)
             .ThenInclude(x => x.Creator)
+            .Include(x => x.Event)
+            .ThenInclude(x => x.Prices)
             .SingleAsync(x => x.Id == priceId, cancellationToken);
 
         if(price.Event.Owners.All(o => o.Id != userId) && price.Event.CreatorId != userId)   
@@ -125,11 +127,43 @@ public class EventPriceController : ControllerBase
             return Unauthorized();
         }
 
-        if (priceRequest.Price < 0.5m)
+        // Prepare the new price
+        var newPrice = new EventPrice(priceRequest.Price ,priceRequest.StartDate.ToUniversalTime(), priceRequest.EndDate.ToUniversalTime());
+
+        // Get the registration period dates
+        var registrationStart = price.Event.OpenRegistrationsDate;
+        var registrationEnd = price.Event.CloseRegistrationsDate;
+
+        // Get the other prices
+        var otherPrices = price.Event.Prices.Where(p => p.Id != priceId).ToList();
+
+        // Add the new price to the list
+        otherPrices.Add(newPrice);
+
+        // Filter prices that are active during the registration period and order them
+        var pricesDuringRegistration = otherPrices
+            .Where(p => p.StartDate <= registrationEnd && p.EndDate >= registrationStart)
+            .OrderBy(p => p.StartDate)
+            .ToList();
+
+        // Check if the registration period is fully covered
+        if (pricesDuringRegistration.Count == 0 ||
+            pricesDuringRegistration.First().StartDate > registrationStart ||
+            pricesDuringRegistration.Last().EndDate < registrationEnd)
         {
-            return Conflict("Price must be greater than 0.5");
+            return Conflict("You can't update this price as it would leave the registration period uncovered");
         }
-        
+
+        // Check for gaps between consecutive prices
+        for (var i = 0; i < pricesDuringRegistration.Count - 1; i++)
+        {
+            if (pricesDuringRegistration[i].EndDate < pricesDuringRegistration[i + 1].StartDate)
+            {
+                return Conflict("You can't update this price as it would leave the registration period uncovered");
+            }
+        }
+
+        // If all checks pass, update the price
         price.Price = priceRequest.Price;
         price.StartDate = priceRequest.StartDate.ToUniversalTime();
         price.EndDate = priceRequest.EndDate.ToUniversalTime();
@@ -138,4 +172,5 @@ public class EventPriceController : ControllerBase
         
         return Ok();
     }
+
 }
