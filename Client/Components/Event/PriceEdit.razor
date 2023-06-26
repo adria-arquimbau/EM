@@ -7,6 +7,10 @@
 <ConfirmationModal Title="Confirmation" Message="Are you sure you want to remove this price?" 
                    Visible="@confirmModalVisible" ConfirmationChanged="OnConfirmationChanged" />
 
+<div class="alert alert-info" role="alert">
+    In case two prices are in the same period, the one with the oldest start date will be used.
+</div>
+
 <EditForm Model="MyEventDto" class="mt-4">
     <DataAnnotationsValidator />
     <div class="container">
