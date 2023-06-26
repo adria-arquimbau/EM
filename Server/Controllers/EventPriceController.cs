@@ -75,10 +75,36 @@ public class EventPriceController : ControllerBase
             return Conflict("You can't remove the last price");
         }
         
+        // Check if the deletion of the price would leave the registration period uncovered
+        var registrationStart = price.Event.OpenRegistrationsDate;
+        var registrationEnd = price.Event.CloseRegistrationsDate;
+        var otherPrices = price.Event.Prices.Where(p => p.Id != priceId).ToList();
+
+        var pricesDuringRegistration = otherPrices
+            .Where(p => p.StartDate <= registrationEnd && p.EndDate >= registrationStart)
+            .OrderBy(p => p.StartDate)
+            .ToList();
+
+        if (pricesDuringRegistration.Count == 0 ||
+            pricesDuringRegistration.First().StartDate > registrationStart ||
+            pricesDuringRegistration.Last().EndDate < registrationEnd)
+        {
+            return Conflict("You can't remove this price as it would leave the registration period uncovered");
+        }
+
+        for (var i = 0; i < pricesDuringRegistration.Count - 1; i++)
+        {
+            if (pricesDuringRegistration[i].EndDate < pricesDuringRegistration[i + 1].StartDate)
+            {
+                return Conflict("You can't remove this price as it would leave the registration period uncovered");
+            }
+        }
+        
         _context.EventPrices.Remove(price);
         await _context.SaveChangesAsync(cancellationToken);
         
         return Ok();
+
     }   
     
     [HttpPut("{priceId:guid}")]

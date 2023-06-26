@@ -87,6 +87,7 @@
     </div>
 </div>
 
+<!-- Add Modal -->
 <div class="@modalClass">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -104,7 +105,7 @@
                         @_errorMessage
                     </div>
                 }
-                <input type="datetime-local" @bind="newPrice.StartDate" class="form-control mb-2" placeholder="Start Date" />
+                <p>Start Date: @newPrice.StartDate.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</p>
                 <input type="datetime-local" @bind="newPrice.EndDate" class="form-control mb-2" placeholder="End Date" />
             </div>
             <div class="modal-footer">
@@ -114,6 +115,7 @@
         </div>
     </div>
 </div>
+
 
 @code {
     [Parameter]
@@ -135,14 +137,17 @@
 
     private void OpenModal()
     {
+        var maxEndDate = MyEventDto.Prices.Max(p => p.EndDate);
+
         newPrice = new EventPriceDto
         {
             EventId = MyEventDto.Id,
-            StartDate = DateTime.Now,
-            EndDate = DateTime.Now.AddDays(7)
+            StartDate = maxEndDate.ToLocalTime(),
+            EndDate = maxEndDate.ToLocalTime().AddDays(7)
         };
         isModalOpen = true;
     }
+
     
     private void OpenEditModal(EventPriceDto price)
     {
@@ -162,6 +167,7 @@
         if (newPrice.Price < 0.5m)
         {
             _errorMessage = "Price must be greater than 0,5.";
+            ToastService.ShowError(_errorMessage); // Show a toast message
         }
         else
         {
@@ -170,10 +176,12 @@
             {
                 CloseModal();
                 await RefreshEvent.InvokeAsync(MyEventDto);
+                ToastService.ShowSuccess("Price added successfully."); // Show a toast message
             }
             else
             {
-                // Handle the error here
+                var errorMessage = await response.Content.ReadAsStringAsync();
+                ToastService.ShowError($"An error occurred while adding the price: {errorMessage}"); // Show a toast message
             }
         }
     }
@@ -183,6 +191,7 @@
         if (editPrice.Price <  0.5m)
         {
             _editErrorMessage = "Price must be greater than 0,5.";
+            ToastService.ShowError(_editErrorMessage); // Show a toast message
         }
         else
         {
@@ -191,10 +200,12 @@
             {
                 CloseEditModal();
                 await RefreshEvent.InvokeAsync(MyEventDto);
+                ToastService.ShowSuccess("Price updated successfully."); // Show a toast message
             }
             else
             {
-                // Handle the error here
+                var errorMessage = await response.Content.ReadAsStringAsync();
+                ToastService.ShowError($"An error occurred while updating the price: {errorMessage}"); // Show a toast message
             }
         }
     }

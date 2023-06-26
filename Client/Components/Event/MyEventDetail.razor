@@ -47,11 +47,11 @@
                     <li class="list-group-item"><strong>Description:</strong> @Event?.Description</li>
                     <li class="list-group-item"><strong>Location:</strong> @Event?.Location</li>
                     <li class="list-group-item"><strong>Max Registrations:</strong> @Event?.MaxRegistrations</li>
-                    <li class="list-group-item"><strong>Open Registrations Date:</strong> @Event?.OpenRegistrationsDate.ToLocalTime()</li>
-                    <li class="list-group-item"><strong>Close Registrations Date:</strong> @Event?.CloseRegistrationsDate.ToLocalTime()</li>
-                    <li class="list-group-item"><strong>Start Date:</strong> @Event?.StartDate.ToLocalTime()</li>
-                    <li class="list-group-item"><strong>Finish Date:</strong> @Event?.FinishDate.ToLocalTime()</li>
-                    <li class="list-group-item"><strong>Creation Date:</strong> @Event?.CreationDate.ToLocalTime()</li>
+                    <li class="list-group-item"><strong>Open Registrations Date:</strong> @Event?.CloseRegistrationsDate.ToLocalTime().ToLongDateString() at @Event?.OpenRegistrationsDate.ToLocalTime().ToShortTimeString()</li>
+                    <li class="list-group-item"><strong>Close Registrations Date:</strong> @Event?.CloseRegistrationsDate.ToLocalTime().ToLongDateString() at @Event?.CloseRegistrationsDate.ToLocalTime().ToShortTimeString()</li>
+                    <li class="list-group-item"><strong>Start Date:</strong> @Event?.StartDate.ToLocalTime().ToLongDateString() at @Event?.StartDate.ToLocalTime().ToShortTimeString()</li>
+                    <li class="list-group-item"><strong>Finish Date:</strong> @Event?.FinishDate.ToLocalTime().ToLongDateString() at  @Event?.FinishDate.ToLocalTime().ToShortTimeString()</li>
+                    <li class="list-group-item"><strong>Creation Date:</strong> @Event?.CreationDate.ToLocalTime().ToLongDateString() at @Event?.CreationDate.ToLocalTime().ToShortTimeString()</li>
                     <li class="list-group-item"><strong>Riders Pre-registrations:</strong> @Event?.RidersPreRegistrationsCount</li>
                     <li class="list-group-item"><strong>Riders Accepted registrations:</strong> @Event?.RidersAcceptedRegistrationsCount</li>
                     <li class="list-group-item"><strong>Marshall Accepted registrations:</strong> @Event?.MarshallAcceptedRegistrationsCount</li>

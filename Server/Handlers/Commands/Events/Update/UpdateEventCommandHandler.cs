@@ -1,4 +1,5 @@
 ﻿using EventsManager.Server.Data;
+using EventsManager.Server.Models;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -31,11 +32,40 @@ public class UpdateEventCommandHandler : IRequestHandler<UpdateEventCommandReque
         {
             throw new Exception("Event with this name already exists");
         }
-
+        
+        EnsureAtLeastOnePriceCoversRegistrationPeriod(request, eventToUpdate);
+        
         eventToUpdate.Update(request.EventDto.Name, request.EventDto.Description, request.EventDto.Location, request.EventDto.MaxRegistrations, request.EventDto.StartDate.ToUniversalTime(), request.EventDto.FinishDate.ToUniversalTime(), request.EventDto.OpenRegistrationsDate.ToUniversalTime(), request.EventDto.CloseRegistrationsDate.ToUniversalTime(), request.EventDto.IsPublic);
         eventToUpdate.IsFree = request.EventDto.IsFree;
         
         await _context.SaveChangesAsync(cancellationToken);
 
+    }
+
+    private static void EnsureAtLeastOnePriceCoversRegistrationPeriod(UpdateEventCommandRequest request, Event eventToUpdate)
+    {
+        // Ensure that there is at least one price that covers the entire registration period
+        var registrationStart = request.EventDto.OpenRegistrationsDate;
+        var registrationEnd = request.EventDto.CloseRegistrationsDate;
+
+        var pricesDuringRegistration = eventToUpdate.Prices
+            .Where(p => p.StartDate <= registrationEnd && p.EndDate >= registrationStart)
+            .OrderBy(p => p.StartDate)
+            .ToList();
+
+        if (pricesDuringRegistration.Count == 0 ||
+            pricesDuringRegistration.First().StartDate > registrationStart ||
+            pricesDuringRegistration.Last().EndDate < registrationEnd)
+        {
+            throw new Exception("The updated registration period is not covered by any price, please add a price that covers the entire registration period before updating the event.");
+        }
+
+        for (var i = 0; i < pricesDuringRegistration.Count - 1; i++)
+        {
+            if (pricesDuringRegistration[i].EndDate < pricesDuringRegistration[i + 1].StartDate)
+            {
+                throw new Exception("The updated registration period is not covered by any price, please add a price that covers the entire registration period before updating the event.");
+            }
+        }
     }
 }
