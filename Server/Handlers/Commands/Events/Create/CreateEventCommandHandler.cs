@@ -36,7 +36,7 @@ public class CreateEventCommandHandler : IRequestHandler<CreateEventCommandReque
         newEvent.Registrations.Add(registration);
         newEvent.IsFree = request.Request.IsFree;   
         
-        newEvent.Prices.Add(new EventPrice(request.Request.FirstPrice == 0 ? 1 : request.Request.FirstPrice,  request.Request.OpenRegistrationsDate.ToUniversalTime(),  request.Request.CloseRegistrationsDate.ToUniversalTime()));
+        newEvent.Prices.Add(new EventPrice(request.Request.FirstPrice == 0 ? 1 : request.Request.FirstPrice, request.Request.CloseRegistrationsDate.ToUniversalTime()));
         
         var productName = "Event Product: " + newEvent.Name;
         var productId = await CreateProductInStripeAsync(productName);

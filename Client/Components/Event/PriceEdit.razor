@@ -8,7 +8,7 @@
                    Visible="@confirmModalVisible" ConfirmationChanged="OnConfirmationChanged" />
 
 <div class="alert alert-info" role="alert">
-    In case two prices are in the same period, the one with the oldest start date will be used.
+    In case two prices have the same end date, the one with the earliest creation date will be used.
 </div>
 
 <EditForm Model="MyEventDto" class="mt-4">
@@ -17,13 +17,14 @@
         <div class="row">
             @if (MyEventDto?.Prices is {Count: > 0 })
             {
-                foreach (var price in MyEventDto.Prices.OrderBy(x => x.StartDate))
+                foreach (var price in MyEventDto.Prices.OrderByDescending(x => x.EndDate))
                 {
                     var now = DateTime.Now;
+                    var currentPrice = MyEventDto.Prices.Where(p => p.EndDate >= now).MinBy(p => p.EndDate);
                     var cardClass = price.EndDate.ToLocalTime() < now ? "card border-danger" : 
-                                    price.StartDate.ToLocalTime() <= now && price.EndDate.ToLocalTime() >= now ? "card border-success" : "card";
+                                    price == currentPrice ? "card border-success" : "card";
                     var endDateClass = price.EndDate.ToLocalTime() < now ? "text-danger" : 
-                                       price.StartDate.ToLocalTime() <= now && price.EndDate.ToLocalTime() >= now ? "text-success" : "text-muted";
+                                       price == currentPrice ? "text-success" : "text-muted";
                     
                     <div class="col-md-4 mb-4">
                         <div class="@cardClass">
@@ -31,12 +32,12 @@
                                 <h5 class="card-title">
                                     Price: <span>@price.Price €</span>
                                 </h5>
-                                <p class="card-text @endDateClass">Start: @price.StartDate.ToLocalTime().ToString("dd/MM/yyyy HH:mm") - End: @price.EndDate.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</p>
+                                <p class="card-text @endDateClass">End: @price.EndDate.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</p>
                                 @if (price.EndDate.ToLocalTime() < now)
                                 {
                                     <p class="text-danger">This price has expired.</p>
                                 }
-                                @if (price.StartDate.ToLocalTime() <= now && price.EndDate.ToLocalTime() >= now)
+                                @if (price == currentPrice)
                                 {
                                     <p class="text-success">This price is currently active.</p>
                                 }
@@ -80,7 +81,6 @@
                         @_editErrorMessage
                     </div>
                 }
-                <input type="datetime-local" @bind="editPrice.StartDate" class="form-control mb-2" placeholder="Start Date" />
                 <input type="datetime-local" @bind="editPrice.EndDate" class="form-control mb-2" placeholder="End Date" />
             </div>
             <div class="modal-footer">
@@ -109,7 +109,6 @@
                         @_errorMessage
                     </div>
                 }
-                <p>Start Date: @newPrice.StartDate.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</p>
                 <input type="datetime-local" @bind="newPrice.EndDate" class="form-control mb-2" placeholder="End Date" />
             </div>
             <div class="modal-footer">
@@ -146,7 +145,6 @@
         newPrice = new EventPriceDto
         {
             EventId = MyEventDto.Id,
-            StartDate = maxEndDate.ToLocalTime(),
             EndDate = maxEndDate.ToLocalTime().AddDays(7)
         };
         isModalOpen = true;
@@ -160,7 +158,6 @@
             Id = price.Id,
             EventId = price.EventId,
             Price = price.Price,
-            StartDate = price.StartDate,
             EndDate = price.EndDate
         };
         isEditModalOpen = true;

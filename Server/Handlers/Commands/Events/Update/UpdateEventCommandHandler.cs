@@ -45,27 +45,14 @@ public class UpdateEventCommandHandler : IRequestHandler<UpdateEventCommandReque
     private static void EnsureAtLeastOnePriceCoversRegistrationPeriod(UpdateEventCommandRequest request, Event eventToUpdate)
     {
         // Ensure that there is at least one price that covers the entire registration period
-        var registrationStart = request.EventDto.OpenRegistrationsDate;
         var registrationEnd = request.EventDto.CloseRegistrationsDate;
 
         var pricesDuringRegistration = eventToUpdate.Prices
-            .Where(p => p.StartDate <= registrationEnd && p.EndDate >= registrationStart)
-            .OrderBy(p => p.StartDate)
-            .ToList();
+            .Any(p => p.EndDate >= registrationEnd);
 
-        if (pricesDuringRegistration.Count == 0 ||
-            pricesDuringRegistration.First().StartDate > registrationStart ||
-            pricesDuringRegistration.Last().EndDate < registrationEnd)
+        if (!pricesDuringRegistration)
         {
             throw new Exception("The updated registration period is not covered by any price, please add a price that covers the entire registration period before updating the event.");
-        }
-
-        for (var i = 0; i < pricesDuringRegistration.Count - 1; i++)
-        {
-            if (pricesDuringRegistration[i].EndDate < pricesDuringRegistration[i + 1].StartDate)
-            {
-                throw new Exception("The updated registration period is not covered by any price, please add a price that covers the entire registration period before updating the event.");
-            }
         }
     }
 }

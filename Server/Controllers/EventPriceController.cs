@@ -27,6 +27,7 @@ public class EventPriceController : ControllerBase
      
         var sportEvent = await _context.Events
             .Include(x => x.Owners)
+            .Include(x => x.Prices)
             .SingleAsync(x => x.Id == priceRequest.EventId, cancellationToken);
 
         if(sportEvent.Owners.All(o => o.Id != userId) && sportEvent.CreatorId != userId)   
@@ -44,18 +45,26 @@ public class EventPriceController : ControllerBase
             return Conflict("Price must be greater than 0.5");
         }
 
-        sportEvent.Prices.Add(new EventPrice(priceRequest.Price, priceRequest.StartDate.ToUniversalTime(), priceRequest.EndDate.ToUniversalTime()));
+        // Check if the end date is before the open registration date
+        var registrationStart = sportEvent.OpenRegistrationsDate;
+        if (priceRequest.EndDate.ToUniversalTime() < registrationStart)
+        {
+            return Conflict("You can't add a price that ends before the open registration date.");
+        }
+
+        sportEvent.Prices.Add(new EventPrice(priceRequest.Price, priceRequest.EndDate.ToUniversalTime()));
         await _context.SaveChangesAsync(cancellationToken);
         
         return Ok();
-    }    
+    }  
+
     
     [HttpDelete("{priceId:guid}")]
     [Authorize(Roles = "Organizer")]
     public async Task<ActionResult> Remove([FromRoute] Guid priceId, CancellationToken cancellationToken)
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-     
+ 
         var price = await _context.EventPrices
             .Include(x => x.Event)
             .ThenInclude(x => x.Owners)
@@ -74,39 +83,25 @@ public class EventPriceController : ControllerBase
         {
             return Conflict("You can't remove the last price");
         }
-        
+
         // Check if the deletion of the price would leave the registration period uncovered
-        var registrationStart = price.Event.OpenRegistrationsDate;
         var registrationEnd = price.Event.CloseRegistrationsDate;
-        var otherPrices = price.Event.Prices.Where(p => p.Id != priceId).ToList();
 
-        var pricesDuringRegistration = otherPrices
-            .Where(p => p.StartDate <= registrationEnd && p.EndDate >= registrationStart)
-            .OrderBy(p => p.StartDate)
-            .ToList();
+        var otherPricesCoveringPeriod = price.Event.Prices
+            .Any(p => p.Id != priceId && p.EndDate >= registrationEnd);
 
-        if (pricesDuringRegistration.Count == 0 ||
-            pricesDuringRegistration.First().StartDate > registrationStart ||
-            pricesDuringRegistration.Last().EndDate < registrationEnd)
+        if (!otherPricesCoveringPeriod)
         {
             return Conflict("You can't remove this price as it would leave the registration period uncovered");
         }
 
-        for (var i = 0; i < pricesDuringRegistration.Count - 1; i++)
-        {
-            if (pricesDuringRegistration[i].EndDate < pricesDuringRegistration[i + 1].StartDate)
-            {
-                return Conflict("You can't remove this price as it would leave the registration period uncovered");
-            }
-        }
-        
         _context.EventPrices.Remove(price);
         await _context.SaveChangesAsync(cancellationToken);
-        
-        return Ok();
 
-    }   
-    
+        return Ok();
+    }
+
+
     [HttpPut("{priceId:guid}")]
     [Authorize(Roles = "Organizer")]
     public async Task<ActionResult> Update([FromRoute] Guid priceId,[FromBody] EventPriceDto priceRequest, CancellationToken cancellationToken)
@@ -127,12 +122,18 @@ public class EventPriceController : ControllerBase
             return Unauthorized();
         }
 
-        // Prepare the new price
-        var newPrice = new EventPrice(priceRequest.Price ,priceRequest.StartDate.ToUniversalTime(), priceRequest.EndDate.ToUniversalTime());
-
-        // Get the registration period dates
+        // Get the registration start and end dates
         var registrationStart = price.Event.OpenRegistrationsDate;
         var registrationEnd = price.Event.CloseRegistrationsDate;
+
+        // Check if the updated end date is before the open registration date
+        if (priceRequest.EndDate.ToUniversalTime() < registrationStart)
+        {
+            return Conflict("You can't update this price as the end date is before the open registration date.");
+        }
+
+        // Create the new price
+        var newPrice = new EventPrice(priceRequest.Price , priceRequest.EndDate.ToUniversalTime());
 
         // Get the other prices
         var otherPrices = price.Event.Prices.Where(p => p.Id != priceId).ToList();
@@ -140,37 +141,22 @@ public class EventPriceController : ControllerBase
         // Add the new price to the list
         otherPrices.Add(newPrice);
 
-        // Filter prices that are active during the registration period and order them
-        var pricesDuringRegistration = otherPrices
-            .Where(p => p.StartDate <= registrationEnd && p.EndDate >= registrationStart)
-            .OrderBy(p => p.StartDate)
-            .ToList();
-
         // Check if the registration period is fully covered
-        if (pricesDuringRegistration.Count == 0 ||
-            pricesDuringRegistration.First().StartDate > registrationStart ||
-            pricesDuringRegistration.Last().EndDate < registrationEnd)
+        var registrationCovered = otherPrices.Any(p => p.EndDate >= registrationEnd);
+
+        if (!registrationCovered)
         {
             return Conflict("You can't update this price as it would leave the registration period uncovered");
         }
 
-        // Check for gaps between consecutive prices
-        for (var i = 0; i < pricesDuringRegistration.Count - 1; i++)
-        {
-            if (pricesDuringRegistration[i].EndDate < pricesDuringRegistration[i + 1].StartDate)
-            {
-                return Conflict("You can't update this price as it would leave the registration period uncovered");
-            }
-        }
-
         // If all checks pass, update the price
         price.Price = priceRequest.Price;
-        price.StartDate = priceRequest.StartDate.ToUniversalTime();
         price.EndDate = priceRequest.EndDate.ToUniversalTime();
         
         await _context.SaveChangesAsync(cancellationToken);
         
         return Ok();
     }
+
 
 }
