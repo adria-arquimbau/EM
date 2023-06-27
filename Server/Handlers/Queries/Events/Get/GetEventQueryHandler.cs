@@ -17,7 +17,7 @@ public class GetEventQueryHandler : IRequestHandler<GetEventQueryRequest, EventD
     
     public async Task<EventDto> Handle(GetEventQueryRequest request, CancellationToken cancellationToken)
     {
-        return await _context.Events
+        var eventDto = await _context.Events
             .Where(x => x.Id == request.EventId)
             .Include(x => x.Registrations)
             .Include(x => x.RegistrationRolePasswords)
@@ -51,8 +51,17 @@ public class GetEventQueryHandler : IRequestHandler<GetEventQueryRequest, EventD
                     Id = p.Id,
                     EndDate = p.EndDate,
                     Price = p.Price
-                }).ToList()
+                }).OrderBy(p => p.EndDate).ToList()
             })
             .SingleAsync(cancellationToken: cancellationToken);
+        
+        for (var i = 0; i < eventDto.Prices.Count; i++)
+        {
+            var price = eventDto.Prices[i];
+            price.IsTheCurrentPrice = DateTime.Now >= eventDto.OpenRegistrationsDate && DateTime.Now <= price.EndDate &&
+                                      (i == eventDto.Prices.Count - 1 || DateTime.Now < eventDto.Prices[i + 1].EndDate);
+        }
+        
+        return eventDto;
     }
 }
