@@ -55,12 +55,37 @@ public class GetEventQueryHandler : IRequestHandler<GetEventQueryRequest, EventD
             })
             .SingleAsync(cancellationToken: cancellationToken);
         
+        // Initialize a variable to store the index of the current price.
+        var currentPriceIndex = -1;
+
         for (var i = 0; i < eventDto.Prices.Count; i++)
         {
             var price = eventDto.Prices[i];
-            price.IsTheCurrentPrice = DateTime.Now >= eventDto.OpenRegistrationsDate && DateTime.Now <= price.EndDate &&
-                                      (i == eventDto.Prices.Count - 1 || DateTime.Now < eventDto.Prices[i + 1].EndDate);
+
+            // Check if this price's end date is later than now and its start date is earlier than or equal to now.
+            bool isWithinDateRange = DateTime.Now >= eventDto.OpenRegistrationsDate && DateTime.Now <= price.EndDate;
+    
+            // If it is and we haven't found a current price yet, or its end date is closer to now than the currently found price,
+            // update the current price.
+            if (isWithinDateRange && (currentPriceIndex == -1 || price.EndDate < eventDto.Prices[currentPriceIndex].EndDate))
+            {
+                // Reset the IsTheCurrentPrice property of the previously found price, if any.
+                if (currentPriceIndex != -1)
+                {
+                    eventDto.Prices[currentPriceIndex].IsTheCurrentPrice = false;
+                }
+
+                // Update the index of the current price.
+                currentPriceIndex = i;
+            }
         }
+
+        // If we've found a current price, set its IsTheCurrentPrice property to true.
+        if (currentPriceIndex != -1)
+        {
+            eventDto.Prices[currentPriceIndex].IsTheCurrentPrice = true;
+        }
+
         
         return eventDto;
     }

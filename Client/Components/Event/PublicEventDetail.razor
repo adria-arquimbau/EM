@@ -63,7 +63,7 @@ else
                                 <tbody>
                                 @foreach (var price in _eventDetail.Prices)
                                 {
-                                    <tr style="color:@(price.IsTheCurrentPrice.Value ? "green" : "black")">
+                                    <tr style="color:@(price.IsTheCurrentPrice ? "green" : "black")">
                                         <td>@price.Price €</td>
                                         <td>@price.EndDate.ToLocalTime().ToString("d/M/yy") at @price.EndDate.ToLocalTime().ToShortTimeString()</td>
                                     </tr>
