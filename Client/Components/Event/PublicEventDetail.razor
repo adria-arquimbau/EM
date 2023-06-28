@@ -65,7 +65,7 @@ else
                                 {
                                     <tr style="color:@(price.IsTheCurrentPrice ? "green" : "black")">
                                         <td>@price.Price €</td>
-                                        <td>@price.EndDate.ToLocalTime().ToString("d/M/yy") at @price.EndDate.ToLocalTime().ToShortTimeString()</td>
+                                        <td>@price.EndDate.ToLocalTime().ToString("dd MMM yy ddd") at @price.EndDate.ToLocalTime().ToShortTimeString()</td>
                                     </tr>
                                 }
                                 </tbody>
