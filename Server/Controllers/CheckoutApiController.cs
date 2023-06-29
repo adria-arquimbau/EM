@@ -54,7 +54,7 @@ public class CheckoutApiController : Controller
         long currentPrice;  
         try
         {
-            currentPrice = await CalculatePriceForTheWeek(request.EventId);
+            currentPrice = await CalculatePriceForTheWeek(request.EventId, cancellationToken);
         }
         catch (Exception e)
         {
@@ -100,22 +100,25 @@ public class CheckoutApiController : Controller
         });
     }
 
-    private async Task<long> CalculatePriceForTheWeek(string eventId)
+    private async Task<long> CalculatePriceForTheWeek(string eventId, CancellationToken cancellationToken)
     {
         var now = DateTime.UtcNow;
 
-        var price = await _context.EventPrices
-            .Include(x => x.Event)
-            .Where(x => x.Event.Id == Guid.Parse(eventId))
-            .OrderByDescending(x => x.EndDate)
-            .FirstOrDefaultAsync(x => x.EndDate >= now);
+        var currentEvent = await _context.Events
+            .Where(x => x.Id == Guid.Parse(eventId))
+            .Include(x => x.Prices)
+            .SingleAsync(cancellationToken);
+    
+        var prices = currentEvent.Prices.OrderBy(p => p.EndDate).ToList();
+        var currentPriceIndex = prices.FindIndex(p => now >= (p == prices.First() ? currentEvent.OpenRegistrationsDate : prices[prices.IndexOf(p) - 1].EndDate) && now <= p.EndDate);
 
-        if (price == null || price.Event.OpenRegistrationsDate > now)
+        if (currentPriceIndex == -1 || currentEvent.OpenRegistrationsDate > now)
         {
             throw new NullReferenceException("Price not found");
         }
-        
+
+        var price = prices[currentPriceIndex];
+    
         return (long)(price.Price * 100);
     }
-
 }
