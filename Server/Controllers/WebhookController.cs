@@ -102,4 +102,35 @@ public class WebhookController : Controller
             return BadRequest(e.Message);
         }
     }
+    
+    [HttpPost("checkout-session-completed")]
+    public async Task<IActionResult> CheckoutSessionCompleted()
+    {
+        var json = await new StreamReader(HttpContext.Request.Body).ReadToEndAsync();
+        try
+        {
+            var endpointSecret = _configuration["StripeWebhookSecret"];
+            var stripeEvent = EventUtility.ConstructEvent(json,
+                Request.Headers["Stripe-Signature"], endpointSecret);
+            var session = stripeEvent.Data.Object as Session;
+            
+            if (stripeEvent.Type == Events.CheckoutSessionCompleted)
+            {
+                var registrationId = session.Metadata["RegistrationId"];
+                var registration = await _context.Registrations
+                    .Include(x => x.Event)
+                    .SingleAsync(x => x.Id == Guid.Parse(registrationId));
+                var paymentIntent = stripeEvent.Data.Object as PaymentIntent;
+                var message = $"Checkout session completed. PaymentIntent ID: {paymentIntent?.Id}.";
+                registration.Payments.Add(new Payment(stripeEvent.Type, stripeEvent.Created, PaymentResult.CheckoutSessionCompleted, message));
+                await _context.SaveChangesAsync();
+            }
+
+            return Ok();
+        }
+        catch (StripeException e)
+        {
+            return BadRequest(e.Message);
+        }
+    }
 }
