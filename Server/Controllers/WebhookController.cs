@@ -34,19 +34,21 @@ public class WebhookController : Controller
             var stripeEvent = EventUtility.ConstructEvent(json,
                 Request.Headers["Stripe-Signature"], endpointSecret);
             
-            var session = stripeEvent.Data.Object as Session;
-            var registrationId = session.Metadata["RegistrationId"];
-            var registration = await _context.Registrations
-                .Include(x => x.Event)
-                .SingleAsync(x => x.Id == Guid.Parse(registrationId));
-            registration.Payments.Add(new Payment(stripeEvent.Type, stripeEvent.Created, stripeEvent.RawJObject.ToString()));
+          
             
             if (stripeEvent.Type == Events.CheckoutSessionCompleted)
             {
+                var session = stripeEvent.Data.Object as Session;
+                var registrationId = session.Metadata["RegistrationId"];
+                var registration = await _context.Registrations
+                    .Include(x => x.Event)
+                    .SingleAsync(x => x.Id == Guid.Parse(registrationId));
+                registration.Payments.Add(new Payment(stripeEvent.Type, stripeEvent.Created, stripeEvent.RawJObject.ToString()));
+                
                 registration.PaymentStatus = PaymentStatus.Paid;
                 registration.State = RegistrationState.Accepted;
                 registration.Price = session.AmountTotal / 100.0m;
-                
+                await _context.SaveChangesAsync();
                 var maxBibNumber = await _context.Registrations
                     .Where(x => x.Event.Id == registration.Event.Id && x.Bib != null)
                     .MaxAsync(x => x.Bib);
