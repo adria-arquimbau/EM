@@ -64,8 +64,6 @@ public class WebhookController : Controller
             }
             else if (stripeEvent.Type == Events.PaymentIntentPaymentFailed)
             {
-               
-                // Optionally log the last payment error message
                 var paymentIntent = stripeEvent.Data.Object as PaymentIntent;
                 var message = $"Payment failed. Error: {paymentIntent?.LastPaymentError?.Message}.";
                 registration.Payments.Add(new Payment(stripeEvent.Type, stripeEvent.Created, PaymentResult.Failed, message));
