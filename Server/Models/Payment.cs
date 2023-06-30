@@ -7,7 +7,11 @@ public class Payment
     public string Type { get; set; }
     public Registration Registration { get; set; }
     
-    public Payment()
+    private Payment(){}
+    
+    public Payment(string type)
     {
+        Type = type;
+        CreationDate = DateTime.UtcNow;
     }
 }

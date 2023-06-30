@@ -1,4 +1,5 @@
 ﻿using EventsManager.Server.Data;
+using EventsManager.Server.Models;
 using EventsManager.Shared.Enums;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -32,14 +33,15 @@ public class WebhookController : Controller
             var endpointSecret = _configuration["StripeWebhookSecret"];
             var stripeEvent = EventUtility.ConstructEvent(json,
                 Request.Headers["Stripe-Signature"], endpointSecret);
-
+            
+            var session = stripeEvent.Data.Object as Session;
+            var registrationId = session.Metadata["RegistrationId"];
+            var registration = await _context.Registrations
+                .Include(x => x.Event)
+                .SingleAsync(x => x.Id == Guid.Parse(registrationId));
+            
             if (stripeEvent.Type == Events.CheckoutSessionCompleted)
             {
-                var session = stripeEvent.Data.Object as Session;
-                var registrationId = session.Metadata["RegistrationId"];
-                var registration = await _context.Registrations
-                    .Include(x => x.Event)
-                    .SingleAsync(x => x.Id == Guid.Parse(registrationId));
                 registration.PaymentStatus = PaymentStatus.Paid;
                 registration.State = RegistrationState.Accepted;
                 registration.Price = session.AmountTotal / 100.0m;
@@ -57,10 +59,8 @@ public class WebhookController : Controller
                 {
                     registration.Bib = maxBibNumber + 1;
                 }
-                
-                await _context.SaveChangesAsync();
             }
-
+            
             // Handle the event
             if (stripeEvent.Type == Events.PaymentIntentCreated)
             {
@@ -74,6 +74,9 @@ public class WebhookController : Controller
             {
                 Console.WriteLine("Unhandled event type: {0}", stripeEvent.Type);
             }
+            
+            registration.Payments.Add(new Payment(stripeEvent.Type));
+            await _context.SaveChangesAsync();
 
             return Ok();
         }
