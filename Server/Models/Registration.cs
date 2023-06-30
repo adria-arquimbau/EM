@@ -16,6 +16,7 @@ public class Registration
     public PaymentStatus PaymentStatus { get; set; }
     public decimal? Price { get; set; }
     public List<Ticket> Tickets { get; set; } = new();
+    public List<Payment> Payments { get; set; } = new();
 
     private Registration()      
     {
