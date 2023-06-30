@@ -33,22 +33,19 @@ public class WebhookController : Controller
             var endpointSecret = _configuration["StripeWebhookSecret"];
             var stripeEvent = EventUtility.ConstructEvent(json,
                 Request.Headers["Stripe-Signature"], endpointSecret);
-            
-          
+            var session = stripeEvent.Data.Object as Session;
+            var registrationId = session.Metadata["RegistrationId"];
+            var registration = await _context.Registrations
+                .Include(x => x.Event)
+                .SingleAsync(x => x.Id == Guid.Parse(registrationId));
+            registration.Payments.Add(new Payment(stripeEvent.Type, stripeEvent.Created));
             
             if (stripeEvent.Type == Events.CheckoutSessionCompleted)
             {
-                var session = stripeEvent.Data.Object as Session;
-                var registrationId = session.Metadata["RegistrationId"];
-                var registration = await _context.Registrations
-                    .Include(x => x.Event)
-                    .SingleAsync(x => x.Id == Guid.Parse(registrationId));
-                registration.Payments.Add(new Payment(stripeEvent.Type, stripeEvent.Created, stripeEvent.RawJObject.ToString()));
-                
                 registration.PaymentStatus = PaymentStatus.Paid;
                 registration.State = RegistrationState.Accepted;
                 registration.Price = session.AmountTotal / 100.0m;
-                await _context.SaveChangesAsync();
+                
                 var maxBibNumber = await _context.Registrations
                     .Where(x => x.Event.Id == registration.Event.Id && x.Bib != null)
                     .MaxAsync(x => x.Bib);
@@ -61,7 +58,6 @@ public class WebhookController : Controller
                 {
                     registration.Bib = maxBibNumber + 1;
                 }
-                await _context.SaveChangesAsync();
             }
             
             // Handle the event
@@ -77,9 +73,8 @@ public class WebhookController : Controller
             {
                 Console.WriteLine("Unhandled event type: {0}", stripeEvent.Type);
             }
-            
-            
 
+            await _context.SaveChangesAsync();
             return Ok();
         }
         catch (StripeException e)
