@@ -244,6 +244,15 @@ public class RegistrationController : ControllerBase
         {
             return BadRequest("Cannot delete creator registration");
         }
+
+        var havePayments = await _context.Payments
+            .Where(x => x.Registration.Id == registrationId)
+            .AnyAsync(cancellationToken: cancellationToken);
+
+        if (havePayments)
+        {
+            return Forbid("Cannot delete registration with payments");
+        }
         
         _context.Registrations.Remove(registration);
         await _context.SaveChangesAsync(cancellationToken);

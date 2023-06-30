@@ -26,5 +26,8 @@ public class RegistrationTypeConfiguration : IEntityTypeConfiguration<Registrati
         builder.Property(r => r.PaymentStatus)
             .HasConversion(v => 
                 v.ToString(), v => (PaymentStatus)Enum.Parse(typeof(PaymentStatus), v));
+        builder.HasMany(r => r.Payments)
+            .WithOne(p => p.Registration)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }
