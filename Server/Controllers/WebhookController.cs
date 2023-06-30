@@ -38,8 +38,7 @@ public class WebhookController : Controller
             var registration = await _context.Registrations
                 .Include(x => x.Event)
                 .SingleAsync(x => x.Id == Guid.Parse(registrationId));
-            registration.Payments.Add(new Payment(stripeEvent.Type, stripeEvent.Created));
-            
+
             if (stripeEvent.Type == Events.PaymentIntentSucceeded)
             {
                 registration.PaymentStatus = PaymentStatus.Paid;
@@ -58,8 +57,18 @@ public class WebhookController : Controller
                 {
                     registration.Bib = maxBibNumber + 1;
                 }
-    
-                Console.WriteLine("Payment intent succeeded: " + stripeEvent);
+                
+                var paymentIntent = stripeEvent.Data.Object as PaymentIntent;
+                var message = $"Payment successful. PaymentIntent ID: {paymentIntent?.Id}.";
+                registration.Payments.Add(new Payment(stripeEvent.Type, stripeEvent.Created, PaymentResult.Succeeded, message));
+            }
+            else if (stripeEvent.Type == Events.PaymentIntentPaymentFailed)
+            {
+               
+                // Optionally log the last payment error message
+                var paymentIntent = stripeEvent.Data.Object as PaymentIntent;
+                var message = $"Payment failed. Error: {paymentIntent?.LastPaymentError?.Message}.";
+                registration.Payments.Add(new Payment(stripeEvent.Type, stripeEvent.Created, PaymentResult.Failed, message));
             }
             else if (stripeEvent.Type == Events.CheckoutSessionCompleted)
             {
@@ -76,7 +85,8 @@ public class WebhookController : Controller
             }
             else
             {
-                Console.WriteLine("Unhandled event type: {0}", stripeEvent.Type);
+                var message = $"Event {stripeEvent.Type} was not explicitly handled.";
+                registration.Payments.Add(new Payment(stripeEvent.Type, stripeEvent.Created, PaymentResult.Failed, message));
             }
 
             await _context.SaveChangesAsync();
