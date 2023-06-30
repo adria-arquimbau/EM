@@ -39,6 +39,7 @@ public class WebhookController : Controller
             var registration = await _context.Registrations
                 .Include(x => x.Event)
                 .SingleAsync(x => x.Id == Guid.Parse(registrationId));
+            registration.Payments.Add(new Payment(stripeEvent.Type, stripeEvent.Created, stripeEvent.RawJObject.ToString()));
             
             if (stripeEvent.Type == Events.CheckoutSessionCompleted)
             {
@@ -75,8 +76,7 @@ public class WebhookController : Controller
                 Console.WriteLine("Unhandled event type: {0}", stripeEvent.Type);
             }
             
-            registration.Payments.Add(new Payment(stripeEvent.Type, stripeEvent.Created, stripeEvent.RawJObject.ToString()));
-            await _context.SaveChangesAsync();
+            
 
             return Ok();
         }
