@@ -61,24 +61,28 @@ public class WebhookController : Controller
                 var paymentIntent = stripeEvent.Data.Object as PaymentIntent;
                 var message = $"Payment successful. PaymentIntent ID: {paymentIntent?.Id}.";
                 registration.Payments.Add(new Payment(stripeEvent.Type, stripeEvent.Created, PaymentResult.Succeeded, message));
+                await _context.SaveChangesAsync();
             }
             else if (stripeEvent.Type == Events.PaymentIntentPaymentFailed)
             {
                 var paymentIntent = stripeEvent.Data.Object as PaymentIntent;
                 var message = $"Payment failed. Error: {paymentIntent?.LastPaymentError?.Message}.";
                 registration.Payments.Add(new Payment(stripeEvent.Type, stripeEvent.Created, PaymentResult.Failed, message));
+                await _context.SaveChangesAsync();
             }
             else if (stripeEvent.Type == Events.CheckoutSessionCompleted)
             {
                 var paymentIntent = stripeEvent.Data.Object as PaymentIntent;
                 var message = $"Checkout session completed. PaymentIntent ID: {paymentIntent?.Id}.";
                 registration.Payments.Add(new Payment(stripeEvent.Type, stripeEvent.Created, PaymentResult.CheckoutSessionCompleted, message));
+                await _context.SaveChangesAsync();
             }
             else if (stripeEvent.Type == Events.PaymentIntentCreated)
             {
                 var paymentIntent = stripeEvent.Data.Object as PaymentIntent;
                 var message = $"Checkout session completed. PaymentIntent ID: {paymentIntent?.Id}.";
                 registration.Payments.Add(new Payment(stripeEvent.Type, stripeEvent.Created, PaymentResult.PaymentIntentCreated, message));
+                await _context.SaveChangesAsync();
             }
             else if (stripeEvent.Type == Events.CheckoutSessionAsyncPaymentSucceeded)
             {
@@ -88,10 +92,9 @@ public class WebhookController : Controller
             {
                 var message = $"Event {stripeEvent.Type} was not explicitly handled.";
                 registration.Payments.Add(new Payment(stripeEvent.Type, stripeEvent.Created, PaymentResult.Failed, message));
+                await _context.SaveChangesAsync();
             }
-
-            await _context.SaveChangesAsync();
-
+            
             return Ok();
         }
         catch (StripeException e)
