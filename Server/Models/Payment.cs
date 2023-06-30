@@ -27,5 +27,7 @@ public class Payment
 public enum PaymentResult
 {
     Failed,
-    Succeeded
+    Succeeded,
+    CheckoutSessionCompleted,
+    PaymentIntentCreated
 }

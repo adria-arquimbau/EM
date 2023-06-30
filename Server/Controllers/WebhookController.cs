@@ -72,12 +72,15 @@ public class WebhookController : Controller
             }
             else if (stripeEvent.Type == Events.CheckoutSessionCompleted)
             {
-                // handle checkout.session.completed event
-                Console.WriteLine("Checkout session completed: " + stripeEvent);
+                var paymentIntent = stripeEvent.Data.Object as PaymentIntent;
+                var message = $"Checkout session completed. PaymentIntent ID: {paymentIntent?.Id}.";
+                registration.Payments.Add(new Payment(stripeEvent.Type, stripeEvent.Created, PaymentResult.CheckoutSessionCompleted, message));
             }
             else if (stripeEvent.Type == Events.PaymentIntentCreated)
             {
-                Console.WriteLine("Payment intent created: " + stripeEvent);
+                var paymentIntent = stripeEvent.Data.Object as PaymentIntent;
+                var message = $"Checkout session completed. PaymentIntent ID: {paymentIntent?.Id}.";
+                registration.Payments.Add(new Payment(stripeEvent.Type, stripeEvent.Created, PaymentResult.PaymentIntentCreated, message));
             }
             else if (stripeEvent.Type == Events.CheckoutSessionAsyncPaymentSucceeded)
             {
