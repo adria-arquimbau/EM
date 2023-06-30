@@ -40,12 +40,12 @@ public class WebhookController : Controller
                 .SingleAsync(x => x.Id == Guid.Parse(registrationId));
             registration.Payments.Add(new Payment(stripeEvent.Type, stripeEvent.Created));
             
-            if (stripeEvent.Type == Events.CheckoutSessionCompleted)
+            if (stripeEvent.Type == Events.PaymentIntentSucceeded)
             {
                 registration.PaymentStatus = PaymentStatus.Paid;
                 registration.State = RegistrationState.Accepted;
                 registration.Price = session.AmountTotal / 100.0m;
-                
+    
                 var maxBibNumber = await _context.Registrations
                     .Where(x => x.Event.Id == registration.Event.Id && x.Bib != null)
                     .MaxAsync(x => x.Bib);
@@ -58,23 +58,29 @@ public class WebhookController : Controller
                 {
                     registration.Bib = maxBibNumber + 1;
                 }
+    
+                Console.WriteLine("Payment intent succeeded: " + stripeEvent);
             }
-            
-            // Handle the event
-            if (stripeEvent.Type == Events.PaymentIntentCreated)
+            else if (stripeEvent.Type == Events.CheckoutSessionCompleted)
             {
-                Console.WriteLine("PAID!!!!!!!!!!" + stripeEvent);
+                // handle checkout.session.completed event
+                Console.WriteLine("Checkout session completed: " + stripeEvent);
+            }
+            else if (stripeEvent.Type == Events.PaymentIntentCreated)
+            {
+                Console.WriteLine("Payment intent created: " + stripeEvent);
             }
             else if (stripeEvent.Type == Events.CheckoutSessionAsyncPaymentSucceeded)
             {
+                // handle checkout.session.async_payment_succeeded event
             }
-            // ... handle other event types
             else
             {
                 Console.WriteLine("Unhandled event type: {0}", stripeEvent.Type);
             }
 
             await _context.SaveChangesAsync();
+
             return Ok();
         }
         catch (StripeException e)
