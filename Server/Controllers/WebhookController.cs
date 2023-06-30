@@ -46,7 +46,6 @@ public class WebhookController : Controller
                 registration.PaymentStatus = PaymentStatus.Paid;
                 registration.State = RegistrationState.Accepted;
                 registration.Price = session.AmountTotal / 100.0m;
-                await _context.SaveChangesAsync();
                 
                 var maxBibNumber = await _context.Registrations
                     .Where(x => x.Event.Id == registration.Event.Id && x.Bib != null)
@@ -60,6 +59,7 @@ public class WebhookController : Controller
                 {
                     registration.Bib = maxBibNumber + 1;
                 }
+                await _context.SaveChangesAsync();
             }
             
             // Handle the event
