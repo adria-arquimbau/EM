@@ -109,9 +109,8 @@ public class WebhookController : Controller
         var json = await new StreamReader(HttpContext.Request.Body).ReadToEndAsync();
         try
         {
-            var endpointSecret = _configuration["StripeWebhookSecret"];
-            var stripeEvent = EventUtility.ConstructEvent(json,
-                Request.Headers["Stripe-Signature"], endpointSecret);
+            var endpointSecret = _configuration["CheckoutSessionCompleted"];
+            var stripeEvent = EventUtility.ConstructEvent(json, Request.Headers["Stripe-Signature"], endpointSecret);
             var session = stripeEvent.Data.Object as Session;
             
             if (stripeEvent.Type == Events.CheckoutSessionCompleted)
