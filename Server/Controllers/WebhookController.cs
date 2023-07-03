@@ -34,10 +34,9 @@ public class WebhookController : Controller
             var stripeEvent = EventUtility.ConstructEvent(json,
                 Request.Headers["Stripe-Signature"], endpointSecret);
             var session = stripeEvent.Data.Object as Session;
-            var registrationId = session.Metadata["RegistrationId"];
             var registration = await _context.Registrations
                 .Include(x => x.Event)
-                .SingleAsync(x => x.Id == Guid.Parse(registrationId));
+                .SingleAsync(x => x.StripeSessionId == session.Id);
 
             if (stripeEvent.Type == Events.PaymentIntentSucceeded)
             {
@@ -115,10 +114,9 @@ public class WebhookController : Controller
             
             if (stripeEvent.Type == Events.CheckoutSessionCompleted)
             {
-                var registrationId = session.Metadata["RegistrationId"];
                 var registration = await _context.Registrations
                     .Include(x => x.Event)
-                    .SingleAsync(x => x.Id == Guid.Parse(registrationId));
+                    .SingleAsync(x => x.StripeSessionId == session.Id);
                 var paymentIntent = stripeEvent.Data.Object as PaymentIntent;
                 var message = $"Checkout session completed. PaymentIntent ID: {paymentIntent?.Id}.";
                 registration.Payments.Add(new Payment(stripeEvent.Type, stripeEvent.Created, PaymentResult.CheckoutSessionCompleted, message));

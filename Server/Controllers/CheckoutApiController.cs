@@ -84,16 +84,19 @@ public class CheckoutApiController : Controller
             CustomerEmail = registration.User.Email,
             SuccessUrl = domain + $"/event-detail/{request.EventId}",
             CancelUrl = domain + $"/event-detail/{request.EventId}",
-            Metadata = new Dictionary<string, string>
-            {
-                { "RegistrationId", request.RegistrationId }
-            },
+            // Metadata = new Dictionary<string, string>
+            // {
+            //     { "RegistrationId", request.RegistrationId }
+            // },
             ExpiresAt = DateTime.UtcNow + new TimeSpan(0, 30, 0)
         };
     
         var sessionService = new SessionService();
         var session = await sessionService.CreateAsync(sessionOptions, cancellationToken: cancellationToken);
 
+        registration.StripeSessionId = session.Id;
+        await _context.SaveChangesAsync(cancellationToken);
+        
         return Ok(new CheckoutResponse
         {
             Url = session.Url
