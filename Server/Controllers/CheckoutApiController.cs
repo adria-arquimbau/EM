@@ -101,9 +101,6 @@ public class CheckoutApiController : Controller
         var sessionService = new SessionService();
         var session = await sessionService.CreateAsync(sessionOptions, cancellationToken: cancellationToken);
 
-        registration.StripeSessionId = session.Id;
-        await _context.SaveChangesAsync(cancellationToken);
-        
         return Ok(new CheckoutResponse
         {
             Url = session.Url

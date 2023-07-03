@@ -17,7 +17,6 @@ public class Registration
     public decimal? Price { get; set; }
     public List<Ticket> Tickets { get; set; } = new();
     public List<Payment> Payments { get; set; } = new();
-    public string? StripeSessionId { get; set; }
 
     private Registration()      
     {
