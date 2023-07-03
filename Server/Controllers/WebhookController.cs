@@ -34,7 +34,7 @@ public class WebhookController : Controller
             var stripeEvent = EventUtility.ConstructEvent(json,
                 Request.Headers["Stripe-Signature"], endpointSecret);
             var session = stripeEvent.Data.Object as Session;
-            var registrationId = session?.Metadata["registrationId"];
+            var registrationId = session?.Metadata["RegistrationId"];
             var registration = await _context.Registrations
                 .Include(x => x.Event)
                 .SingleAsync(x => x.Id == Guid.Parse(registrationId));
@@ -115,7 +115,7 @@ public class WebhookController : Controller
             
             if (stripeEvent.Type == Events.CheckoutSessionCompleted)
             {
-                var registrationId = session?.Metadata["registrationId"];
+                var registrationId = session?.Metadata["RegistrationId"];
                 var registration = await _context.Registrations
                     .Include(x => x.Event)
                     .SingleAsync(x => x.Id == Guid.Parse(registrationId));
