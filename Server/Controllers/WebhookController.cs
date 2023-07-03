@@ -68,21 +68,18 @@ public class WebhookController : Controller
                 registration.Payments.Add(new Payment(stripeEvent.Type, stripeEvent.Created, PaymentResult.Failed, message));
                 await _context.SaveChangesAsync();
             }
-            else if (stripeEvent.Type == Events.CheckoutSessionCompleted)
-            {
-                var message = $"Checkout session completed. PaymentIntent ID: {paymentIntent?.Id}.";
-                registration.Payments.Add(new Payment(stripeEvent.Type, stripeEvent.Created, PaymentResult.CheckoutSessionCompleted, message));
-                await _context.SaveChangesAsync();
-            }
             else if (stripeEvent.Type == Events.PaymentIntentCreated)
             {
-                var message = $"Checkout session completed. PaymentIntent ID: {paymentIntent?.Id}.";
+                var message = $"Payment intent created: {paymentIntent?.Id}.";
                 registration.Payments.Add(new Payment(stripeEvent.Type, stripeEvent.Created, PaymentResult.PaymentIntentCreated, message));
                 await _context.SaveChangesAsync();
             }
-            else if (stripeEvent.Type == Events.CheckoutSessionAsyncPaymentSucceeded)
+            else if (stripeEvent.Type == Events.CheckoutSessionExpired)
             {
-                // handle checkout.session.async_payment_succeeded event
+                var session = stripeEvent.Data.Object as Session;
+                var message = $"Checkout session expired. Session id: {session?.Id}.";
+                registration.Payments.Add(new Payment(stripeEvent.Type, stripeEvent.Created, PaymentResult.CheckoutSessionExpired, message));
+                await _context.SaveChangesAsync();
             }
             else
             {

@@ -29,5 +29,6 @@ public enum PaymentResult
     Failed,
     Succeeded,
     CheckoutSessionCompleted,
-    PaymentIntentCreated
+    PaymentIntentCreated,
+    CheckoutSessionExpired
 }
