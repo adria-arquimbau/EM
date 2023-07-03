@@ -84,10 +84,17 @@ public class CheckoutApiController : Controller
             CustomerEmail = registration.User.Email,
             SuccessUrl = domain + $"/event-detail/{request.EventId}",
             CancelUrl = domain + $"/event-detail/{request.EventId}",
-            // Metadata = new Dictionary<string, string>
-            // {
-            //     { "RegistrationId", request.RegistrationId }
-            // },
+            PaymentIntentData = new SessionPaymentIntentDataOptions
+            {
+                Metadata = new Dictionary<string, string>
+                {
+                    { "RegistrationId", request.RegistrationId },
+                }
+            },
+            Metadata = new Dictionary<string, string>
+            {
+                { "RegistrationId", request.RegistrationId }
+            },
             ExpiresAt = DateTime.UtcNow + new TimeSpan(0, 30, 0)
         };
     
