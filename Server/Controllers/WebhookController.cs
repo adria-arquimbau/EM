@@ -31,19 +31,19 @@ public class WebhookController : Controller
         try
         {
             var endpointSecret = _configuration["StripeWebhookSecret"];
-            var stripeEvent = EventUtility.ConstructEvent(json,
-                Request.Headers["Stripe-Signature"], endpointSecret);
-            var session = stripeEvent.Data.Object as Session;
-            var registrationId = session?.Metadata["RegistrationId"];
+            var stripeEvent = EventUtility.ConstructEvent(json, Request.Headers["Stripe-Signature"], endpointSecret);
+            
+            var paymentIntent = stripeEvent.Data.Object as PaymentIntent;
+            var registrationId = paymentIntent?.Metadata["RegistrationId"];
             var registration = await _context.Registrations
                 .Include(x => x.Event)
                 .SingleAsync(x => x.Id == Guid.Parse(registrationId));
 
             if (stripeEvent.Type == Events.PaymentIntentSucceeded)
-            {
+            {   
                 registration.PaymentStatus = PaymentStatus.Paid;
                 registration.State = RegistrationState.Accepted;
-                registration.Price = session.AmountTotal / 100.0m;
+                registration.Price = paymentIntent.Amount / 100.0m;
     
                 var maxBibNumber = await _context.Registrations
                     .Where(x => x.Event.Id == registration.Event.Id && x.Bib != null)
@@ -58,28 +58,24 @@ public class WebhookController : Controller
                     registration.Bib = maxBibNumber + 1;
                 }
                 
-                var paymentIntent = stripeEvent.Data.Object as PaymentIntent;
-                var message = $"Payment successful. PaymentIntent ID: {paymentIntent?.Id}.";
+                var message = $"Payment successful. PaymentIntent ID: {paymentIntent.Id}.";
                 registration.Payments.Add(new Payment(stripeEvent.Type, stripeEvent.Created, PaymentResult.Succeeded, message));
                 await _context.SaveChangesAsync();
             }
             else if (stripeEvent.Type == Events.PaymentIntentPaymentFailed)
             {
-                var paymentIntent = stripeEvent.Data.Object as PaymentIntent;
                 var message = $"Payment failed. Error: {paymentIntent?.LastPaymentError?.Message}.";
                 registration.Payments.Add(new Payment(stripeEvent.Type, stripeEvent.Created, PaymentResult.Failed, message));
                 await _context.SaveChangesAsync();
             }
             else if (stripeEvent.Type == Events.CheckoutSessionCompleted)
             {
-                var paymentIntent = stripeEvent.Data.Object as PaymentIntent;
                 var message = $"Checkout session completed. PaymentIntent ID: {paymentIntent?.Id}.";
                 registration.Payments.Add(new Payment(stripeEvent.Type, stripeEvent.Created, PaymentResult.CheckoutSessionCompleted, message));
                 await _context.SaveChangesAsync();
             }
             else if (stripeEvent.Type == Events.PaymentIntentCreated)
             {
-                var paymentIntent = stripeEvent.Data.Object as PaymentIntent;
                 var message = $"Checkout session completed. PaymentIntent ID: {paymentIntent?.Id}.";
                 registration.Payments.Add(new Payment(stripeEvent.Type, stripeEvent.Created, PaymentResult.PaymentIntentCreated, message));
                 await _context.SaveChangesAsync();
