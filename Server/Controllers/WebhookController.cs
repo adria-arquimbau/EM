@@ -115,8 +115,7 @@ public class WebhookController : Controller
                 var registration = await _context.Registrations
                     .Include(x => x.Event)
                     .SingleAsync(x => x.Id == Guid.Parse(registrationId));
-                var paymentIntent = stripeEvent.Data.Object as PaymentIntent;
-                var message = $"Checkout session completed. PaymentIntent ID: {paymentIntent?.Id}.";
+                var message = $"Checkout session completed. Session id: {session?.Id}.";
                 registration.Payments.Add(new Payment(stripeEvent.Type, stripeEvent.Created, PaymentResult.CheckoutSessionCompleted, message));
                 await _context.SaveChangesAsync();
             }
