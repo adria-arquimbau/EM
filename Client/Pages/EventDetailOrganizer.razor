@@ -27,7 +27,7 @@
     {
         <button type="button" class="btn @(currentComponent == PageComponent.OwnersManagement ? "btn-primary" : "btn-outline-primary")" @onclick="(() => SetCurrentComponent(PageComponent.OwnersManagement))">Owners Management</button>
     }
-    <!-- Add more buttons as necessary -->
+    <button type="button" class="btn @(currentComponent == PageComponent.Files ? "btn-primary" : "btn-outline-primary")" @onclick="(() => SetCurrentComponent(PageComponent.Files))">Files</button>
 </div>
 
 @if (eventDetail == null)
@@ -56,6 +56,9 @@ else
             case PageComponent.Tickets:
                 <TicketsManager EventId="@eventDetail.Id"/>
                 break;
+            case PageComponent.Files:
+                <FilesManager EventId="@eventDetail.Id"/>
+                break;
             // Add more cases as necessary
         }
 
@@ -73,8 +76,8 @@ else
         RegistrationRolePasswords,
         Price,
         OwnersManagement,
-        Tickets
-        // Add more components as necessary
+        Tickets,
+        Files
     }
 
     [Parameter]
